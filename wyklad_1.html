@@ -14645,9 +14645,8 @@ f_{\beta}(X) = \beta_0 + \beta_1 X_1 + \ldots + \beta_p X_p.
 \operatorname{MSE} = \frac{1}{n} \sum_{i=1}^n (y_i - \hat{f}(x_i))^2.
 \end{equation*}</p>
 <ul>
-<li>Podczas treningu $\operatorname{MSE}$ jest minimalizowane na zbiorze treningowym.</li>
-<li>Do oceny dokładności modelu obliczamy $\operatorname{MSE}$ na zbiorze testowym.</li>
-<li>Jeśli $\operatorname{MSE}$ na zbiorze testowym jest dużo większe niż na zbiorze treningowym, to model jest niedouczony (<em>underfitting</em>). Jeśli $\operatorname{MSE}$ na zbiorze testowym jest dużo większe niż na zbiorze treningowym, to model jest przeuczony (<em>overfitting</em>).</li>
+<li>Podczas treningu $\operatorname{MSE}$ jest minimalizowane na zbiorze treningowym. Błąd ten jest nazywany błędem treningowym (<em>train error</em>).</li>
+<li>Do oceny dokładności modelu obliczamy $\operatorname{MSE}$ na zbiorze testowym. Ten błąd z kolei nazywany jest błędem testowym (<em>test error</em>).</li>
 </ul>
 </div>
 </div>
@@ -14713,7 +14712,7 @@ f_{\beta}(X) = \beta_0 + \beta_1 X_1 + \ldots + \beta_p X_p.
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <h3 id="Kompromis-mi%C4%99dzy-obci%C4%85%C5%BCeniem-a-wariancj%C4%85-(bias-variance-tradeoff)">Kompromis między obciążeniem a wariancją (<em>bias-variance tradeoff</em>)<a class="anchor-link" href="#Kompromis-mi%C4%99dzy-obci%C4%85%C5%BCeniem-a-wariancj%C4%85-(bias-variance-tradeoff)">¶</a></h3><p>Wyżej widzieliśmy, że błąd predykcji dla $x_0$ można rozłożyć na błąd systematyczny i błąd losowy. Wzór ten uzyskujemy przy założeniu, że estymacja $\hat{f}$ została już wyliczona i jest znana. Zauważmy jednak, że $\hat{f}$ zależy od danych treningowych, zmiana danych treningowych niemal zawsze prowadzi do zmiany $\hat{f}$. Mamy zatem kolejny poziom losowości, związany z wyborem danych treningowych i wpływający na błąd predykcji.</p>
-<p>Ustalmy $x_0$ z odpowiedzią $y_0$. Wówczas oczekiwany (uśredniony) błąd predykcji dla $x_0$ jest równy:</p>
+<p>Ustalmy $x_0$ z odpowiedzią $y_0$. Niech $\mathbf{E}_{\mathcal{T}}$ oznacza wartość oczekiwaną względem losowego zbioru treningowego $\mathcal{T}= \{(x_1, y_1), \ldots, (x_n, y_n)\}$ (w praktyce zbiór $\mathcal{T}$ mamy tylko jeden). Wówczas oczekiwany (uśredniony) błąd predykcji dla $x_0$ jest równy:</p>
 <p>\begin{equation*}
 \begin{split}
 \mathbf{E}_{\mathcal{T}}\mathbf{E}(y_0 - \hat{f}(x_0))^2 &amp;= \mathbf{E}_{\mathcal{T}}\left([f(x_0) - \hat{f}(x_0)]^2 + \operatorname{Var}(\varepsilon)\right) \\
@@ -14732,8 +14731,8 @@ f_{\beta}(X) = \beta_0 + \beta_1 X_1 + \ldots + \beta_p X_p.
 \end{equation}</p>
 <p>W powyższym wzorze:</p>
 <ul>
-<li>Pierwszy składnik to błąd obciążenia (<em>bias</em>), stopień w jakim estymacja $\hat{f}(x_0)$ różni się od $f(x_0)$. Duży błąd obciążenia wskazuje na niedouczenie modelu, lub na jego nieadekwatność do danych.</li>
-<li>Drugi składnik to wariancja predykcji. Może wzrastać wraz z komplikacją modelu. Duża wariancja predykcji wskazuje na dużą zależność modelu od danych treningowych i wskazuje na przeuczenie modelu.</li>
+<li>Pierwszy składnik to błąd obciążenia (<em>bias</em>), stopień w jakim estymacja $\hat{f}(x_0)$ różni się od $f(x_0)$. Duży błąd obciążenia wskazuje na niedouczenie modelu (<em>underfitting</em>), lub na jego nieadekwatność do danych (tzn. model jest już douczony, ale np. ze względu na swą prostotę nie jest w stanie uchwycić złożoności danych).</li>
+<li>Drugi składnik to wariancja predykcji. Może wzrastać wraz z komplikacją modelu. Duża wariancja predykcji wskazuje na dużą zależność modelu od danych treningowych i wskazuje na przeuczenie modelu (<em>overfitting</em>).</li>
 <li>Ostatni składnik to omawiany wcześniej nieredukowalny błąd losowy.</li>
 </ul>
 <p>Zobacz Figure 3.5 (p. 150) w <a href="https://www.microsoft.com/en-us/research/people/cmbishop/prml-book/">PRML</a> oraz Figure 7.2 (p. 225) w <a href="https://hastie.su.domains/ElemStatLearn/">ESL</a>.</p>
