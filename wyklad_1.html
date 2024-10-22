@@ -14324,7 +14324,7 @@ Y = f(X) + \varepsilon.
 <p>Mamy:</p>
 <p>\begin{equation*}
 \begin{split}
-\mathbf{E}(y_0 - \hat{f}(x_0))^2 &amp;= \mathbf{E}(f(x_0) + \varepsilon - \hat{f}(x_0))^2 \\
+\mathbf{E}((Y - \hat{f}(X))^2|X=x_0) &amp;= \mathbf{E}(f(x_0) + \varepsilon - \hat{f}(x_0))^2 \\
  &amp;= \mathbf{E}((f(x_0) - \hat{f}(x_0))^2 + 2(f(x_0) - \hat{f}(x_0))\varepsilon + \varepsilon^2) \\
  &amp;= (f(x_0) - \hat{f}(x_0))^2 + 2(f(x_0) - \hat{f}(x_0))\mathbf{E}(\varepsilon) + \mathbf{E}(\varepsilon^2) \\
  &amp;=[f(x_0) - \hat{f}(x_0)]^2 + \operatorname{Var}(\varepsilon).
@@ -14333,7 +14333,7 @@ Y = f(X) + \varepsilon.
 <p>W powyższych wyliczeniach skorzystaliśmy z założenia, że $\mathbf{E}(\varepsilon) = 0$. To spowodowało, że drugi składnik zniknął a ostatni zamienił się w wariancję $\varepsilon$.</p>
 <p>Podsumowując:</p>
 <p>\begin{equation}
-\mathbf{E}(y_0 - \hat{f}(x_0))^2 = \underbrace{[f(x_0) - \hat{f}(x_0)]^2}_{\text{Błąd systematyczny}} + \underbrace{\operatorname{Var}(\varepsilon)}_{\text{Błąd losowy}}.
+\mathbf{E}((Y - \hat{f}(X))^2|X=x_0) = \underbrace{[f(x_0) - \hat{f}(x_0)]^2}_{\text{Błąd systematyczny}} + \underbrace{\operatorname{Var}(\varepsilon)}_{\text{Błąd losowy}}.
 \end{equation}</p>
 <p>W powyższym wzorze:</p>
 <ul>
@@ -14712,20 +14712,21 @@ f_{\beta}(X) = \beta_0 + \beta_1 X_1 + \ldots + \beta_p X_p.
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <h3 id="Kompromis-mi%C4%99dzy-obci%C4%85%C5%BCeniem-a-wariancj%C4%85-(bias-variance-tradeoff)">Kompromis między obciążeniem a wariancją (<em>bias-variance tradeoff</em>)<a class="anchor-link" href="#Kompromis-mi%C4%99dzy-obci%C4%85%C5%BCeniem-a-wariancj%C4%85-(bias-variance-tradeoff)">¶</a></h3><p>Wyżej widzieliśmy, że błąd predykcji dla $x_0$ można rozłożyć na błąd systematyczny i błąd losowy. Wzór ten uzyskujemy przy założeniu, że estymacja $\hat{f}$ została już wyliczona i jest znana. Zauważmy jednak, że $\hat{f}$ zależy od danych treningowych, zmiana danych treningowych niemal zawsze prowadzi do zmiany $\hat{f}$. Mamy zatem kolejny poziom losowości, związany z wyborem danych treningowych i wpływający na błąd predykcji.</p>
-<p>Ustalmy $x_0$ z odpowiedzią $y_0$. Niech $\mathbf{E}_{\mathcal{T}}$ oznacza wartość oczekiwaną względem losowego zbioru treningowego $\mathcal{T}= \{(x_1, y_1), \ldots, (x_n, y_n)\}$ (w praktyce zbiór $\mathcal{T}$ mamy tylko jeden). Wówczas oczekiwany (uśredniony) błąd predykcji dla $x_0$ jest równy:</p>
+<p>Ustalmy $x_0$. Niech $\mathbf{E}_{\mathcal{T}}$ oznacza wartość oczekiwaną względem losowego zbioru treningowego $\mathcal{T}= \{(x_1, y_1), \ldots, (x_n, y_n)\}$ (w praktyce zbiór $\mathcal{T}$ mamy tylko jeden).
+Wówczas oczekiwany (uśredniony) błąd predykcji dla $x_0$ jest równy:</p>
 <p>\begin{equation*}
 \begin{split}
-\mathbf{E}_{\mathcal{T}}\mathbf{E}(y_0 - \hat{f}(x_0))^2 &amp;= \mathbf{E}_{\mathcal{T}}\left([f(x_0) - \hat{f}(x_0)]^2 + \operatorname{Var}(\varepsilon)\right) \\
+\mathbf{E}_{\mathcal{T}}\mathbf{E}((Y - \hat{f}(X))^2|X=x_0) &amp;= \mathbf{E}_{\mathcal{T}}\left([f(x_0) - \hat{f}(x_0)]^2 + \operatorname{Var}(\varepsilon)\right) \\
 &amp;= \mathbf{E}_{\mathcal{T}}[f(x_0) - \hat{f}(x_0)]^2 + \operatorname{Var}(\varepsilon) \\
 &amp;= \mathbf{E}_{\mathcal{T}}[f(x_0) - \mathbf{E}_{\mathcal{T}}\hat{f}(x_0) + \mathbf{E}_{\mathcal{T}}\hat{f}(x_0) - \hat{f}(x_0)]^2 + \operatorname{Var}(\varepsilon) \\
 &amp;= \mathbf{E}_{\mathcal{T}}[f(x_0) - \mathbf{E}_{\mathcal{T}}\hat{f}(x_0)]^2 + \mathbf{E}_{\mathcal{T}}[\mathbf{E}_{\mathcal{T}}\hat{f}(x_0) - \hat{f}(x_0)]^2 + \operatorname{Var}(\varepsilon) \\
 &amp;= \operatorname{Bias}^2(\hat{f}(x_0)) + \operatorname{Var}_{\mathcal{T}}(\hat{f}(x_0)) + \operatorname{Var}(\varepsilon).
 \end{split}
 \end{equation*}</p>
-<p>Podsumowując, oczekiwany błąd predykcji dla $x_0$ można rozłożyć na trzy składniki:
-\begin{equation}
+<p>Podsumowując, oczekiwany błąd predykcji dla $x_0$ można rozłożyć na trzy składniki:</p>
+<p>\begin{equation}
 \begin{split}
-\mathbf{E}_{\mathcal{T}}\mathbf{E}(y_0 - \hat{f}(x_0))^2 &amp;= \operatorname{Bias}^2(\hat{f}(x_0)) + \operatorname{Var}_{\mathcal{T}}(\hat{f}(x_0)) + \operatorname{Var}(\varepsilon) \\
+\mathbf{E}_{\mathcal{T}}\mathbf{E}((Y - \hat{f}(X))^2|X=x_0) &amp;= \operatorname{Bias}^2(\hat{f}(x_0)) + \operatorname{Var}_{\mathcal{T}}(\hat{f}(x_0)) + \operatorname{Var}(\varepsilon) \\
 &amp;= \text{Błąd obciążenia} + \text{Wariancja predykcji} + \text{Błąd losowy}.
 \end{split}
 \end{equation}</p>
