@@ -14719,7 +14719,7 @@ Wówczas oczekiwany (uśredniony) błąd predykcji dla $x_0$ jest równy:</p>
 \mathbf{E}_{\mathcal{T}}\mathbf{E}((Y - \hat{f}(X))^2|X=x_0) &amp;= \mathbf{E}_{\mathcal{T}}\left([f(x_0) - \hat{f}(x_0)]^2 + \operatorname{Var}(\varepsilon)\right) \\
 &amp;= \mathbf{E}_{\mathcal{T}}[f(x_0) - \hat{f}(x_0)]^2 + \operatorname{Var}(\varepsilon) \\
 &amp;= \mathbf{E}_{\mathcal{T}}[f(x_0) - \mathbf{E}_{\mathcal{T}}\hat{f}(x_0) + \mathbf{E}_{\mathcal{T}}\hat{f}(x_0) - \hat{f}(x_0)]^2 + \operatorname{Var}(\varepsilon) \\
-&amp;= \mathbf{E}_{\mathcal{T}}[f(x_0) - \mathbf{E}_{\mathcal{T}}\hat{f}(x_0)]^2 + \mathbf{E}_{\mathcal{T}}[\mathbf{E}_{\mathcal{T}}\hat{f}(x_0) - \hat{f}(x_0)]^2 + \operatorname{Var}(\varepsilon) \\
+&amp;= [f(x_0) - \mathbf{E}_{\mathcal{T}}\hat{f}(x_0)]^2 + \mathbf{E}_{\mathcal{T}}[\mathbf{E}_{\mathcal{T}}\hat{f}(x_0) - \hat{f}(x_0)]^2 + \operatorname{Var}(\varepsilon) \\
 &amp;= \operatorname{Bias}^2(\hat{f}(x_0)) + \operatorname{Var}_{\mathcal{T}}(\hat{f}(x_0)) + \operatorname{Var}(\varepsilon).
 \end{split}
 \end{equation*}</p>
