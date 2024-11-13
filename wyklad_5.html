@@ -13211,7 +13211,7 @@ I(y_i \neq \hat{y}_i) = \begin{cases}
 \end{cases}
 \end{equation*}</p>
 <p>Analogicznie jak w przypadku regresji symbolem $\hat{y}_i$ oznaczamy przewidywaną etykietę przypisaną do obiektu $x_i$ przez funkcję $\hat{f}$: $\hat{y}_i = \hat{f}(x_i)$.</p>
-<p><em>Błąd testowy</em> klasyfikatora (ang. <em>test error</em>) obliczamy na podstawie zbioru testowego, który nie był używany do uczenia klasyfikatora. Stosujemy wtedy tę samą funkcję błędu co wyżej, ale zamiast zbioru treningowego używamy zbioru testowego.</p>
+<p><em>Błąd testowy</em> klasyfikatora (ang. <em>test error</em>) obliczamy na podstawie zbioru testowego, który nie był używany do uczenia. Stosujemy wtedy tę samą funkcję błędu co wyżej, tyle że na zbiorze testowym zamiast treningowym.</p>
 <p>Błąd treningowy powinien być jak najmniejszy, jednak jego mała wartość niekoniecznie oznacza, że klasyfikator dobrze generalizuje. W praktyce zależy nam na minimalizacji błędu testowego, gdyż to on określa jakość klasyfikatora na nigdy nie widzianych wcześniej danych.</p>
 <p>Błąd testowy jest przybliżeniem <em>oczekiwanego błędu predykcji</em> (ang. <em>expected prediction error</em>):</p>
 <p>\begin{equation*}
@@ -13242,11 +13242,11 @@ I(y_i \neq \hat{y}_i) = \begin{cases}
 <p>Jak zdefiniować $\hat{f}$, aby powyższa wartość była minimalna?</p>
 <p>Ponieważ funkcja wskaźnikowa $I(\cdot)$ przyjmuje jedynie wartości $0$ i $1$, to podana wyżej wartość oczekiwana jest równa $p(Y=1|X=x)$ (jeśli $\hat{f}(x)=0$) lub $p(Y=0|X=x)$ (jeśli $\hat{f}(x)=1$). Zatem wartość ta będzie najmniejsza, gdy $\hat{f}$ zadamy wzorem:</p>
 <p>\begin{equation*}
-\hat{f}(x) = \operatorname{argmin}_{k \in \{0,1\}} p(Y=k|X=x).
+\hat{f}(x) = \operatorname{argmax}_{k \in \{0,1\}} p(Y=k|X=x)
 \end{equation*}</p>
 <p>Ogólnie, gdy $Y \in \{0,1,\dots,K-1\}$, to</p>
 <p>\begin{equation*}
-\hat{f}(x) = \operatorname{argmin}_{k \in \{0,1,\dots,K-1\}} p(Y=k|X=x).
+\hat{f}(x) = \operatorname{argmax}_{k \in \{0,1,\dots,K-1\}} p(Y=k|X=x).
 \end{equation*}</p>
 <p>Inaczej mówiąc, $\hat{f}$ przypisuje obiektowi $x$ tę etykietę $j$, która ma największe prawdopodobieństwo w rozkładzie $p(Y=j|X=x)$.</p>
 <p>W konsekwencji oczekiwany błąd predykcji w punkcie $x$ klasyfikatora Bayesa jest równy $1 - \max_{k \in \{0,1,\dots,K-1\}} p(Y=k|X=x)$. Błąd ten nazywamy <em>Bayes error rate</em>. Ogólny błąd Bayesa czyli oczekiwany błąd predykcji względem rozkładu wektora $X$ wynosi:</p>
