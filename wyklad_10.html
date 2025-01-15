@@ -13698,11 +13698,15 @@ $$</p>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Balans-mi%C4%99dzy-wariancj%C4%85-a-obci%C4%85%C5%BCeniem-w-metodzie-walidacji-krzy%C5%BCowej">Balans między wariancją a obciążeniem w metodzie walidacji krzyżowej<a class="anchor-link" href="#Balans-mi%C4%99dzy-wariancj%C4%85-a-obci%C4%85%C5%BCeniem-w-metodzie-walidacji-krzy%C5%BCowej">¶</a></h3><ul>
-<li>Załóżmy, że stosujemy metodę $k$-krotnej walidacji krzyżowej z małym $k$. Wówczas zbiór treningowy jest znacznie mniejszy niż zbiór danych (dla $k=2$ będzie to połowa danych). Z tego powodu model dopasowany do zbioru treningowego będzie miał duże obciążenie (w przypadku regresji oznacza to, że średnio będzie odsuwał się od prawdziwej funkcji regresji). Z drugiej jednak strony modele będą trenowane na względnie różnych zbiorach treningowych (dla $k=2$ będą to dwa różne zbiory; dla $k=5$ każde dwa zbiory będą się różnić o 25% obserwacji). W konsekwencji korelacja między modelami będzie niska, a zatem niska będzie również wariancja błędu predykcji.</li>
-<li>Załóżmy, że stosujemy teraz metodę $k$-krotnej walidacji krzyżowej z dużym $k$, np. <em>LOOCV</em> ($k=n$). Wówczas zbiór treningowy będzie bardzo duży (dla <em>LOOCV</em> będzie to zbiór danych bez jednej obserwacji). Z tego powodu model dopasowany do zbioru treningowego będzie miał małe obciążenie (w przypadku regresji oznacza to, że średnio będzie blisko prawdziwej funkcji regresji). Z drugiej jednak strony modele będą trenowane na zbiorach treningowych, które będą się znacznie pokrywać (dla <em>LOOCV</em> każde dwa zbiory będą się różnić tylko dwiema obserwacjami). W konsekwencji korelacja między modelami będzie wysoka, a zatem wysoka będzie również wariancja błędu predykcji.</li>
-</ul>
-<p>Jest to kolejny powód, dla którego w praktyce stosuje się metodę 5 lub 10-krotnej walidacji krzyżowej. Poza tym, że jest ona mniej kosztowna obliczeniowo, to ma ona również lepszy balans między obciążeniem a wariancją.</p>
+<h3 id="Wyb%C3%B3r-liczby-fold%C3%B3w">Wybór liczby foldów<a class="anchor-link" href="#Wyb%C3%B3r-liczby-fold%C3%B3w">¶</a></h3><p>Toczy się dyskusja na temat wyboru optymalnej liczby foldów i schematu działania walidacji krzyżowej. Więcej szczegółów na ten temat znajdziesz <a href="https://stats.stackexchange.com/questions/61546/optimal-number-of-folds-in-k-fold-cross-validation-is-leave-one-out-cv-always">tutaj</a> i w <a href="https://hastie.su.domains/ElemStatLearn/">ESL</a> w paragrafie 7.10.</p>
+<p>Można jednak sformułować pewne ogólne zasady:</p>
+<ol>
+<li><em>LOOCV</em> jest najbardziej kosztowna obliczeniowo.</li>
+<li>W <em>LOOCV</em> próba treningowa jest duża (model będzie miał małe obciążenie), ale modele są silnie skorelowane.</li>
+<li>W metodzie $k$-krotnej walidacji krzyżowej próba treningowa jest mniejsza (model będzie miał większe obciążenie), ale modele są mniej skorelowane.</li>
+<li>W praktyce stosuje się metodę 5 lub 10-krotnej walidacji krzyżowej.</li>
+<li>W przypadku małych zbiorów danych stosuje się <em>LOOCV</em>.</li>
+</ol>
 </div>
 </div>
 </div>
