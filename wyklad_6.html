@@ -13652,17 +13652,17 @@ P(Y_1=y_1,\dots,Y_n=y_n|X_1=x_1,\dots,X_n=x_n;\beta_0,\beta_1).
 <h3 id="Predykcje">Predykcje<a class="anchor-link" href="#Predykcje">¶</a></h3><p>Z podanej wyżej tabeli wnioskujemy, że</p>
 <p>\begin{equation*}
 \begin{split}
-\hat{P}(\verb+default+ = \verb+Yes+ | \verb+balance+) &amp;= \sigma(-10.6513+0.0055\cdot\verb+balance+)\\
-&amp;= \frac{1}{1+\exp(-(-10.6513+0.0055\cdot\verb+balance+))}.
+\hat{P}(\texttt{default} = \texttt{Yes} | \texttt{balance}) &amp;= \sigma(-10.6513+0.0055\cdot\texttt{balance})\\
+&amp;= \frac{1}{1+\exp(-(-10.6513+0.0055\cdot\texttt{balance}))}.
 \end{split}
 \end{equation*}</p>
 <p>Zatem dla <code>balance</code>$=1000$:</p>
 <p>\begin{equation*}
-\hat{P}(\verb+default+ = \verb+Yes+ | \verb+balance+ = 1000) = \frac{1}{1+\exp(-(-10.6513+0.0055\cdot 1000))} = 0.0058.
+\hat{P}(\texttt{default} = \texttt{Yes} | \texttt{balance} = 1000) = \frac{1}{1+\exp(-(-10.6513+0.0055\cdot 1000))} = 0.0058.
 \end{equation*}</p>
 <p>Zatem szansa zalegania z płatnościami dla klienta o saldzie <code>balance</code>$=1000$ wynosi $0.58\%$, czyli jest bardzo mała. Dla <code>balance</code>$=2000$ to prawdopodobieństwo jest znanacznie większe:</p>
 <p>\begin{equation*}
-\hat{P}(\verb+default+ = \verb+Yes+ | \verb+balance+ = 2000) = \frac{1}{1+\exp(-(-10.6513+0.0055\cdot 2000))} = 0.586,
+\hat{P}(\texttt{default} = \texttt{Yes} | \texttt{balance} = 2000) = \frac{1}{1+\exp(-(-10.6513+0.0055\cdot 2000))} = 0.586,
 \end{equation*}</p>
 <p>czyli około $59\%$.</p>
 <p>Te same predykcje można uzyskać za pomocą metody <code>predict</code>:</p>
@@ -13767,14 +13767,14 @@ P(Y_1=y_1,\dots,Y_n=y_n|X_1=x_1,\dots,X_n=x_n;\beta_0,\beta_1).
 <p>$p$-wartość dla współczynnika <code>student</code> jest bardzo mała, co pozwala na odrzucenie hipotezy zerowej $H_0:\beta_1=0$ na rzecz hipotezy alternatywnej $H_1:\beta_1\neq 0$. Zatem zmienna <code>default</code> zależy od zmiennej <code>student</code>. Współczynnik $\beta_1$ jest dodatni, co oznacza, że szansa zalegania z płatnościami jest większa dla studentów niż dla nie-studentów. Konkretne prawdopobieństwa są następujące:</p>
 <p>\begin{equation*}
 \begin{split}
-\hat{P}(\verb+default+ = \verb+Yes+ | \verb+student+ = \verb+Yes+) &amp;= \sigma(-3.5041+0.4049\cdot 1)\\
+\hat{P}(\texttt{default} = \texttt{Yes} | \texttt{student} = \texttt{Yes}) &amp;= \sigma(-3.5041+0.4049\cdot 1)\\
 &amp;= \frac{1}{1+\exp(-(-3.5041+0.4049))} = 0.0431,
 \end{split}
 \end{equation*}</p>
 <p>oraz</p>
 <p>\begin{equation*}
 \begin{split}
-\hat{P}(\verb+default+ = \verb+Yes+ | \verb+student+ = \verb+No+) &amp;= \sigma(-3.5041+0.4049\cdot 0)\\
+\hat{P}(\texttt{default} = \texttt{Yes} | \texttt{student} = \texttt{No}) &amp;= \sigma(-3.5041+0.4049\cdot 0)\\
 &amp;= \frac{1}{1+\exp(-(-3.5041))} = 0.0292.
 \end{split}
 \end{equation*}</p>
@@ -13942,9 +13942,15 @@ P(Y=1|X=x) &amp;= \frac{\exp(\beta_0+\beta_1x_1+\dots+\beta_px_p)}{1+\exp(\beta_
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>Zauważmy, że teraz, przeciwnie niż w poprzednim modelu, współczynnik <code>student</code> jest ujemny. Czyli poprzednio uzyskaliśmy wniosek, że wśród studentów szansa na zaleganie z płatnościami jest większa niż wśród nie-studentów, podczas gdy teraz uzyskujemy wniosek odwrotny. Fakt ten jest spowodowany tym, że zmienna <code>balance</code> częściowo tłumaczy tak zmienną <code>student</code>, jak i <code>default</code>: wzrost <code>balance</code> powoduje wzrost prawdopodobieństwa na zaleganie z płatnościami i jednocześnie wzrost prawdopodobieństwa bycia studentem. Zmienna <code>balance</code> jest <em>zmienną zakłócającą</em> (<em>confounding variable</em>) wprowadzającą pozorną zależność między <code>student</code> a <code>default</code>. Zależność ta udaje się wyjaśnić dopiero po wprowadzeniu zmiennej <code>balance</code> do modelu.</p>
 <p>Obliczmy prawdobodobieństwa wystąpienia <code>default</code> dla klienta o saldzie <code>balance</code>$=2000$, dochodzie <code>income</code>$=50000$ i będącego studentem:</p>
+<!-- \begin{equation*}
+\begin{split}
+\hat{P}(\verb+default+ = \verb+Yes+ |& \verb+balance+ = 2000, \verb+income+ = 50000, \verb+student+ = \verb+Yes+)\\ &= \sigma(-10.8690+0.0057\cdot 2000+0.0000\cdot 50000-0.6468\cdot 1)\\
+&= \frac{1}{1+\exp(-(-10.8690+0.0057\cdot 2000+0.0000\cdot 50000-0.6468\cdot 1))} = 0.53.
+\end{split}
+\end{equation*} -->
 <p>\begin{equation*}
 \begin{split}
-\hat{P}(\verb+default+ = \verb+Yes+ |&amp; \verb+balance+ = 2000, \verb+income+ = 50000, \verb+student+ = \verb+Yes+)\\ &amp;= \sigma(-10.8690+0.0057\cdot 2000+0.0000\cdot 50000-0.6468\cdot 1)\\
+\hat{P}(\texttt{default} = \texttt{Yes} |&amp; \texttt{balance} = 2000, \texttt{income} = 50000, \texttt{student} = \texttt{Yes})\\ &amp;= \sigma(-10.8690+0.0057\cdot 2000+0.0000\cdot 50000-0.6468\cdot 1)\\
 &amp;= \frac{1}{1+\exp(-(-10.8690+0.0057\cdot 2000+0.0000\cdot 50000-0.6468\cdot 1))} = 0.53.
 \end{split}
 \end{equation*}</p>
