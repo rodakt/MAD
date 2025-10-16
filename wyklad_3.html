@@ -13104,7 +13104,7 @@ div#notebook {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Modele-analizy-danych">Modele analizy danych<a class="anchor-link" href="#Modele-analizy-danych">¶</a></h1><h3 id="2024/2025,-semestr-zimowy">2024/2025, semestr zimowy<a class="anchor-link" href="#2024/2025,-semestr-zimowy">¶</a></h3><p>Tomasz Rodak</p>
+<h1 id="Modele-analizy-danych">Modele analizy danych<a class="anchor-link" href="#Modele-analizy-danych">¶</a></h1><p>Tomasz Rodak</p>
 <hr/>
 </div>
 </div>
@@ -13331,7 +13331,7 @@ Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \ldots + \beta_p X_p + \epsilon.
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Zmienna $X_j$ jest $j$-tym predyktorem, $\beta_j$ jest współczynnikiem regresji dla $j$-tego predyktora. Współczynniki $\beta_j$ określają, jak bardzo zmienna $Y$ zmienia się wraz ze zmianą $j$-tego predyktora $X_j$, przy założeniu, że <strong>wszystkie inne predyktory są stałe</strong>.</p>
+<p>Zmienna $X_j$ jest $j$-tym predyktorem, $\beta_j$ jest współczynnikiem regresji dla $j$-tego predyktora. Współczynniki $\beta_j$ określają, jak bardzo $Y$ zmienia się wraz ze zmianą $j$-tego predyktora $X_j$, przy założeniu, że <strong>wszystkie inne predyktory są stałe</strong>.</p>
 </div>
 </div>
 </div>
@@ -13545,7 +13545,7 @@ F = \frac{\text{wariancja wyjaśniona przez model}}{\text{wariancja pozostała w
 <p>\begin{equation*}
 \mathbb{E}((\text{TSS} - \text{RSS})/p) = \sigma^2.
 \end{equation*}</p>
-<p>Zatem jeśli hipoteza zerowa jest prawdziwa, to wartość statystyki $F$ powinna oscylować wokół 1. Jeśli natomiast hipoteza zerowa jest fałszywa, to wartość statystyki $F$ powinna być wyraźnie większa od 1. Zauważmy, że jeśli model został dopasowany metodą najmniejszych kwadratów, to zawsze $\text{RSS} \leqslant \text{TSS}$ (gdyż wtedy model wyjaśnia nie mniej niż zwykła średnia) i w konsekwencji $F \geqslant 0$.</p>
+<p>Zatem, jeśli hipoteza zerowa jest prawdziwa, to wartość statystyki $F$ powinna oscylować wokół 1. Jeśli natomiast hipoteza zerowa jest fałszywa, to wartość statystyki $F$ powinna być wyraźnie większa od 1. Zauważmy, że jeśli model został dopasowany metodą najmniejszych kwadratów, to zawsze $\text{RSS} \leqslant \text{TSS}$ (gdyż wtedy model wyjaśnia nie mniej niż zwykła średnia) i w konsekwencji $F \geqslant 0$.</p>
 </div>
 </div>
 </div>
@@ -13612,7 +13612,7 @@ F = \frac{\text{wariancja wyjaśniona przez model}}{\text{wariancja pozostała w
 <p>Wartość $F$ wynosi 570.3, czyli jest bardzo duża. Z kolei $p$-wartość dla tej statystyki wynosi 1.58e-96, czyli jest ekstremalnie mała. Mamy zatem bardzo silną podstawę do odrzucenia hipotezy zerowej i przyjęcia hipotezy alternatywnej, że przynajmniej jeden z parametrów <code>TV</code>, <code>radio</code>, <code>newspaper</code> jest różny od 0.</p>
 <p>$p$-wartość w tym teście obliczana jest następująco. Jeśli hipoteza zerowa jest prawdziwa, to statystyka $F$ ma rozkład $F$-Snedecora z $p$ i $n-p-1$ stopniami swobody. Niech $F_{\text{score}}$ będzie wartością statystyki $F$ dla danych treningowych. Wówczas</p>
 <p>\begin{equation*}
-p = P(F&gt;F_{\text{score}}|H_0) = P(F_{p, n-p-1} &gt; F_{\text{score}}),
+p = P(F&gt;F_{\text{score}}\mid H_0) = P(F_{p, n-p-1} &gt; F_{\text{score}}),
 \end{equation*}</p>
 <p>gdzie $F_{p, n-p-1}$ jest zmienną losową o rozkładzie $F$-Snedecora z $p$ i $n-p-1$ stopniami swobody. W Pythonie $p$-wartość w tym teście obliczymy za pomocą funkcji <code>scipy.stats.f.sf</code>. Symbol <code>sf</code> oznacza <em>survival function</em>, czyli funkcję prawdopodobieństwa dla zmiennej losowej $X$ zdefiniowaną jako $P(X&gt;x)$ (dopełnienie dystrybuanty do 1).</p>
 </div>
@@ -13856,7 +13856,6 @@ F = \frac{\text{wariancja wyjaśniona przez model z wyłączeniem ostatnich } q 
 <ul>
 <li><em>forward selection</em>: zaczynamy od modelu <em>zerowego</em> przewidującego średnią zmiennej celu. Następnie dodajemy do niego każdy z $p$ predyktorów i wybieramy ten, który daje najniższy $\text{RSS}$. Następnie dodajemy do modelu ten spośród pozostałych $p-1$ predyktorów, który daje najniższy $\text{RSS}$. Procedurę powtarzamy, aż do spełnienia pewnego kryterium stopu.</li>
 <li><em>backward selection</em>: zaczynamy od modelu zawierającego wszystkie $p$ predyktorów. Następnie usuwamy z niego zmienną o największej $p$-wartości, czyli najmniej istotną. Procedurę powtarzamy, aż do spełnienia pewnego kryterium stopu.</li>
-<li><em>mixed selection</em>: zaczynamy od modelu zerowego. Dodajemy do niego predyktory dające najlepsze dopasowanie, tak jak w <em>forward selection</em>. Wówczas $p$-wartości dla predyktorów w modelu mogą wzrastać. Gdy $p$-wartość dla któregoś z predyktorów przekroczy ustalony próg, to usuwamy ten predyktor z modelu. Procedurę powtarzamy, aż do spełnienia pewnego kryterium stopu.</li>
 </ul>
 </div>
 </div>
@@ -14012,9 +14011,10 @@ R^2 = \frac{\text{TSS} - \text{RSS}}{\text{TSS}} = 1 - \frac{\text{RSS}}{\text{T
 <p>Predykcja zaburzana jest przez trzy różne źródła błędów:</p>
 <ol>
 <li>Stopień w jakim parametry $\hat{\beta}_0, \hat{\beta}_1, \ldots, \hat{\beta}_p$ odstają od prawdziwych parametrów $\beta_0, \beta_1, \ldots, \beta_p$. Jest to błąd <em>redukowalny</em>: możemy go zmniejszyć, gdy zwiększymy liczbę obserwacji $n$. Ten błąd decyduje o tym jak bardzo $\hat{y}$ może się różnić się prawdziwej wartości oczekiwanej $f(x)$ dla nowej obserwacji $x$. Dla oszacowania tej rozbieżności oblicza sie <em>przedział ufności</em> (<em>confidence interval</em>) dla $\hat{y}$.</li>
-<li>Być może prawdziwa zależność $f$ między predyktorami a zmienną celu jest nieliniowa, podczas gdy my dopasowaliśmy model liniowy. Powstały w ten sposób błąd nazywamy <em>obciążeniem</em> (<em>bias</em>). Obciążenie jest również błędem <em>redukowalnym</em>: możemy je zmniejszyć dobierając bardziej adekwatny model.</li>
+<li>Być może prawdziwa zależność $f$ między predyktorami a zmienną celu jest nieliniowa, podczas gdy my dopasowaliśmy model liniowy. Błąd ten możemy je zmniejszyć dobierając bardziej adekwatny model.</li>
 <li>Nawet gdybyśmy znali prawdziwą zależność $f(X)$, to jeszcze pozostaje błąd losowy $\epsilon$ związany z postacią modelu $Y=f(X)+\varepsilon$. Błąd ten jest niemożliwy do usunięcia. Pokazuje on jak bardzo $\hat{y}$ może się różnić się od prawdziwej wartości $y$ dla nowej obserwacji $x$. Dla oszacowania tej rozbieżności wyznacza się <em>przedział predykcji</em> (<em>prediction interval</em>) dla $\hat{y}$.</li>
 </ol>
+<p>Błędy z punktów 1. i 2. to znany nam z wykładu 1 błąd systematyczny; błąd z punktu 3. to błąd losowy.</p>
 <p>Oba te przedziały są wyśrodkowane wokół wartości przewidywanej $\hat{y}$, ale różnią się długością: przedział predykcji jest zawsze dłuższy od przedziału ufności, gdyż poza błędem oszacowania wartości średniej $\hat{y}$ uwzględnia również błąd losowy $\epsilon$.</p>
 <p>Średnia oraz przedziały ufności i predykcji dla modelu <code>sales</code> względem <code>TV</code> i <code>radio</code> dla nowej obserwacji <code>TV=100</code>, <code>radio=20</code>:</p>
 </div>
