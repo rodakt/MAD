@@ -13163,7 +13163,26 @@ topics. MIT press.</p>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Regresja-liniowa-wielokrotna">Regresja liniowa wielokrotna<a class="anchor-link" href="#Regresja-liniowa-wielokrotna">¶</a></h2>
+<h2 id="Spis-tre%C5%9Bci">Spis treści<a class="anchor-link" href="#Spis-tre%C5%9Bci">¶</a></h2><ol>
+<li>Regresja liniowa wielokrotna<ul>
+<li>Szacowanie parametrów modelu metodą najmniejszych kwadratów</li>
+<li>Test istnienia relacji między predyktorami a zmienną celu<ul>
+<li>Test zależności od podzbioru predyktorów</li>
+</ul>
+</li>
+<li>Które predyktory są istotne?</li>
+<li>Jakość dopasowania</li>
+<li>Jakość predykcji</li>
+</ul>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="1.-Regresja-liniowa-wielokrotna">1. Regresja liniowa wielokrotna<a class="anchor-link" href="#1.-Regresja-liniowa-wielokrotna">¶</a></h2>
 </div>
 </div>
 </div>
@@ -13338,7 +13357,7 @@ Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \ldots + \beta_p X_p + \epsilon.
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Szacowanie-parametr%C3%B3w-modelu-metod%C4%85-najmniejszych-kwadrat%C3%B3w">Szacowanie parametrów modelu metodą najmniejszych kwadratów<a class="anchor-link" href="#Szacowanie-parametr%C3%B3w-modelu-metod%C4%85-najmniejszych-kwadrat%C3%B3w">¶</a></h3>
+<h3 id="1.1-Szacowanie-parametr%C3%B3w-modelu-metod%C4%85-najmniejszych-kwadrat%C3%B3w">1.1 Szacowanie parametrów modelu metodą najmniejszych kwadratów<a class="anchor-link" href="#1.1-Szacowanie-parametr%C3%B3w-modelu-metod%C4%85-najmniejszych-kwadrat%C3%B3w">¶</a></h3>
 </div>
 </div>
 </div>
@@ -13499,7 +13518,7 @@ Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \ldots + \beta_p X_p + \epsilon.
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Test-istnienia-relacji-mi%C4%99dzy-predyktorami-a-zmienn%C4%85-celu">Test istnienia relacji między predyktorami a zmienną celu<a class="anchor-link" href="#Test-istnienia-relacji-mi%C4%99dzy-predyktorami-a-zmienn%C4%85-celu">¶</a></h3>
+<h3 id="1.2-Test-istnienia-relacji-mi%C4%99dzy-predyktorami-a-zmienn%C4%85-celu">1.2 Test istnienia relacji między predyktorami a zmienną celu<a class="anchor-link" href="#1.2-Test-istnienia-relacji-mi%C4%99dzy-predyktorami-a-zmienn%C4%85-celu">¶</a></h3>
 </div>
 </div>
 </div>
@@ -13621,7 +13640,7 @@ p = P(F&gt;F_{\text{score}}\mid H_0) = P(F_{p, n-p-1} &gt; F_{\text{score}}),
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h4 id="Test-zale%C5%BCno%C5%9Bci-od-podzbioru-predyktor%C3%B3w">Test zależności od podzbioru predyktorów<a class="anchor-link" href="#Test-zale%C5%BCno%C5%9Bci-od-podzbioru-predyktor%C3%B3w">¶</a></h4>
+<h4 id="1.2.1-Test-zale%C5%BCno%C5%9Bci-od-podzbioru-predyktor%C3%B3w">1.2.1 Test zależności od podzbioru predyktorów<a class="anchor-link" href="#1.2.1-Test-zale%C5%BCno%C5%9Bci-od-podzbioru-predyktor%C3%B3w">¶</a></h4>
 </div>
 </div>
 </div>
@@ -13843,7 +13862,7 @@ F = \frac{\text{wariancja wyjaśniona przez model z wyłączeniem ostatnich } q 
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Kt%C3%B3re-predyktory-s%C4%85-istotne?">Które predyktory są istotne?<a class="anchor-link" href="#Kt%C3%B3re-predyktory-s%C4%85-istotne?">¶</a></h3>
+<h3 id="1.3-Kt%C3%B3re-predyktory-s%C4%85-istotne?">1.3 Które predyktory są istotne?<a class="anchor-link" href="#1.3-Kt%C3%B3re-predyktory-s%C4%85-istotne?">¶</a></h3>
 </div>
 </div>
 </div>
@@ -13863,7 +13882,7 @@ F = \frac{\text{wariancja wyjaśniona przez model z wyłączeniem ostatnich } q 
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Jako%C5%9B%C4%87-dopasowania">Jakość dopasowania<a class="anchor-link" href="#Jako%C5%9B%C4%87-dopasowania">¶</a></h3>
+<h3 id="1.4-Jako%C5%9B%C4%87-dopasowania">1.4 Jakość dopasowania<a class="anchor-link" href="#1.4-Jako%C5%9B%C4%87-dopasowania">¶</a></h3>
 </div>
 </div>
 </div>
@@ -14001,7 +14020,7 @@ R^2 = \frac{\text{TSS} - \text{RSS}}{\text{TSS}} = 1 - \frac{\text{RSS}}{\text{T
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Jako%C5%9B%C4%87-predykcji">Jakość predykcji<a class="anchor-link" href="#Jako%C5%9B%C4%87-predykcji">¶</a></h3>
+<h3 id="1.5-Jako%C5%9B%C4%87-predykcji">1.5 Jakość predykcji<a class="anchor-link" href="#1.5-Jako%C5%9B%C4%87-predykcji">¶</a></h3>
 </div>
 </div>
 </div>
