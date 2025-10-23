@@ -13112,6 +13112,14 @@ div#notebook {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Wyk%C5%82ad-III">Wykład III<a class="anchor-link" href="#Wyk%C5%82ad-III">¶</a></h2><p>ISLP, rozdz. 3.2</p>
+<hr/>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="Literatura">Literatura<a class="anchor-link" href="#Literatura">¶</a></h2><ol>
 <li><p>James, G., Witten, D., Hastie, T., Tibshirani, R., &amp; Taylor,
 J. (2023). An Introduction to Statistical Learning: With
@@ -13148,14 +13156,6 @@ topics. MIT press.</p>
 <p><a href="https://www.deeplearningbook.org/">https://www.deeplearningbook.org/</a></p>
 </li>
 </ol>
-<hr/>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Wyk%C5%82ad-III">Wykład III<a class="anchor-link" href="#Wyk%C5%82ad-III">¶</a></h2><p>ISLP, rozdz. 3.2</p>
 <hr/>
 </div>
 </div>
@@ -13603,10 +13603,10 @@ F = \frac{\text{wariancja wyjaśniona przez model}}{\text{wariancja pozostała w
 <th>Method:</th> <td>Least Squares</td> <th>  F-statistic:       </th> <td>   570.3</td>
 </tr>
 <tr>
-<th>Date:</th> <td>Wed, 23 Oct 2024</td> <th>  Prob (F-statistic):</th> <td>1.58e-96</td>
+<th>Date:</th> <td>Thu, 23 Oct 2025</td> <th>  Prob (F-statistic):</th> <td>1.58e-96</td>
 </tr>
 <tr>
-<th>Time:</th> <td>10:11:59</td> <th>  Log-Likelihood:    </th> <td> -386.18</td>
+<th>Time:</th> <td>10:45:57</td> <th>  Log-Likelihood:    </th> <td> -386.18</td>
 </tr>
 <tr>
 <th>No. Observations:</th> <td>   200</td> <th>  AIC:               </th> <td>   780.4</td>
@@ -13825,7 +13825,7 @@ F = \frac{\text{wariancja wyjaśniona przez model z wyłączeniem ostatnich } q 
 <div class="output_area">
 <div class="prompt output_prompt">Out[10]:</div>
 <div class="output_text output_subarea output_execute_result">
-<pre>array([0.02087296, 0.00149865, 0.04705599, 0.03900912])</pre>
+<pre>array([0.01334239, 0.00170131, 0.02062387, 0.0435352 , 0.01369961])</pre>
 </div>
 </div>
 </div>
@@ -13853,7 +13853,7 @@ F = \frac{\text{wariancja wyjaśniona przez model z wyłączeniem ostatnich } q 
 <div class="output_area">
 <div class="prompt output_prompt">Out[11]:</div>
 <div class="output_text output_subarea output_execute_result">
-<pre>np.float64(0.4952237922164484)</pre>
+<pre>np.float64(0.12257774238933727)</pre>
 </div>
 </div>
 </div>
@@ -14030,7 +14030,7 @@ R^2 = \frac{\text{TSS} - \text{RSS}}{\text{TSS}} = 1 - \frac{\text{RSS}}{\text{T
 <p>Predykcja zaburzana jest przez trzy różne źródła błędów:</p>
 <ol>
 <li>Stopień w jakim parametry $\hat{\beta}_0, \hat{\beta}_1, \ldots, \hat{\beta}_p$ odstają od prawdziwych parametrów $\beta_0, \beta_1, \ldots, \beta_p$. Jest to błąd <em>redukowalny</em>: możemy go zmniejszyć, gdy zwiększymy liczbę obserwacji $n$. Ten błąd decyduje o tym jak bardzo $\hat{y}$ może się różnić się prawdziwej wartości oczekiwanej $f(x)$ dla nowej obserwacji $x$. Dla oszacowania tej rozbieżności oblicza sie <em>przedział ufności</em> (<em>confidence interval</em>) dla $\hat{y}$.</li>
-<li>Być może prawdziwa zależność $f$ między predyktorami a zmienną celu jest nieliniowa, podczas gdy my dopasowaliśmy model liniowy. Błąd ten możemy je zmniejszyć dobierając bardziej adekwatny model.</li>
+<li>Być może prawdziwa zależność $f$ między predyktorami a zmienną celu jest nieliniowa, podczas gdy my dopasowaliśmy model liniowy. Błąd ten możemy zmniejszyć dobierając bardziej adekwatny model.</li>
 <li>Nawet gdybyśmy znali prawdziwą zależność $f(X)$, to jeszcze pozostaje błąd losowy $\epsilon$ związany z postacią modelu $Y=f(X)+\varepsilon$. Błąd ten jest niemożliwy do usunięcia. Pokazuje on jak bardzo $\hat{y}$ może się różnić się od prawdziwej wartości $y$ dla nowej obserwacji $x$. Dla oszacowania tej rozbieżności wyznacza się <em>przedział predykcji</em> (<em>prediction interval</em>) dla $\hat{y}$.</li>
 </ol>
 <p>Błędy z punktów 1. i 2. to znany nam z wykładu 1 błąd systematyczny; błąd z punktu 3. to błąd losowy.</p>
@@ -14041,10 +14041,10 @@ R^2 = \frac{\text{TSS} - \text{RSS}}{\text{TSS}} = 1 - \frac{\text{RSS}}{\text{T
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In [ ]:</div>
+<div class="prompt input_prompt">In [15]:</div>
 <div class="inner_cell">
 <div class="input_area">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">OLS</span><span class="p">(</span><span class="n">advertising</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">'sales'</span><span class="p">],</span> <span class="n">sm</span><span class="o">.</span><span class="n">add_constant</span><span class="p">(</span><span class="n">advertising</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">'TV radio'</span><span class="o">.</span><span class="n">split</span><span class="p">()]))</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">OLS</span><span class="p">(</span><span class="n">advertising</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">'sales'</span><span class="p">],</span> <span class="n">sm</span><span class="o">.</span><span class="n">add_constant</span><span class="p">(</span><span class="n">advertising</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="p">[</span><span class="s1">'TV'</span><span class="p">,</span> <span class="s1">'radio'</span><span class="p">]]))</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
 <span class="n">predictions</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">get_prediction</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">20</span><span class="p">])</span>
 <span class="n">predictions</span><span class="o">.</span><span class="n">summary_frame</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
 </pre></div>
@@ -14054,7 +14054,7 @@ R^2 = \frac{\text{TSS} - \text{RSS}}{\text{TSS}} = 1 - \frac{\text{RSS}}{\text{T
 <div class="output_wrapper">
 <div class="output">
 <div class="output_area">
-<div class="prompt output_prompt">Out[ ]:</div>
+<div class="prompt output_prompt">Out[15]:</div>
 <div class="output_html rendered_html output_subarea output_execute_result"><div>
 <style scoped="">
     .dataframe tbody tr th:only-of-type {

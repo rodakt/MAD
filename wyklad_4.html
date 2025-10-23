@@ -13104,7 +13104,7 @@ div#notebook {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Modele-analizy-danych">Modele analizy danych<a class="anchor-link" href="#Modele-analizy-danych">¶</a></h1><h3 id="2024/2025,-semestr-zimowy">2024/2025, semestr zimowy<a class="anchor-link" href="#2024/2025,-semestr-zimowy">¶</a></h3><p>Tomasz Rodak</p>
+<h1 id="Modele-analizy-danych">Modele analizy danych<a class="anchor-link" href="#Modele-analizy-danych">¶</a></h1><p>Tomasz Rodak</p>
 <hr/>
 </div>
 </div>
@@ -13160,6 +13160,33 @@ topics. MIT press.</p>
 </div>
 </div>
 </div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Spis-tre%C5%9Bci">Spis treści<a class="anchor-link" href="#Spis-tre%C5%9Bci">¶</a></h2><ol>
+<li>Zmienne jakościowe<ul>
+<li>Zmienna jakościowa o dwóch wartościach</li>
+<li>Zmienna jakościowa o więcej niż dwóch wartościach</li>
+</ul>
+</li>
+<li>Rozszerzanie modelu liniowego<ul>
+<li>Zależność nieaddytywna</li>
+<li>Zależność nieliniowa</li>
+</ul>
+</li>
+<li>Problemy występujące w modelu liniowym<ul>
+<li>Brak liniowości</li>
+<li>Korelacja reszt</li>
+<li>Heteroskedastyczność</li>
+<li>Wartości odstające</li>
+<li>Punkty wpływowe</li>
+<li>Współliniowość</li>
+</ul>
+</li>
+</ol>
+</div>
+</div>
+</div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 <div class="prompt input_prompt">In [1]:</div>
@@ -13180,15 +13207,15 @@ topics. MIT press.</p>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Regresja-wielokrotna-II">Regresja wielokrotna II<a class="anchor-link" href="#Regresja-wielokrotna-II">¶</a></h2>
+<h2 id="1.-Zmienne-jako%C5%9Bciowe">1. Zmienne jakościowe<a class="anchor-link" href="#1.-Zmienne-jako%C5%9Bciowe">¶</a></h2>
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Zmienne-jako%C5%9Bciowe">Zmienne jakościowe<a class="anchor-link" href="#Zmienne-jako%C5%9Bciowe">¶</a></h3><p>Predyktory rozważane do tej pory były zmiennymi ilościowymi. Często jednak w danych pojawiają się zmienne jakościowe. Przykładem może być płeć, kolor oczu, odpowiedzi tak/nie itp. Aby wykorzystać tego typu zmienne w modelu regresji liniowej należy je odpowiednio zakodować.</p>
-<h4 id="Zmienna-jako%C5%9Bciowa-o-dw%C3%B3ch-warto%C5%9Bciach">Zmienna jakościowa o dwóch wartościach<a class="anchor-link" href="#Zmienna-jako%C5%9Bciowa-o-dw%C3%B3ch-warto%C5%9Bciach">¶</a></h4><p>W zbiorze <code>Credit.csv</code> mamy cztery zmienne jakościowe: <code>Own</code>, <code>Student</code>, <code>Married</code> i <code>Region</code>. Zmienną celu jest <code>Balance</code> - zmienna ilościowa. Poza tym mamy predyktory ilościowe: <code>Income</code>, <code>Limit</code>, <code>Rating</code>, <code>Cards</code>, <code>Age</code> i <code>Education</code>.</p>
+<p>Predyktory rozważane do tej pory były zmiennymi ilościowymi. Często jednak w danych pojawiają się zmienne jakościowe. Przykładem może być płeć, kolor oczu, odpowiedzi tak/nie itp. Aby wykorzystać tego typu zmienne w modelu regresji liniowej należy je odpowiednio zakodować.</p>
+<h3 id="1.1-Zmienna-jako%C5%9Bciowa-o-dw%C3%B3ch-warto%C5%9Bciach">1.1 Zmienna jakościowa o dwóch wartościach<a class="anchor-link" href="#1.1-Zmienna-jako%C5%9Bciowa-o-dw%C3%B3ch-warto%C5%9Bciach">¶</a></h3><p>W zbiorze <code>Credit.csv</code> mamy cztery zmienne jakościowe: <code>Own</code>, <code>Student</code>, <code>Married</code> i <code>Region</code>. Zmienną celu jest <code>Balance</code> - zmienna ilościowa. Poza tym mamy predyktory ilościowe: <code>Income</code>, <code>Limit</code>, <code>Rating</code>, <code>Cards</code>, <code>Age</code> i <code>Education</code>.</p>
 </div>
 </div>
 </div>
@@ -13471,7 +13498,7 @@ topics. MIT press.</p>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h4 id="Zmienna-jako%C5%9Bciowa-o-wi%C4%99cej-ni%C5%BC-dw%C3%B3ch-warto%C5%9Bciach">Zmienna jakościowa o więcej niż dwóch wartościach<a class="anchor-link" href="#Zmienna-jako%C5%9Bciowa-o-wi%C4%99cej-ni%C5%BC-dw%C3%B3ch-warto%C5%9Bciach">¶</a></h4><p>Gdy zmienna jakościowa przyjmuje więcej niż dwie wartości, to można ją zakodować stosując tzw. <em>One Hot Encoding</em>. Polega on na zamianie zmiennej jakościowej o $K$ wartościach na $K-1$ zmiennych binarnych. Na przykład zmienną <code>Region</code> można zakodować w następujący sposób:</p>
+<h3 id="1.2-Zmienna-jako%C5%9Bciowa-o-wi%C4%99cej-ni%C5%BC-dw%C3%B3ch-warto%C5%9Bciach">1.2 Zmienna jakościowa o więcej niż dwóch wartościach<a class="anchor-link" href="#1.2-Zmienna-jako%C5%9Bciowa-o-wi%C4%99cej-ni%C5%BC-dw%C3%B3ch-warto%C5%9Bciach">¶</a></h3><p>Gdy zmienna jakościowa przyjmuje więcej niż dwie wartości, to można ją zakodować stosując tzw. <em>One Hot Encoding</em>. Polega on na zamianie zmiennej jakościowej o $K$ wartościach na $K-1$ zmiennych binarnych. Na przykład zmienną <code>Region</code> można zakodować w następujący sposób:</p>
 <p>\begin{equation*}
 \texttt{Region}_{i1} =
 \begin{cases}
@@ -13598,7 +13625,7 @@ topics. MIT press.</p>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Rozszerzanie-modelu-liniowego">Rozszerzanie modelu liniowego<a class="anchor-link" href="#Rozszerzanie-modelu-liniowego">¶</a></h2><p>Model liniowy opiera się na dwóch założeniach:</p>
+<h2 id="2.-Rozszerzanie-modelu-liniowego">2. Rozszerzanie modelu liniowego<a class="anchor-link" href="#2.-Rozszerzanie-modelu-liniowego">¶</a></h2><p>Model liniowy opiera się na dwóch założeniach:</p>
 <ul>
 <li><em>addytywności</em> - wpływ każdego predyktora na zmienną celu jest niezależny od pozostałych predyktorów,</li>
 <li><em>liniowości</em> - wpływ każdego predyktora na zmienną celu jest liniowy, czyli zmiana wartości predyktora o jedną jednostkę powoduje zmianę wartości zmiennej celu o stałą wartość, bez względu na wartość predyktora.</li>
@@ -13609,7 +13636,7 @@ topics. MIT press.</p>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Zale%C5%BCno%C5%9B%C4%87-nieaddytywna">Zależność nieaddytywna<a class="anchor-link" href="#Zale%C5%BCno%C5%9B%C4%87-nieaddytywna">¶</a></h3><p>Rozważmy model:</p>
+<h3 id="2.1-Zale%C5%BCno%C5%9B%C4%87-nieaddytywna">2.1 Zależność nieaddytywna<a class="anchor-link" href="#2.1-Zale%C5%BCno%C5%9B%C4%87-nieaddytywna">¶</a></h3><p>Rozważmy model:</p>
 <p>\begin{equation*}
 Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \varepsilon.
 \end{equation*}</p>
@@ -13906,7 +13933,7 @@ Y &amp;= \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \beta_3 X_1 X_2 + \varepsilon \\
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h4 id="Zale%C5%BCno%C5%9B%C4%87-nieliniowa">Zależność nieliniowa<a class="anchor-link" href="#Zale%C5%BCno%C5%9B%C4%87-nieliniowa">¶</a></h4><p>Jeden ze sposobów na uwzględnienie zależności nieliniowych w danych jest dodanie do modelu regresji nowych zmiennych będących nieliniowymi przeksztalceniami zmiennych oryginalnych. Przykładem może być model regresji <code>mpg</code> względem <code>horsepower</code> ze zbioru <code>Auto.csv</code>. Wykres rozproszenia sugeruje, że zależność między <code>mpg</code> a <code>horsepower</code> jest nieliniowa:</p>
+<h3 id="2.2-Zale%C5%BCno%C5%9B%C4%87-nieliniowa">2.2 Zależność nieliniowa<a class="anchor-link" href="#2.2-Zale%C5%BCno%C5%9B%C4%87-nieliniowa">¶</a></h3><p>Jeden ze sposobów na uwzględnienie zależności nieliniowych w danych jest dodanie do modelu regresji nowych zmiennych będących nieliniowymi przeksztalceniami zmiennych oryginalnych. Przykładem może być model regresji <code>mpg</code> względem <code>horsepower</code> ze zbioru <code>Auto.csv</code>. Wykres rozproszenia sugeruje, że zależność między <code>mpg</code> a <code>horsepower</code> jest nieliniowa:</p>
 </div>
 </div>
 </div>
@@ -14123,7 +14150,7 @@ Y &amp;= \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \beta_3 X_1 X_2 + \varepsilon \\
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Problemy-wyst%C4%99puj%C4%85ce-w-modelu-liniowym">Problemy występujące w modelu liniowym<a class="anchor-link" href="#Problemy-wyst%C4%99puj%C4%85ce-w-modelu-liniowym">¶</a></h3><h4 id="Brak-liniowo%C5%9Bci">Brak liniowości<a class="anchor-link" href="#Brak-liniowo%C5%9Bci">¶</a></h4><p>Problem braku liniowości pomaga wykryć wykres rozproszenia reszt względem predyktora (w przypadku modelu z jednym predyktorem) lub wykres rozproszenia reszt względem wartości przewidywanych (w przypadku modelu z wieloma predyktorami). Oto przykład dla dwóch modeli <code>mpg</code> względem <code>horsepower</code>:</p>
+<h2 id="3.-Problemy-wyst%C4%99puj%C4%85ce-w-modelu-liniowym">3. Problemy występujące w modelu liniowym<a class="anchor-link" href="#3.-Problemy-wyst%C4%99puj%C4%85ce-w-modelu-liniowym">¶</a></h2><h3 id="3.1-Brak-liniowo%C5%9Bci">3.1 Brak liniowości<a class="anchor-link" href="#3.1-Brak-liniowo%C5%9Bci">¶</a></h3><p>Problem braku liniowości pomaga wykryć wykres rozproszenia reszt względem predyktora (w przypadku modelu z jednym predyktorem) lub wykres rozproszenia reszt względem wartości przewidywanych (w przypadku modelu z wieloma predyktorami). Oto przykład dla dwóch modeli <code>mpg</code> względem <code>horsepower</code>:</p>
 </div>
 </div>
 </div>
@@ -14164,8 +14191,8 @@ Y &amp;= \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \beta_3 X_1 X_2 + \varepsilon \\
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h4 id="Korelacja-reszt">Korelacja reszt<a class="anchor-link" href="#Korelacja-reszt">¶</a></h4><p>Zgodnie z założeniami modelu regresji reszty odpowiadające błędom losowym $\varepsilon_i$ powinny być niezależne od siebie. Jeśli jednak występuje korelacja między resztami, to oznacza to, że w danych występuje jakaś zależność, która nie została uwzględniona w modelu i pozostała w resztach. Skutkiem korelacji reszt jest nadmierne zmniejszenie $p$-wartości dla parametrów modelu i zawężenie przedziałów ufności.</p>
-<h4 id="Heteroskedastyczno%C5%9B%C4%87">Heteroskedastyczność<a class="anchor-link" href="#Heteroskedastyczno%C5%9B%C4%87">¶</a></h4><p>Reszty powinny mieć jednakową wariancję, w modelu zakłada się bowiem, że wariancja błędu losowego $\varepsilon_i$ jest stała (choć nieznana). Jeśli wariancja reszt jest różna dla różnych wartości predyktora, to mówimy o heteroskedastyczności.</p>
+<h3 id="3.2-Korelacja-reszt">3.2 Korelacja reszt<a class="anchor-link" href="#3.2-Korelacja-reszt">¶</a></h3><p>Zgodnie z założeniami modelu regresji reszty odpowiadające błędom losowym $\varepsilon_i$ powinny być niezależne od siebie. Jeśli jednak występuje korelacja między resztami, to oznacza to, że w danych występuje jakaś zależność, która nie została uwzględniona w modelu i pozostała w resztach. Skutkiem korelacji reszt jest nadmierne zmniejszenie $p$-wartości dla parametrów modelu i zawężenie przedziałów ufności.</p>
+<h3 id="3.3-Heteroskedastyczno%C5%9B%C4%87">3.3 Heteroskedastyczność<a class="anchor-link" href="#3.3-Heteroskedastyczno%C5%9B%C4%87">¶</a></h3><p>Reszty powinny mieć jednakową wariancję, w modelu zakłada się bowiem, że wariancja błędu losowego $\varepsilon_i$ jest stała (choć nieznana). Jeśli wariancja reszt jest różna dla różnych wartości predyktora, to mówimy o heteroskedastyczności.</p>
 <p>W przypadku wystąpienia heteroskedastyczności można próbować zastosować wklęsłe przekształcenie zmiennej celu $Y$, np. $\sqrt{Y}$, $\log(Y)$.</p>
 </div>
 </div>
@@ -14173,7 +14200,7 @@ Y &amp;= \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \beta_3 X_1 X_2 + \varepsilon \\
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h4 id="Warto%C5%9Bci-odstaj%C4%85ce-(outliers)">Wartości odstające (<em>outliers</em>)<a class="anchor-link" href="#Warto%C5%9Bci-odstaj%C4%85ce-(outliers)">¶</a></h4><p>Wartości odstające to obserwacje, które znacznie odbiegają od pozostałych obserwacji. Mogą one powodować duże zmiany parametrów modelu i wartości $R^2$.</p>
+<h3 id="3.4-Warto%C5%9Bci-odstaj%C4%85ce-(outliers)">3.4 Wartości odstające (<em>outliers</em>)<a class="anchor-link" href="#3.4-Warto%C5%9Bci-odstaj%C4%85ce-(outliers)">¶</a></h3><p>Wartości odstające to obserwacje, które znacznie odbiegają od pozostałych obserwacji. Mogą one powodować duże zmiany parametrów modelu i wartości $R^2$.</p>
 <p>Wartości odstające można wykryć na wykresie rozproszenia reszt lub studentyzowanych reszt względem wartości przewidywanych.</p>
 </div>
 </div>
@@ -14212,7 +14239,7 @@ Y &amp;= \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \beta_3 X_1 X_2 + \varepsilon \\
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h4 id="Punkty-wp%C5%82ywowe-(leverage-points)">Punkty wpływowe (<em>leverage points</em>)<a class="anchor-link" href="#Punkty-wp%C5%82ywowe-(leverage-points)">¶</a></h4><p>Punkty wpływowe to obserwacje, które znacznie odbiegają od pozostałych obserwacji pod względem wartości predyktora. Mogą one powodować duże zmiany parametrów modelu i wartości $R^2$.</p>
+<h3 id="3.5-Punkty-wp%C5%82ywowe-(leverage-points)">3.5 Punkty wpływowe (<em>leverage points</em>)<a class="anchor-link" href="#3.5-Punkty-wp%C5%82ywowe-(leverage-points)">¶</a></h3><p>Punkty wpływowe to obserwacje, które znacznie odbiegają od pozostałych obserwacji pod względem wartości predyktora. Mogą one powodować duże zmiany parametrów modelu i wartości $R^2$.</p>
 </div>
 </div>
 </div>
@@ -14252,7 +14279,7 @@ Y &amp;= \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \beta_3 X_1 X_2 + \varepsilon \\
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h4 id="Wsp%C3%B3%C5%82liniowo%C5%9B%C4%87">Współliniowość<a class="anchor-link" href="#Wsp%C3%B3%C5%82liniowo%C5%9B%C4%87">¶</a></h4><p>Współliniowość to zjawisko, w którym dwa lub więcej predyktorów są ze sobą silnie skorelowane. Jeśli predyktory $X_i$ i $X_j$ są ze sobą silnie skorelowane, to oznacza to, że w modelu występuje zależność między $X_i$ i $X_j$. Wówczas model nie jest w stanie jednoznacznie określić indywidualnego wpływu $X_i$ i $X_j$ na $Y$.</p>
+<h3 id="3.6-Wsp%C3%B3%C5%82liniowo%C5%9B%C4%87">3.6 Współliniowość<a class="anchor-link" href="#3.6-Wsp%C3%B3%C5%82liniowo%C5%9B%C4%87">¶</a></h3><p>Współliniowość to zjawisko, w którym dwa lub więcej predyktorów są ze sobą silnie skorelowane. Jeśli predyktory $X_i$ i $X_j$ są ze sobą silnie skorelowane, to oznacza to, że w modelu występuje zależność między $X_i$ i $X_j$. Wówczas model nie jest w stanie jednoznacznie określić indywidualnego wpływu $X_i$ i $X_j$ na $Y$.</p>
 <p>Współliniowość można wykryć na wykresie rozproszenia predyktorów lub na wykresie korelacji między predyktorami.</p>
 </div>
 </div>
