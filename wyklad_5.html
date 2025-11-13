@@ -13212,76 +13212,84 @@ topics. MIT press.</p>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Klasyfikacja to problem w nadzorowanym uczeniu maszynowym, w którym celem jest przypisanie obiektu do jednej ze (skończenie wielu) klas. Dane treningowe mają postać $(x_i, y_i)$, $i=1,\dots,n$, gdzie $x_i$ to wektor cech, a $y_i$ to etykieta klasy. Przez $\hat{f}$ oznaczamy funkcję klasyfikującą, która przypisuje obiektowi $x$ etykietę $\hat{y} = \hat{f}(x)$.</p>
-<p><em>Błąd treningowy</em> klasyfikatora (ang. <em>training error</em>) definiujemy jako frakcję błędnie zaklasyfikowanych obiektów w zbiorze treningowym:</p>
+<h3 id="1.1-Klasyfikator-Bayesa">1.1 Klasyfikator Bayesa<a class="anchor-link" href="#1.1-Klasyfikator-Bayesa">¶</a></h3><p>Klasyfikacja to problem w nadzorowanym uczeniu maszynowym, w którym celem jest przypisanie obiektu, reprezentowanego przez punkt $x\in \mathbb{R}^p$, do jednej ze (skończenie wielu) klas.</p>
+<p>Niech</p>
 <p>\begin{equation*}
-\frac{1}{n} \sum_{i=1}^n I(y_i \neq \hat{y}_i),
+f\colon \mathbb{R}^p \to \{\mathcal{C}_1, \mathcal{C}_2, \dots, \mathcal{C}_K\}
 \end{equation*}</p>
-<p>gdzie $I(\cdot)$ to funkcja wskaźnikowa:</p>
+<p>oznacza funkcję przypisującą obiektowi $x$ etykietę klasy $\mathcal{C}_k$. Funkcję $f$ nazywamy <strong>klasyfikatorem</strong> (<em>classifier</em>) albo <strong>funkcją decyzyjną</strong> (<em>decision function</em>). Jeśli $\mathcal{T} = \{\,(x_i, y_i), i=1,\dots,n\,\}$ jest zbiorem punktów wejściowych wraz z odpowiadającymi im etykietami klas, to dla tego zbioru  możemy wyznaczyć <strong>błąd predykcji</strong> klasyfikatora $f$ na zbiorze $\mathcal{T}$ (<em>misclassification error</em>) jako odsetek błędnie sklasyfikowanych punktów. Formalnie, błąd predykcji definiujemy jako:
+\begin{equation*}
+\frac{1}{n} \sum_{i=1}^n I(y_i \neq f(x_i))=1-\frac{1}{n} \sum_{i=1}^n I(y_i = f(x_i)),
+\end{equation*}
+gdzie $I(\cdot)$ to funkcja wskaźnikowa:
+\begin{equation*}
+I(a\neq b) = \begin{cases}
+1 &amp; \text{jeśli } a\neq b, \\
+0 &amp; \text{jeśli } a= b,
+\end{cases}
+\end{equation*}
+oraz $I(a=b)=1 - I(a\neq b)$.</p>
+<p>Od roli zbioru $\mathcal{T}$ zależy, jak interpretujemy powyższy błąd predykcji:</p>
+<ul>
+<li>Jeśli $\mathcal{T}$ jest zbiorem treningowym, czyli jeśli zbiór ten był użyty do wyznaczenia funkcji $f$, to powyższy błąd predykcji nazywamy <strong>błędem treningowym</strong> (<em>training error</em>).</li>
+<li>Jeśli $\mathcal{T}$ jest zbiorem testowym/walidacyjnym, czyli nie był użyty do uczenia funkcji $f$, to powyższy błąd predykcji nazywamy <strong>błędem testowym</strong> (<em>test error</em>).</li>
+</ul>
+<p>Z punktu widzenia budowy modelu wygląda to następująco. Niech $(X, Y)$ będzie elementem losowym generującym dane. Zakładamy zatem, że $X=(X_1, X_2, \dots, X_p)$ to wektor zmiennych losowych opisujących obiekt, a $Y$ to zmienna losowa przyjmująca wartości w zbiorze etykiet klas $\{\mathcal{C}_1, \mathcal{C}_2, \dots, \mathcal{C}_K\}$. Interesuje nas wówczas <strong>oczekiwany błąd predykcji</strong> (<em>expected prediction error</em>) klasyfikatora $f$:</p>
 <p>\begin{equation*}
-I(y_i \neq \hat{y}_i) = \begin{cases}
-1 &amp; \text{jeśli } y_i \neq \hat{y}_i, \\
-0 &amp; \text{jeśli } y_i = \hat{y}_i.
+\operatorname{EPE}(f) := \mathbb{E}_{(X, Y)}(I(Y \neq f(X)))=P(Y \neq f(X)),
+\end{equation*}</p>
+<p>gdzie wartość oczekiwana jest brana względem łącznego rozkładu wektora $(X, Y)$. Zdefiniowany wyżej błąd predykcji na zbiorze testowym, czyli błąd testowy, jest właśnie przybliżeniem $\operatorname{EPE}(f)$.</p>
+<p>Intuicyjnie jest jasne, że chcemy znaleźć taki klasyfikator $f$, dla którego $\operatorname{EPE}(f)$ jest jak najmniejsze.
+Okazuje się, taki klasyfikator istnieje i nazywa się go <strong>klasyfikatorem Bayesa</strong> (<em>Bayes classifier</em>). Definiuje się go wzorem:</p>
+<p>\begin{equation*}
+f^*(x) = \operatorname{argmax}_{c\in \{\mathcal{C}_1, \mathcal{C}_2, \dots, \mathcal{C}_K\}} P(Y=c|X=x).
+\end{equation*}</p>
+<p>Inaczej mówiąc, klasyfikator Bayesa przypisuje obiektowi $x$ etykietę tej klasy, dla której prawdopodobieństwo warunkowe $P(Y=c|X=x)$ jest największe. Idea ta jest intuicyjna: przypisujemy obiektowi $x$ tę klasę, która jest najbardziej prawdopodobna, biorąc pod uwagę wartość cech $x$. Jak powiedzieliśmy wyżej klasyfikator Bayesa jest najlepszy w tym sensie, że minimalizuje oczekiwany błąd predykcji $\operatorname{EPE}(f)$: dla dowolnego innego klasyfikatora $f$ zachodzi nierówność</p>
+<p>\begin{equation*}
+\operatorname{EPE}(f^*) \leq \operatorname{EPE}(f).
+\end{equation*}</p>
+<p>Wielkość $\operatorname{EPE}(f^*)$ nazywamy <strong>błędem Bayesa</strong> (<em>Bayes error</em>). Jest to najniższy możliwy błąd predykcji, jaki można osiągnąć dla danego problemu klasyfikacji. Błąd Bayesa jest odpowiednikiem błędu losowego $\varepsilon$ w modelu regresji $Y = f(X) + \epsilon$.</p>
+<p>Okazuje się, że klasyfikator Bayesa minimalizuje nie tylko oczekiwany błąd predykcji $\operatorname{EPE}(f)$, ale również <strong>błąd predykcji w punkcie $x$</strong> (<em>prediction error at $x$</em>):</p>
+<p>\begin{equation*}
+\mathbb{E}(I(Y \neq f(X))|X=x) = P(Y \neq f(X)|X=x).
+\end{equation*}</p>
+<p>Akurat ten fakt jest łatwy do udowodnienia. Założmy dla uproszczenia, że mamy do czynienia z problemem klasyfikacji binarnej $Y\in \{\mathcal{C}_1, \mathcal{C}_2\}$ i że $f$ jest dowolnym klasyfikatorem. Wtedy:</p>
+<p>\begin{align*}
+\mathbb{E}(I(Y \neq f(X))|X=x) &amp;= P(Y \neq f(X)|X=x) \\
+&amp;= P(Y = \mathcal{C}_1, f(X) \neq \mathcal{C}_1|X=x) + P(Y = \mathcal{C}_2, f(X) \neq \mathcal{C}_2|X=x) \\
+&amp;= P(Y = \mathcal{C}_1|X=x) I(f(x) \neq \mathcal{C}_1) + P(Y = \mathcal{C}_2|X=x) I(f(x) \neq \mathcal{C}_2).
+\end{align*}</p>
+<p>Zatem, z określenia klasyfikatora Bayesa $f^*$ mamy:</p>
+<p>\begin{equation*}
+\mathbb{E}(I(Y \neq f^*(X))|X=x) = \\
+\begin{cases}
+P(Y = \mathcal{C}_2|X=x), &amp; \text{jeśli } P(Y = \mathcal{C}_2|X=x) &lt;= P(Y = \mathcal{C}_1|X=x), \\
+P(Y = \mathcal{C}_1|X=x) &amp; \text{jeśli } P(Y = \mathcal{C}_1|X=x) &lt; P(Y = \mathcal{C}_2|X=x).
 \end{cases}
 \end{equation*}</p>
-<p>Analogicznie jak w przypadku regresji symbolem $\hat{y}_i$ oznaczamy przewidywaną etykietę przypisaną do obiektu $x_i$ przez funkcję $\hat{f}$: $\hat{y}_i = \hat{f}(x_i)$.</p>
-<p><em>Błąd testowy</em> klasyfikatora (ang. <em>test error</em>) obliczamy na podstawie zbioru testowego, który nie był używany do uczenia. Stosujemy wtedy tę samą funkcję błędu co wyżej, tyle że na zbiorze testowym zamiast treningowym.</p>
-<p>Błąd treningowy powinien być jak najmniejszy, jednak jego mała wartość niekoniecznie oznacza, że klasyfikator dobrze generalizuje. W praktyce zależy nam na minimalizacji błędu testowego, gdyż to on określa jakość klasyfikatora na nigdy niewidzianych wcześniej danych.</p>
-<p>Błąd testowy jest przybliżeniem <em>oczekiwanego błędu predykcji</em> (ang. <em>expected prediction error</em>):</p>
+<p>Podobnie, jeśli mamy do czynienia z problemem klasyfikacji wieloklasowej, to:</p>
 <p>\begin{equation*}
-\operatorname{EPE}(\hat{f}) = \mathbb{E}_{(X, Y)}(I(Y \neq \hat{f}(X))),
-\end{equation*}</p>
-<p>gdzie wartość oczekiwana jest brana względem łącznego rozkładu wektora $(X, Y)$ o gęstości $p(x, y)$. Ponieważ rozkład $p(x, y)$ nie jest znany, więc $\operatorname{EPE}(\hat{f})$ możemy jedynie przybliżać na podstawie testowego zbioru danych.</p>
-<p>Interesuje nas znalezienie takiego klasyfikatora $\hat{f}$, który zminimalizuje $\operatorname{EPE}(\hat{f})$. Można wykazać, że w tym celu wystarczy minimalizować warunkową wartość oczekiwaną $I(Y \neq \hat{f}(X))$ względem $Y$ przy założeniu, że $X$ jest znane:</p>
+\mathbb{E}(I(Y \neq f(X))|X=x) = \sum_{k=1}^K P(Y = \mathcal{C}_k|X=x) I(f(x) \neq \mathcal{C}_k)
+\end{equation*}
+i z definicji klasyfikatora Bayesa $f^*$ mamy:</p>
 <p>\begin{equation*}
-\mathbb{E}(I(Y \neq \hat{f}(X))|X).
+\mathbb{E}(I(Y \neq f^*(X))|X=x) = 1 - \max_{k=1,\dots,K} P(Y = \mathcal{C}_k|X=x).
 \end{equation*}</p>
-<p>W tym przypadku wartość oczekiwana liczona jest względem rozkładu warunkowego $p(y|x)$. Wartość oczekiwana $\mathbb{E}(I(Y \neq \hat{f}(X))|X=x)$ jest nazywana <em>oczekiwanym błędem predykcji w punkcie $x$</em> (ang. <em>expected prediction error at $x$</em>).</p>
-<p>Rozkład $p(y|x)$ również nie jest znany, dlatego w praktyce szukamy klasyfikatora, który minimalizuje
-<em>testowy błąd predykcji w punkcie $x$</em> (ang. <em>test error at $x$</em>):</p>
-<p>\begin{equation*}
-\operatorname{Average}(I(y \neq \hat{f}(x))),
-\end{equation*}</p>
-<p>gdzie $\operatorname{Average}$ oznacza uśrednienie  $I(y \neq \hat{f}(x))$ względem znanych $y$ dla ustalonego $x$. Zwykle dla ustalonego $x$ istnieje co najwyżej jedna etykieta $y$, dlatego nie ma oczywistego sposobu na przeprowadzenie takiego uśrednienia. Prostą propozycję rozwiązania tego problemu oferuje metoda $k$-najbliższych sąsiadów (ang. <em>$k$-nearest neighbors</em>): zamiast bezpośrednio uśredniać wartość etykiety $y$ w $x$ możemy próbować uśredniać wartość etykiety $y$ dla $k$ najbliższych sąsiadów $x$.</p>
+<p>Można wykazać, że klasyfikator minimalizujący błąd predykcji w punkcie $x$ również minimalizuje oczekiwany błąd predykcji $\operatorname{EPE}(f)$. Zatem klasyfikator Bayesa minimalizuje oba te błędy jednocześnie.</p>
+<p>Fakt istnienia klasyfikatora Bayesa jest bardzo ważny z punktu widzenia budowy modeli klasyfikacyjnych. Pokazuje on, że istnieje teoretycznie najlepszy klasyfikator, do którego powinniśmy dążyć. Niestety, w praktyce nie znamy rozkładu warunkowego $P(Y\mid X=x)$, dlatego bezpośrednia konstrukcja klasyfikatora Bayesa jest niemożliwa. Zamiast tego, w praktyce stosujemy różne metody przybliżania klasyfikatora Bayesa na podstawie dostępnych danych treningowych. Jedną z takich metod jest algorytm K najbliższych sąsiadów.</p>
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="1.1-Klasyfikator-Bayesa">1.1 Klasyfikator Bayesa<a class="anchor-link" href="#1.1-Klasyfikator-Bayesa">¶</a></h3><p>Załóżmy, że rozkład $p(y|x)$ jest znany. Dla uproszczenia przyjmijmy, że etykiety są tylko dwie $y \in \{0,1\}$. Wówczas oczekiwany błąd predykcji w punkcie $x$ wynosi:</p>
+<h3 id="1.2-$K$-najbli%C5%BCszych-s%C4%85siad%C3%B3w">1.2 $K$ najbliższych sąsiadów<a class="anchor-link" href="#1.2-$K$-najbli%C5%BCszych-s%C4%85siad%C3%B3w">¶</a></h3><p>Metoda $K$ najbliższych sąsiadów (ang. <em>$K$ nearest neighbors</em>, $K$-NN) jest jedną z najprostszych metod klasyfikacji, polegającą na przybliżeniu rozkładu $P(Y|X=x)$ za pomocą $K$ najbliższych obiektów treningowych $x_i$ do $x$. Metoda ta wymaga ustalenia metryki $d(x,x')$ na przestrzeni cech.</p>
+<p>Ustalmy dodatnią liczbę całkowitą $K$. Dla ustalonego obiektu $x$ znajdujemy zbiór $\mathcal{N}_x$ $K$ najbliższych obiektów treningowych $x_i$ do $x$ (w sensie metryki $d$). Prawdobodobieństwo $P(Y=\mathcal{C}_k|X=x)$ estymujemy jako frakcję obiektów $x_i$ w $\mathcal{N}_x$, dla których $y_i=\mathcal{C}_k$:</p>
 <p>\begin{equation*}
-\mathbb{E}(I(Y \neq \hat{f}(X))|X=x) = I(0\neq \hat{f}(x))p(Y=0|X=x) + I(1\neq \hat{f}(x))p(Y=1|X=x).
+P(Y=\mathcal{C}_k|X=x) = \frac{1}{K} \sum_{x_i \in \mathcal{N}_x} I(y_i=\mathcal{C}_k).
 \end{equation*}</p>
-<p>Jak zdefiniować $\hat{f}$, aby powyższa wartość była minimalna?</p>
-<p>Ponieważ funkcja wskaźnikowa $I(\cdot)$ przyjmuje jedynie wartości $0$ i $1$, to podana wyżej wartość oczekiwana jest równa $p(Y=1|X=x)$ (jeśli $\hat{f}(x)=0$) lub $p(Y=0|X=x)$ (jeśli $\hat{f}(x)=1$). Zatem wartość ta będzie najmniejsza, gdy $\hat{f}$ zadamy wzorem:</p>
-<p>\begin{equation*}
-\hat{f}(x) = \operatorname{argmax}_{k \in \{0,1\}} p(Y=k|X=x)
-\end{equation*}</p>
-<p>Ogólnie, gdy $Y \in \{0,1,\dots,K-1\}$, to</p>
-<p>\begin{equation*}
-\hat{f}(x) = \operatorname{argmax}_{k \in \{0,1,\dots,K-1\}} p(Y=k|X=x).
-\end{equation*}</p>
-<p>Inaczej mówiąc, $\hat{f}$ przypisuje obiektowi $x$ tę etykietę $j$, która ma największe prawdopodobieństwo w rozkładzie $p(Y=j|X=x)$.</p>
-<p>W konsekwencji oczekiwany błąd predykcji w punkcie $x$ klasyfikatora Bayesa jest równy $1 - \max_{k \in \{0,1,\dots,K-1\}} p(Y=k|X=x)$. Błąd ten nazywamy <em>Bayes error rate</em>. Ogólny błąd Bayesa czyli oczekiwany błąd predykcji względem rozkładu wektora $X$ wynosi:</p>
-<p>\begin{equation*}
-\operatorname{BER} = \mathbb{E}_X(1 - \max_{k \in \{0,1,\dots,K-1\}} p(Y=k|X)).
-\end{equation*}</p>
-<p>Funkcję $\hat{f}$ nazywamy <em>klasyfikatorem Bayesa</em> (ang. <em>Bayes classifier</em>). Fakt, że klasyfikator Bayesa "zna" rozkład warunkowy $p(y|x)$, sprawia, że jest to klasyfikator optymalny. Teoretycznie, spośród wszystkich klasyfikatorów, klasyfikator Bayesa osiąga najniższą wartość oczekiwanego błędu predykcji $\operatorname{EPE}(\hat{f})$ i najwyższą skuteczność klasyfikacji.</p>
-<p>Dla dwóch klas <em>granicą decyzyjną Bayesa</em> (ang. <em>Bayes decision boundary</em>) nazywamy zbiór obiektów $x$, dla których $p(y=1|x) = p(y=0|x)$. Regułą decyzyjną jest wówczas przypisanie obiektowi $x$ klasy $1$, jeśli $p(y=1|x) &gt; p(y=0|x)$, a klasy $0$ w przeciwnym przypadku.</p>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="1.2-$K$-najbli%C5%BCszych-s%C4%85siad%C3%B3w">1.2 $K$ najbliższych sąsiadów<a class="anchor-link" href="#1.2-$K$-najbli%C5%BCszych-s%C4%85siad%C3%B3w">¶</a></h3><p>Metoda $K$ najbliższych sąsiadów (ang. <em>$K$ nearest neighbors</em>, $K$-NN) jest jedną z najprostszych metod klasyfikacji, polegającą na przybliżeniu rozkładu $p(y|x)$ za pomocą $K$ najbliższych obiektów treningowych $x_i$ do $x$. Metoda ta wymaga ustalenia metryki $d(x,x')$ na przestrzeni cech.</p>
-<p>Ustalmy dodatnią liczbę całkowitą $K$. Dla ustalonego obiektu $x$ znajdujemy zbiór $\mathcal{N}_x$ $K$ najbliższych obiektów treningowych $x_i$ do $x$ (w sensie metryki $d$). Prawdobodobieństwo $p(Y=j|X=x)$ estymujemy jako frakcję obiektów $x_i$ w $\mathcal{N}_x$, dla których $y_i=j$:</p>
-<p>\begin{equation*}
-p(Y=j|X=x) = \frac{1}{K} \sum_{x_i \in \mathcal{N}_x} I(y_i=j).
-\end{equation*}</p>
-<p>Dla uproszczenia notacji prawdobodobieństwo to oznaczamy przez $p$, choć bardziej ściśle byłoby pisać $\hat{p}$, gdyż jest to estymator prawdopodobieństwa.</p>
-<p>Gdy mamy już rozkłady $p(y|x)$, to klasyfikator definiujemy jako klasyfikator Bayesa zadany przez te rozkłady: obiektowi $x$ przypisujemy tę etykietę $j$, która ma największe prawdopodobieństwo w rozkładzie $p(Y=j|X=x)$.</p>
+<p>Dla uproszczenia notacji prawdobodobieństwo to oznaczamy przez $P$, choć bardziej ściśle byłoby pisać $\hat{P}$, gdyż jest to estymator prawdopodobieństwa.</p>
+<p>Gdy mamy już rozkłady $P(Y|X=x)$, to klasyfikator definiujemy jako klasyfikator Bayesa zadany przez te rozkłady: obiektowi $x$ przypisujemy tę etykietę $k$, która ma największe prawdopodobieństwo w rozkładzie $P(Y=\mathcal{C}_k|X=x)$.</p>
 </div>
 </div>
 </div>
