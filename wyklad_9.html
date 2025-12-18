@@ -13160,6 +13160,20 @@ topics. MIT press.</p>
 </div>
 </div>
 </div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Spis-tre%C5%9Bci">Spis treści<a class="anchor-link" href="#Spis-tre%C5%9Bci">¶</a></h2><ol>
+<li>Uogólniony model liniowy (<em>Generalized Linear Model</em>, GLM)<ul>
+<li>Regresja liniowa dla <em>Bikeshare</em></li>
+<li>Regresja Poissona</li>
+<li>GLM</li>
+</ul>
+</li>
+</ol>
+</div>
+</div>
+</div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 <div class="prompt input_prompt">In [1]:</div>
@@ -13189,7 +13203,7 @@ topics. MIT press.</p>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Uog%C3%B3lniony-model-liniowy-(Generalized-Linear-Model,-GLM)">Uogólniony model liniowy (<em>Generalized Linear Model</em>, GLM)<a class="anchor-link" href="#Uog%C3%B3lniony-model-liniowy-(Generalized-Linear-Model,-GLM)">¶</a></h2><h3 id="Regresja-liniowa-dla-Bikeshare">Regresja liniowa dla <em>Bikeshare</em><a class="anchor-link" href="#Regresja-liniowa-dla-Bikeshare">¶</a></h3><p>Zbiór danych <em>Bikeshare</em> zawiera informacje o liczbie wypożyczonych rowerów w zależności od pory roku, dnia tygodnia, godziny dnia, pogody itp.</p>
+<h2 id="1.-Uog%C3%B3lniony-model-liniowy-(Generalized-Linear-Model,-GLM)">1. Uogólniony model liniowy (<em>Generalized Linear Model</em>, GLM)<a class="anchor-link" href="#1.-Uog%C3%B3lniony-model-liniowy-(Generalized-Linear-Model,-GLM)">¶</a></h2><h3 id="1.1-Regresja-liniowa-dla-Bikeshare">1.1 Regresja liniowa dla <em>Bikeshare</em><a class="anchor-link" href="#1.1-Regresja-liniowa-dla-Bikeshare">¶</a></h3><p>Zbiór danych <em>Bikeshare</em> zawiera informacje o liczbie wypożyczonych rowerów w zależności od pory roku, dnia tygodnia, godziny dnia, pogody itp.</p>
 </div>
 </div>
 </div>
@@ -14011,7 +14025,7 @@ Name: count, dtype: int64</pre>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Regresja-Poissona">Regresja Poissona<a class="anchor-link" href="#Regresja-Poissona">¶</a></h3><h4 id="Rozk%C5%82ad-Poissona">Rozkład Poissona<a class="anchor-link" href="#Rozk%C5%82ad-Poissona">¶</a></h4><p>Niech $Y$ będzie zmienną losową o wartościach w zbiorze $\{0, 1, 2, \ldots\}$. Wówczas $Y$ ma rozkład Poissona z parametrem $\lambda &gt; 0$ jeśli</p>
+<h3 id="1.2-Regresja-Poissona">1.2 Regresja Poissona<a class="anchor-link" href="#1.2-Regresja-Poissona">¶</a></h3><h4 id="Rozk%C5%82ad-Poissona">Rozkład Poissona<a class="anchor-link" href="#Rozk%C5%82ad-Poissona">¶</a></h4><p>Niech $Y$ będzie zmienną losową o wartościach w zbiorze $\{0, 1, 2, \ldots\}$. Wówczas $Y$ ma rozkład Poissona z parametrem $\lambda &gt; 0$ jeśli</p>
 </div>
 </div>
 </div>
@@ -14471,7 +14485,7 @@ zmniejsza się, średnio, o czynnik $\exp(-0.0752) = 0.9275$, czyli o $7.3\%$.</
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="GLM">GLM<a class="anchor-link" href="#GLM">¶</a></h3><p>Trzy poznane przez nas jak dotąd modele regresji liniowej, logistycznej i Poissona są szczególnymi przypadkami uogólnionego modelu liniowego (<em>Generalized Linear Model</em>, GLM). W każdym z tych modeli zakładamy pewną postać warunkowego rozkładu zmiennej celu $Y$ w zależności od zmiennych objaśniających $X_1, \ldots, X_p$.</p>
+<h3 id="1.3-GLM">1.3 GLM<a class="anchor-link" href="#1.3-GLM">¶</a></h3><p>Trzy poznane przez nas jak dotąd modele regresji liniowej, logistycznej i Poissona są szczególnymi przypadkami uogólnionego modelu liniowego (<em>Generalized Linear Model</em>, GLM). W każdym z tych modeli zakładamy pewną postać warunkowego rozkładu zmiennej celu $Y$ w zależności od zmiennych objaśniających $X_1, \ldots, X_p$.</p>
 <p>W modelu regresji liniowej zakładamy, że $Y|X_1, \ldots, X_p \sim \mathcal{N}(\mu(X_1, \ldots, X_p), \sigma^2)$, gdzie</p>
 <p>\begin{equation*}
 \mu(X_1, \ldots, X_p) = \mathbf{E}(Y|X_1, \ldots, X_p) =  \beta_0 + \beta_1 X_1 + \ldots + \beta_p X_p.

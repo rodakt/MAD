@@ -13120,6 +13120,20 @@ div#notebook {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Spis-tre%C5%9Bci">Spis treści<a class="anchor-link" href="#Spis-tre%C5%9Bci">¶</a></h2><ol>
+<li>Modele generatywne w problemach klasyfikacji<ul>
+<li>QDA (Quadratic Discriminant Analysis)</li>
+<li>Naiwny klasyfikator Bayesa (Naive Bayes)</li>
+</ul>
+</li>
+<li>Metody klasyfikacji - porównanie</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="Literatura">Literatura<a class="anchor-link" href="#Literatura">¶</a></h2><ol>
 <li><p>James, G., Witten, D., Hastie, T., Tibshirani, R., &amp; Taylor,
 J. (2023). An Introduction to Statistical Learning: With
@@ -13160,42 +13174,10 @@ topics. MIT press.</p>
 </div>
 </div>
 </div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In [ ]:</div>
-<div class="inner_cell">
-<div class="input_area">
-<div class="highlight hl-python"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
-<span class="n">sns</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In [ ]:</div>
-<div class="inner_cell">
-<div class="input_area">
-<div class="highlight hl-python"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.discriminant_analysis</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">LinearDiscriminantAnalysis</span> <span class="k">as</span> <span class="n">LDA</span><span class="p">,</span>
-    <span class="n">QuadraticDiscriminantAnalysis</span> <span class="k">as</span> <span class="n">QDA</span>
-<span class="p">)</span>
-
-<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
-<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">confusion_matrix</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Modele-generatywne-w-problemach-klasyfikacji:-QDA,-Naive-Bayes">Modele generatywne w problemach klasyfikacji: QDA, Naive Bayes<a class="anchor-link" href="#Modele-generatywne-w-problemach-klasyfikacji:-QDA,-Naive-Bayes">¶</a></h2><p>Przpomnijmy wprowadzony w poprzednim wykładzie schemat modelu generatywnego w problemie klasyfikacji. Niech $X$ będzie wektorem losowym cech, a $Y\in\{1,\ldots,K\}$ zmienną losową oznaczającą klasę. Na podstawie danych modelujemy rozkład a priori $P(Y=k)$ występowania oraz rozkłady warunkowe $p(x|Y=k)$ cech dla każdej klasy $k$ z osobna. Gdy te rozkłady już mamy, to możemy obliczyć rozkład a posteriori $P(Y=k|X=x)$ ze wzoru Bayesa:</p>
+<h2 id="1.-Modele-generatywne-w-problemach-klasyfikacji:-QDA,-Naive-Bayes">1. Modele generatywne w problemach klasyfikacji: QDA, Naive Bayes<a class="anchor-link" href="#1.-Modele-generatywne-w-problemach-klasyfikacji:-QDA,-Naive-Bayes">¶</a></h2><p>Przpomnijmy wprowadzony w poprzednim wykładzie schemat modelu generatywnego w problemie klasyfikacji. Niech $X$ będzie wektorem losowym cech, a $Y\in\{1,\ldots,K\}$ zmienną losową oznaczającą klasę. Na podstawie danych modelujemy rozkład a priori $P(Y=k)$ występowania oraz rozkłady warunkowe $p(x|Y=k)$ cech dla każdej klasy $k$ z osobna. Gdy te rozkłady już mamy, to możemy obliczyć rozkład a posteriori $P(Y=k|X=x)$ ze wzoru Bayesa:</p>
 <p>$$
 P(Y=k|x) = \frac{P(Y=k)p(x|Y=k)}{\sum_{k=1}^K P(Y=k)p(x|Y=k)}.
 $$</p>
@@ -13207,7 +13189,7 @@ $$</p>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Quadratic-Discriminant-Analysis-(QDA)">Quadratic Discriminant Analysis (QDA)<a class="anchor-link" href="#Quadratic-Discriminant-Analysis-(QDA)">¶</a></h3><p>W modelu QDA, podobnie jak w LDA, zakładamy, że rozkłady warunkowe $p(x|Y=k)$ są rozkładami normalnymi. Jednak w przeciwieństwie do LDA, nie zakładamy, że macierze kowariancji są jednakowe dla wszystkich klas. Mamy zatem założenie o postaci rozkładów (są to rozkłady normalne) i założenie o parametrach (macierz kowariancji może być inna dla każdej klasy). W modelu QDA rozkład warunkowy $p(x|Y=k)$ jest rozkładem normalnym o gęstości</p>
+<h3 id="1.1-Quadratic-Discriminant-Analysis-(QDA)">1.1 Quadratic Discriminant Analysis (QDA)<a class="anchor-link" href="#1.1-Quadratic-Discriminant-Analysis-(QDA)">¶</a></h3><p>W modelu QDA, podobnie jak w LDA, zakładamy, że rozkłady warunkowe $p(x|Y=k)$ są rozkładami normalnymi. Jednak w przeciwieństwie do LDA, nie zakładamy, że macierze kowariancji są jednakowe dla wszystkich klas. Mamy zatem założenie o postaci rozkładów (są to rozkłady normalne) i założenie o parametrach (macierz kowariancji może być inna dla każdej klasy). W modelu QDA rozkład warunkowy $p(x|Y=k)$ jest rozkładem normalnym o gęstości</p>
 <p>$$
 p(x|Y=k) = \frac{1}{(2\pi)^{p/2}|\Sigma_k|^{1/2}}\exp\left(-\frac{1}{2}(x-\mu_k)^T\Sigma_k^{-1}(x-\mu_k)\right),
 $$</p>
@@ -13224,7 +13206,7 @@ $$</p>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Naiwny-klasyfikator-Bayesa-(Naive-Bayes)">Naiwny klasyfikator Bayesa (<em>Naive Bayes</em>)<a class="anchor-link" href="#Naiwny-klasyfikator-Bayesa-(Naive-Bayes)">¶</a></h3><p>W modela LDA i QDA zakładaliśmy, że rozkłady warunkowe $p(x|Y=k)$ są rozkładami normalnymi. W obu tych przypadkach szukaliśmy, przy założeniu, że znana jest klasa $k$, rozkładów <em>łącznych</em> wektorów losowych $X$. Oznacza to, że szukając rozkładu $X|Y=k$ estymujemy nie tylko rozkłady poszczególnych składowych wektora cech $X_j|Y=k$, ale także kowariancje między nimi. Problem ten ulega znacznemu uproszczeniu w naiwnym klasyfikatorze Bayesa (<em>Naive Bayes</em>), w którym zakładamy, że cechy $X_j$ są niezależne, gdy znamy klasę $k$. Wówczas warunkowy rozkład łączny $X|Y=k$ jest iloczynem rozkładów warunkowych poszczególnych składowych $X_j|Y=k$:</p>
+<h3 id="1.2-Naiwny-klasyfikator-Bayesa-(Naive-Bayes)">1.2 Naiwny klasyfikator Bayesa (<em>Naive Bayes</em>)<a class="anchor-link" href="#1.2-Naiwny-klasyfikator-Bayesa-(Naive-Bayes)">¶</a></h3><p>W modela LDA i QDA zakładaliśmy, że rozkłady warunkowe $p(x|Y=k)$ są rozkładami normalnymi. W obu tych przypadkach szukaliśmy, przy założeniu, że znana jest klasa $k$, rozkładów <em>łącznych</em> wektorów losowych $X$. Oznacza to, że szukając rozkładu $X|Y=k$ estymujemy nie tylko rozkłady poszczególnych składowych wektora cech $X_j|Y=k$, ale także kowariancje między nimi. Problem ten ulega znacznemu uproszczeniu w naiwnym klasyfikatorze Bayesa (<em>Naive Bayes</em>), w którym zakładamy, że cechy $X_j$ są niezależne, gdy znamy klasę $k$. Wówczas warunkowy rozkład łączny $X|Y=k$ jest iloczynem rozkładów warunkowych poszczególnych składowych $X_j|Y=k$:</p>
 <p>$$
 p(x|Y=k) = \prod_{j=1}^p p(x_j|Y=k).
 $$</p>
@@ -13245,7 +13227,7 @@ $$</p>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Metody-klasyfikacji---por%C3%B3wnanie">Metody klasyfikacji - porównanie<a class="anchor-link" href="#Metody-klasyfikacji---por%C3%B3wnanie">¶</a></h2><p>Ustalmy klasę $K$ jako punkt odniesienia i rozważmy logarytmy stosunków prawdopodobieństw:</p>
+<h2 id="2.-Metody-klasyfikacji---por%C3%B3wnanie">2. Metody klasyfikacji - porównanie<a class="anchor-link" href="#2.-Metody-klasyfikacji---por%C3%B3wnanie">¶</a></h2><p>Ustalmy klasę $K$ jako punkt odniesienia i rozważmy logarytmy stosunków prawdopodobieństw:</p>
 <p>$$
 \log\frac{P(Y=k|x)}{P(Y=K|x)},\qquad k=1,\ldots,K.
 $$</p>
