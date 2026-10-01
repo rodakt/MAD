@@ -156,7 +156,7 @@ O rodzaju zadania decyduje **charakter** zmiennej $y$, nie postać cech.
 Średnia z dwóch gatunków rośliny nie jest żadnym gatunkiem, a pomyłka
 między klasami nie jest „mała” ani „duża”.
 
-## Pytanie
+## Pytanie {.pytanie}
 
 Przewidujemy **liczbę wizyt pacjenta w szpitalu w ciągu roku**:
 $0, 1, 2, \ldots$
@@ -373,7 +373,7 @@ Ok. 12 min na blok.
 
 # Predyktor optymalny
 
-## Pytanie
+## Pytanie {.pytanie}
 
 ::: {style="font-size: 1.4em; text-align: center; margin-top: 1.5em"}
 Która funkcja $f$ minimalizuje $\Risk(f)$?

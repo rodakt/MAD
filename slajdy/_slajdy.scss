@@ -28,3 +28,11 @@ $link-color: $turkus;
 .reveal.has-dark-background .slide-number {
   color: rgba(255, 255, 255, 0.75);
 }
+
+// Nieodsłonięte fragmenty (". . .") są wyszarzone, a nie ukryte -- od razu
+// widać, że slajd ma jeszcze ciąg dalszy. Wyjątek: slajdy z klasą
+// .pytanie, na których fragment jest odpowiedzią i ma pozostać ukryty.
+.reveal .slides section.slide:not(.pytanie) .fragment:not(.visible) {
+  opacity: 0.2;
+  visibility: inherit;
+}
