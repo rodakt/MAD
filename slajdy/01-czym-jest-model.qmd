@@ -202,7 +202,8 @@ Ok. 8 min na blok.
 ## Dwa pytania
 
 Obiekty o tych samych cechach mają różne wyniki, a model daje im jedną
-predykcję. Zanim powiemy, co znaczy „dobry model”:
+predykcję. Zanim powiemy, co znaczy „dobry model”, musimy
+odpowiedzieć na dwa pytania:
 
 1. **Z czym porównujemy predykcję**, skoro pojedynczy wynik nie jest
    właściwym punktem odniesienia?
@@ -258,7 +259,7 @@ $$
 - Warunek $\E(\varepsilon\mid\X)=0$ wynika z definicji -- to nie
   założenie.
 - Notacja: $\fopt$ -- wielkość populacyjna (optymalna), $f$ -- dowolny
-  predyktor, $\widehat f$ -- dopasowany do danych.
+  predyktor, $\widehat f$ -- predyktor wyznaczony z danych.
 
 ## Klasyfikacja: prawdopodobieństwa klas
 
