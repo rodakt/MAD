@@ -25,6 +25,9 @@ function Pandoc(doc)
   if not makra then
     return nil
   end
+  -- Slajdy składa MathJax 2, którego fonty nie mają \mathbb{1} (wychodzi
+  -- zwykła jedynka); znak Unicode U+1D7D9 wygląda tak jak w książce.
+  makra = makra .. "\\renewcommand{\\ind}{\\unicode{x1D7D9}}"
   local blok = pandoc.Div(
     { pandoc.Para({ pandoc.Math("DisplayMath", makra) }) },
     { class = "hidden" }
