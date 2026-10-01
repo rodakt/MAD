@@ -42,6 +42,7 @@ execute:
 # Strony HTML dołączają go bezpośrednio, slajdy przez filtr _makra.lua.
 filters:
   - _makra.lua
+  - _sekcje.lua
 
 format:
   html:

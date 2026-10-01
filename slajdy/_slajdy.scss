@@ -3,9 +3,28 @@
 // Domyślne 40px przy slajdzie 1050x700 mieści za mało tekstu.
 $presentation-font-size-root: 32px;
 
+// Kolory z motywu flatly strony kursu: granat i (przyciemniony dla
+// czytelności na białym tle) turkus.
+$granat: #2c3e50;
+$turkus: #128f76;
+
+$presentation-heading-color: $granat;
+$link-color: $turkus;
+
 /*-- scss:rules --*/
 
 .definicja {
-  border-left: 4px solid #1B6CA8;
+  border-left: 4px solid $turkus;
   padding-left: 0.6em;
+}
+
+// Slajdy otwierające część (tło nadaje filtr _sekcje.lua).
+.reveal .slides section.title-slide.level1 h1 {
+  color: #fff;
+}
+
+.reveal.has-dark-background .footer,
+.reveal.has-dark-background .footer a,
+.reveal.has-dark-background .slide-number {
+  color: rgba(255, 255, 255, 0.75);
 }
