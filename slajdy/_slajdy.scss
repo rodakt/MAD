@@ -1,0 +1,11 @@
+/*-- scss:defaults --*/
+
+// Domyślne 40px przy slajdzie 1050x700 mieści za mało tekstu.
+$presentation-font-size-root: 32px;
+
+/*-- scss:rules --*/
+
+.definicja {
+  border-left: 4px solid #1B6CA8;
+  padding-left: 0.6em;
+}

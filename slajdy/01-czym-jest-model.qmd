@@ -6,9 +6,7 @@ format:
     slide-number: true
     chalkboard: true
     footer: "[Strona kursu](../index.html) · [Slajdy](index.html)"
-    include-in-header:
-      text: |
-        <style>.definicja { border-left: 4px solid #1B6CA8; padding-left: 0.6em; }</style>
+    theme: [default, _slajdy.scss]
 execute:
   echo: false
 ---
