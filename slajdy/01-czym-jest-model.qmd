@@ -5,6 +5,7 @@ format:
   revealjs:
     slide-number: true
     chalkboard: true
+    footer: "[Strona kursu](../index.html) · [Slajdy](index.html)"
 ---
 
 ## Materiał
