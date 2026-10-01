@@ -13,11 +13,19 @@ Podstawą kursu jest podręcznik
 teorię, wyprowadzenia i ćwiczenia. Ta strona zbiera materiały do zajęć:
 harmonogram, slajdy i karty laboratoriów.
 
-## Formy zajęć
+## Wymagania
 
-- **Wykład** -- slajdy, demonstracje i programowanie na żywo, wyprowadzenia
-  przy tablicy.
-- **Laboratorium tablicowe** -- ćwiczenia rachunkowe i koncepcyjne
-  z książki.
-- **Laboratorium komputerowe** -- ćwiczenia symulacyjne z książki,
-  realizowane w Pythonie według kart laboratoryjnych.
+Zakładamy znajomość rachunku prawdopodobieństwa i algebry liniowej na
+poziomie kursu podstawowego oraz umiejętność programowania w dowolnym
+języku imperatywnym. Nie zakładamy natomiast wcześniejszego kontaktu
+z uczeniem maszynowym. Ponieważ uczestnicy kursu przychodzą z różnych
+kierunków -- ekonometrii, informatyki, biologii, matematyki -- pojęcia
+wprowadzamy powoli i staramy się uzasadniać, skąd się biorą.
+
+## Zasady zaliczenia
+
+Kurs składa się z dwóch części, zaliczanych oddzielnie.
+
+- **Wykład** -- test pisemny w formie papierowej.
+- **Projekt** -- przygotowywany samodzielnie w domu, a następnie broniony
+  ustnie.
