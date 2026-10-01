@@ -469,9 +469,12 @@ $$
 \end{aligned}
 $$
 
-Nieredukowalny to średnia wariancja szumu $\varepsilon$ -- zależy od cech,
-nie od modelu
-([książka](https://rodakt.github.io/MAD_book/1-fundamenty/02-predyktory-optymalne.html#sec-blad-nieredukowalny)).
+- **Redukowalny** -- średni kwadrat odległości $f$ od $\fopt$; znika
+  dla $f=\fopt$.
+- **Nieredukowalny** -- średnia wariancja szumu $\varepsilon=Y-\fopt(\X)$.
+  Nie ma w nim $f$: żaden model go nie zmniejszy, może to zrobić tylko
+  inny zestaw cech
+  ([książka](https://rodakt.github.io/MAD_book/1-fundamenty/02-predyktory-optymalne.html#sec-blad-nieredukowalny)).
 
 ## Inna strata -- inna odpowiedź
 
