@@ -438,15 +438,24 @@ liczba $a$ minimalizuje $r(a\mid\x)$?
 minimalizuje funkcja regresji $\fopt(\x)=\E(Y\mid\X=\x)$.
 :::
 
-Dla $m=\E(Y\mid\X=\x)$, $\;Y-a=(Y-m)+(m-a)$, skąd
+Niech $m=\E(Y\mid\X=\x)$; wtedy $Y-a=(Y-m)+(m-a)$, więc
 
 $$
-r(a\mid\x)=\Var(Y\mid\X=\x)+(m-a)^2 .
+\begin{aligned}
+r(a\mid\x)
+&=\E\big[(Y-m)^2\mid\X=\x\big]+(m-a)^2\\
+&\quad+2(m-a)\underbrace{\E\big[Y-m\mid\X=\x\big]}_{=\,0}\\[0.3em]
+&=\Var(Y\mid\X=\x)+(m-a)^2 .
+\end{aligned}
 $$
+
+Pierwszy składnik nie zależy od $a$, drugi zeruje się dokładnie dla $a=m$.
 
 . . .
 
+::: {.wniosek}
 Nawet optymalny predyktor ma niezerowe ryzyko: $\Var(Y\mid\X=\x)$.
+:::
 
 ## Rozkład ryzyka (strata kwadratowa)
 
