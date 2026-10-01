@@ -45,6 +45,6 @@ filters:
 
 format:
   html:
-    theme: cosmo
+    theme: flatly
     toc: true
     include-before-body: _macros-html.html
