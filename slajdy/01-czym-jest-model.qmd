@@ -438,7 +438,7 @@ liczba $a$ minimalizuje $r(a\mid\x)$?
 minimalizuje funkcja regresji $\fopt(\x)=\E(Y\mid\X=\x)$.
 :::
 
-Dowód na tablicy: $m=\E(Y\mid\X=\x)$, $\;Y-a=(Y-m)+(m-a)$, skąd
+Dla $m=\E(Y\mid\X=\x)$, $\;Y-a=(Y-m)+(m-a)$, skąd
 
 $$
 r(a\mid\x)=\Var(Y\mid\X=\x)+(m-a)^2 .
