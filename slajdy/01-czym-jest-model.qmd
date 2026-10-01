@@ -132,8 +132,11 @@ $$
 \mathcal D=\{\x_1,\ldots,\x_n\}
 $$
 
-Cel: struktura samych cech -- grupy, mniej zmiennych, nietypowe
-obserwacje.
+Cel: struktura samych cech, np.
+
+- **grupowanie** podobnych obiektów,
+- **redukcja wymiaru** (np. PCA),
+- **wykrywanie obserwacji odstających**.
 
 Brak znanych odpowiedzi utrudnia ocenę wyniku.
 :::
