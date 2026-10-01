@@ -32,7 +32,7 @@ Przypomnienia z rachunku prawdopodobieństwa i zadania są w książce.
 
 . . .
 
-Prawdziwość absolutna nie jest więc kryterium oceny. Zastępują ją
+Doskonała wierność nie jest więc kryterium oceny. Zastępują ją
 **trafność**, **zakres stosowalności** i **użyteczność**.
 
 ## Cechy dobrego modelu
