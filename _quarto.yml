@@ -37,7 +37,14 @@ website:
 execute:
   freeze: auto
 
+# Makra matematyczne z książki. _macros-html.html to niezmieniona kopia pliku
+# z repozytorium książki -- po zmianie makr tam skopiuj go ponownie.
+# Strony HTML dołączają go bezpośrednio, slajdy przez filtr _makra.lua.
+filters:
+  - _makra.lua
+
 format:
   html:
     theme: cosmo
     toc: true
+    include-before-body: _macros-html.html

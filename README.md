@@ -26,8 +26,13 @@ index.qmd          strona główna
 harmonogram.qmd    harmonogram zajęć
 slajdy/            slajdy wykładów (revealjs)
 laby/              karty laboratoriów; szablon: laby/_szablon-karty.qmd
+_macros-html.html  makra matematyczne -- kopia pliku z repozytorium książki
+_makra.lua         filtr wstawiający te makra do slajdów revealjs
 _freeze/           cache obliczeń -- COMMITOWANY (CI renderuje bez Pythona)
 ```
+
+Makra (`\x`, `\Risk`, `\E`, ...) są te same co w książce. Po zmianie makr
+w książce skopiuj `_macros-html.html` ponownie, bez edycji.
 
 Ćwiczenia są w książce. Karty laboratoriów linkują do nich
 (`#exr-...`) i dokładają tylko część pythonową.
