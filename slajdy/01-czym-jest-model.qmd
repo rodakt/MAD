@@ -1,14 +1,664 @@
 ---
 title: "Czym jest model?"
-subtitle: "Rozdział 1"
+subtitle: "Rozdziały 1--2"
 format:
   revealjs:
     slide-number: true
     chalkboard: true
     footer: "[Strona kursu](../index.html) · [Slajdy](index.html)"
+    include-in-header:
+      text: |
+        <style>.definicja { border-left: 4px solid #1B6CA8; padding-left: 0.6em; }</style>
+execute:
+  echo: false
 ---
 
 ## Materiał
 
-Rozdział [Czym jest model?](https://rodakt.github.io/MAD_book/1-fundamenty/01-czym-jest-model.html)
-w książce.
+- Rozdział [Czym jest model?](https://rodakt.github.io/MAD_book/1-fundamenty/01-czym-jest-model.html)
+- Rozdział [Predyktory optymalne i błąd nieredukowalny](https://rodakt.github.io/MAD_book/1-fundamenty/02-predyktory-optymalne.html)
+
+Przypomnienia z rachunku prawdopodobieństwa i zadania są w książce.
+
+# Czym jest model
+
+## Model upraszcza
+
+- Mapa jest modelem terytorium -- i jest użyteczna **dlatego**, że pomija
+  szczegóły.
+- Model doskonale wierny byłby kopią rzeczywistości: równie
+  przeładowaną i równie trudną do zrozumienia.
+- Model to kompromis między wiernością a użytecznością.
+
+> „Wszystkie modele są błędne, ale niektóre są użyteczne” -- G. Box
+
+. . .
+
+Prawdziwość absolutna nie jest więc kryterium oceny. Zastępują ją
+**trafność**, **zakres stosowalności** i **użyteczność**.
+
+## Cechy dobrego modelu
+
+- **Celowość** -- miasto ma inny model dla urbanisty, epidemiologa
+  i nawigacji satelitarnej.
+- **Selektywność i jawne granice** -- to, co model pomija, może się
+  później ujawnić jako źródło błędu.
+- **Zachowanie istotnych relacji** -- mapa drogowa musi oddać połączenia,
+  niekoniecznie odległości.
+- **Ograniczony zakres stosowalności** -- nowe dane mogą ujawnić granice
+  modelu; modelowanie jest procesem iteracyjnym.
+
+::: notes
+Pełna lista (także użyteczność i redukcja złożoności) -- sekcja
+„Pojęcie modelu”. Ok. 8 min na ten blok.
+:::
+
+# Model w analizie danych
+
+## Cechy i odpowiedź
+
+$$
+\widehat y=\widehat f(\x)
+$$
+
+- $\x$ -- **cechy** (zmienne wejściowe), np. wiek, masa ciała, wyniki badań
+- $y$ -- **odpowiedź** (zmienna docelowa), obserwowany wynik
+  (*ground truth*), np. obecność choroby
+- daszek: $\widehat f$ i $\widehat y$ są **wyznaczone z danych** -- to nie
+  rzeczywisty mechanizm zjawiska
+
+## Te same cechy, różne wyniki
+
+**Cechy zwykle nie wyznaczają wyniku jednoznacznie.** Dwóch pacjentów
+o identycznych zarejestrowanych cechach: jeden chory, drugi zdrowy.
+
+- czynniki nieuwzględnione w danych
+- błędy pomiarowe
+- przypadkowa zmienność zjawiska
+
+. . .
+
+A model jest funkcją -- obu przypisze **tę samą** predykcję.
+
+## Model opisuje grupę, nie przypadek
+
+Skoro obiekty o identycznych cechach mają różne wyniki, żadna pojedyncza
+odpowiedź nie będzie trafna dla wszystkich.
+
+Sprzeczności więc nie ma: model opisuje **grupę obiektów podobnych**, a nie
+pojedynczy przypadek.
+
+- czas hospitalizacji -- wartość przeciętna (i przedział),
+- choroba -- ryzyko zamiast diagnozy.
+
+## Słowo „model” w dwóch znaczeniach
+
+|  | Przykład |
+|---|---|
+| **Klasa modeli** -- zbiór dopuszczalnych zależności | regresja logistyczna: ogólna postać, bez współczynników |
+| **Model dopasowany** -- konkretny element klasy | regresja logistyczna dopasowana do danych pasażerów *Titanica* |
+
+. . .
+
+**Algorytm uczenia** to jeszcze coś innego: procedura, która z danych
+treningowych wybiera model dopasowany z klasy. Ten proces nazywamy
+dopasowaniem, uczeniem albo treningiem.
+
+::: notes
+Ok. 10 min na blok. Zadanie 2 z rozdziału 1 (klasa / model / algorytm
+dla regresji liniowej i kNN) dobrze nadaje się na pytanie do sali.
+:::
+
+# Typy zadań
+
+## Uczenie nadzorowane i nienadzorowane
+
+:::: {.columns}
+::: {.column width="50%"}
+**Nadzorowane**
+
+$$
+\mathcal D=\{(\x_1,y_1),\ldots,(\x_n,y_n)\}
+$$
+
+Cel: zależność $y$ od $\x$, stosowana do nowych obiektów ze znanym $\x$
+i nieznanym $y$.
+
+„Nadzór” = obecność $y$ w danych treningowych.
+:::
+
+::: {.column width="50%"}
+**Nienadzorowane**
+
+$$
+\mathcal D=\{\x_1,\ldots,\x_n\}
+$$
+
+Cel: struktura samych cech -- grupy, mniej zmiennych, nietypowe
+obserwacje.
+
+Brak znanych odpowiedzi utrudnia ocenę wyniku.
+:::
+::::
+
+## Regresja i klasyfikacja
+
+O rodzaju zadania decyduje **charakter** zmiennej $y$, nie postać cech.
+
+- **Regresja** -- $y$ ilościowa: liczy się wielkość, porządek, różnice.
+  Sensowne pytanie o „środek” rozkładu.
+- **Klasyfikacja** -- $y$ jakościowa: przynależność do jednej z **klas**.
+  Kodowanie $0/1$ to tylko etykiety.
+
+. . .
+
+Średnia z dwóch gatunków rośliny nie jest żadnym gatunkiem, a pomyłka
+między klasami nie jest „mała” ani „duża”.
+
+## Pytanie
+
+Przewidujemy **liczbę wizyt pacjenta w szpitalu w ciągu roku**:
+$0, 1, 2, \ldots$
+
+Zmienna jest dyskretna. Regresja czy klasyfikacja?
+
+. . .
+
+**Regresja.** Wartości są liczbami: 5 wizyt to więcej niż 2, a różnicę
+da się zmierzyć. Pytamy, *ilu wizyt się spodziewać*, a nie *do której
+kategorii* należy pacjent.
+
+Podział regresja/klasyfikacja $\neq$ podział ciągła/dyskretna.
+
+::: notes
+Więcej przypadków granicznych (gwiazdki 1--5, województwo) -- zadanie 3
+z rozdziału 1.
+:::
+
+## Klasyfikacja w dwóch krokach
+
+1. Model szacuje prawdopodobieństwa klas
+   $$
+   \widehat\eta_k(\x)\approx\Prob(Y=k\mid\X=\x).
+   $$
+2. **Reguła decyzyjna** wybiera klasę, np. tę o największym
+   $\widehat\eta_k(\x)$.
+
+. . .
+
+Ten sam model, różne decyzje: w diagnostyce próg rozpoznania może być
+niższy niż $0{,}5$, gdy przeoczenie choroby kosztuje więcej niż fałszywy
+alarm.
+
+Dlatego regresja logistyczna, mimo nazwy, jest metodą klasyfikacji.
+
+::: notes
+Ok. 8 min na blok.
+:::
+
+# Opis probabilistyczny
+
+## Dwa pytania
+
+Obiekty o tych samych cechach mają różne wyniki, a model daje im jedną
+predykcję. Zanim powiemy, co znaczy „dobry model”:
+
+1. **Z czym porównujemy predykcję**, skoro pojedynczy wynik nie jest
+   właściwym punktem odniesienia?
+2. **Jak wycenić rozbieżność** między predykcją a obserwacją?
+
+## Dane jako próba z rozkładu
+
+- Cechy i wynik są losowe: para $(\X,Y)$ ma **rozkład łączny** $P$.
+- Próba: pary $(\X_1,Y_1),\ldots,(\X_n,Y_n)$ niezależne, o rozkładzie $P$;
+  dane $(\x_i,y_i)$ to ich realizacje.
+- $P$ opisuje populację i **nie jest znany** -- mamy tylko obserwacje.
+
+. . .
+
+Niezależność obserwacji to **założenie**, nie własność danych. Łamią je
+np. szeregi czasowe, dane przestrzenne, powtarzane pomiary tego samego
+pacjenta.
+
+::: notes
+Przypomnienia (zmienna losowa, gęstość, rozkład warunkowy) są
+w książce jako zwijane ramki -- odesłać, nie omawiać.
+:::
+
+## Rozkład łączny = cechy × zależność
+
+$$
+p(\x,y)=\underbrace{p(\x)}_{\text{gdzie leżą obiekty}}\cdot
+\underbrace{p(y\mid\x)}_{\text{zależność wyniku od cech}}
+$$
+
+- $p(\x)$ -- rozkład brzegowy cech: jacy pacjenci występują i jak często.
+  O zależności nie mówi nic.
+- $p(y\mid\x)$ -- rozkład warunkowy $Y\mid\X=\x$: **cała** zależność
+  wyniku od cech.
+
+. . .
+
+Odpowiedź na pytanie 1: predykcję porównujemy nie z jedną wartością,
+lecz z **rozkładem** $Y\mid\X=\x$ -- jego część systematyczna plus szum.
+
+## Regresja: część systematyczna i szum
+
+**Funkcja regresji** -- przeciętny wynik wśród obiektów o cechach $\x$:
+$$
+\fopt(\x)=\E(Y\mid\X=\x).
+$$
+
+Definiując $\varepsilon=Y-\fopt(\X)$, dostajemy
+$$
+Y=\fopt(\X)+\varepsilon,\qquad\E(\varepsilon\mid\X)=0.
+$$
+
+- Warunek $\E(\varepsilon\mid\X)=0$ wynika z definicji -- to nie
+  założenie.
+- Notacja: $\fopt$ -- wielkość populacyjna (optymalna), $f$ -- dowolny
+  predyktor, $\widehat f$ -- dopasowany do danych.
+
+## Klasyfikacja: prawdopodobieństwa klas
+
+Etykieta + odchylenie nie jest etykietą, więc rozkład opisujemy wprost:
+$$
+\eta_k(\x)=\Prob(Y=k\mid\X=\x),\qquad \sum_{k=1}^K\eta_k(\x)=1.
+$$
+
+Dla dwóch klas:
+$Y\mid\X=\x\sim\operatorname{Bernoulli}\big(\eta(\x)\big)$.
+
+. . .
+
+Jeżeli $0<\eta(\x)<1$, obie klasy są możliwe przy tych samych cechach:
+nawet **dokładna** znajomość $\eta$ nie daje bezbłędnej klasyfikacji.
+
+## Jeden opis, dwie charakterystyki
+
+Punkt wyjścia ten sam: rozkład $Y\mid\X=\x$. Różni się tylko to, co
+z niego odczytujemy.
+
+- **Regresja** -- „środek” rozkładu: $\fopt(\x)$ (albo mediana).
+- **Klasyfikacja** -- „środka” nie ma, podajemy cały wektor
+  $\big(\eta_1(\x),\ldots,\eta_K(\x)\big)$.
+
+. . .
+
+Dla klas kodowanych $0/1$: $\E(Y\mid\X=\x)=\Prob(Y=1\mid\X=\x)$, czyli
+$\fopt=\eta$.
+
+::: notes
+Ok. 15 min na blok. Modele dyskryminacyjne vs generatywne (ramka
+„Po co nam ten podział”) -- najwyżej jedno zdanie.
+:::
+
+# Strata i ryzyko
+
+## Funkcja straty
+
+$\Loss(y,\widehat y)\ge 0$ -- koszt predykcji $\widehat y$, gdy wynikiem
+okazało się $y$; $\Loss(y,y)=0$.
+
+:::: {.columns}
+::: {.column width="50%"}
+**Regresja** -- strata kwadratowa
+$$
+\Loss(y,\widehat y)=(y-\widehat y)^2
+$$
+Jeden błąd o wartości 10 kosztuje tyle, co sto błędów o wartości 1.
+:::
+
+::: {.column width="50%"}
+**Klasyfikacja** -- strata 0--1
+$$
+\Loss(y,\widehat y)=\ind(y\neq\widehat y)
+$$
+Każda pomyłka kosztuje tyle samo.
+:::
+::::
+
+Koszt błędu wynika z celu i kontekstu, nie z danych.
+
+## Ryzyko
+
+::: {.definicja}
+**Ryzyko** predyktora $f$ -- oczekiwana strata względem rozkładu $(\X,Y)$:
+$$
+\Risk(f)=\E\big[\Loss\big(Y,f(\X)\big)\big].
+$$
+:::
+
+| strata | ryzyko |
+|---|---|
+| kwadratowa | błąd średniokwadratowy $\E\big[(Y-f(\X))^2\big]$ |
+| 0--1 | prawdopodobieństwo błędu $\Prob\big(f(\X)\neq Y\big)$ |
+
+Jedno pojęcie, dwa podstawienia.
+
+## Ryzyko a błąd na danych treningowych
+
+Ryzyka nie umiemy obliczyć -- nie znamy $P$. Umiemy obliczyć
+**ryzyko empiryczne**
+$$
+\widehat{\Risk}_n(f)=\frac1n\sum_{i=1}^{n}\Loss\big(y_i,f(\x_i)\big).
+$$
+
+. . .
+
+Jeśli te same dane posłużyły do dopasowania modelu,
+$\widehat{\Risk}_n$ jest **systematycznie zaniżone**: model był
+dobierany tak, by na nich wypadać dobrze.
+
+## Błąd redukowalny i nieredukowalny
+
+- **Nieredukowalny** -- najmniejsze ryzyko osiągalne przy danych cechach
+  i stracie. Dodatni nawet przy znanym $P$ i optymalnej regule.
+- **Redukowalny** -- nadwyżka ryzyka naszego predyktora ponad to minimum:
+  ograniczenia klasy modeli, skończona próba.
+
+. . .
+
+::: {.callout-important}
+## Nieredukowalny -- ale względem czego?
+Względem **ustalonego zestawu cech**, nie zjawiska. Nowa, informatywna
+cecha może go zmniejszyć: czego nie da się poprawić modelowaniem, często
+daje się poprawić pomiarem.
+:::
+
+::: notes
+Ok. 12 min na blok.
+:::
+
+# Predyktor optymalny
+
+## Pytanie
+
+::: {style="font-size: 1.4em; text-align: center; margin-top: 1.5em"}
+Która funkcja $f$ minimalizuje $\Risk(f)$?
+:::
+
+Minimalizujemy po **wszystkich** funkcjach, nie w żadnej klasie modeli.
+Odpowiedź wyznacza granicę, do której metody uczenia mogą się tylko
+zbliżać.
+
+## Minimalizacja punktowa
+
+Prawo iterowanej wartości oczekiwanej:
+$$
+\Risk(f)=\E\Big[\,\E\big[\Loss(Y,f(\X))\mid\X\big]\Big].
+$$
+
+**Ryzyko warunkowe** predykcji $a$ w punkcie $\x$:
+$$
+r(a\mid\x)=\E\big[\Loss(Y,a)\mid\X=\x\big].
+$$
+
+::: {.definicja}
+**Twierdzenie.** Jeżeli $\fopt(\x)$ minimalizuje $r(\cdot\mid\x)$ dla
+każdego $\x$, to $\fopt$ minimalizuje $\Risk$ wśród wszystkich
+predyktorów.
+:::
+
+::: notes
+Dowód: nierówność punktowa zachowuje się przy uśrednianiu po X.
+Na tablicy, jedna linijka.
+:::
+
+## Co z tego wynika
+
+- Predykcje w różnych punktach $\x$ wybieramy **niezależnie** -- bez
+  kompromisów między obszarami przestrzeni cech.
+- **Każdy kompromis obserwowany w praktyce bierze się z ograniczeń klasy
+  modeli lub ze skończoności próby**, a nie z natury problemu.
+- Optymalna predykcja w $\x$ zależy tylko od $Y\mid\X=\x$. Rozkład cech
+  $p(\x)$ jedynie waży, ile wnosi błąd w danym obszarze.
+
+. . .
+
+Zostaje pytanie: dla danej straty i danego rozkładu $Y\mid\X=\x$, która
+liczba $a$ minimalizuje $r(a\mid\x)$?
+
+## Strata kwadratowa: funkcja regresji
+
+::: {.definicja}
+**Twierdzenie.** Przy $\Loss(y,a)=(y-a)^2$ i $\E Y^2<\infty$ ryzyko
+minimalizuje funkcja regresji $\fopt(\x)=\E(Y\mid\X=\x)$.
+:::
+
+Dowód na tablicy: $m=\E(Y\mid\X=\x)$, $\;Y-a=(Y-m)+(m-a)$, skąd
+
+$$
+r(a\mid\x)=\Var(Y\mid\X=\x)+(m-a)^2 .
+$$
+
+. . .
+
+Nawet optymalny predyktor ma niezerowe ryzyko: $\Var(Y\mid\X=\x)$.
+
+## Rozkład ryzyka (strata kwadratowa)
+
+$$
+\begin{aligned}
+\underbrace{\E\big[(Y - f(\X))^2\big]}_{\text{ryzyko } f}
+&=
+\underbrace{\E\Big[\big(\fopt(\X) - f(\X)\big)^2\Big]}_{\text{błąd redukowalny}}\\
+&\quad+
+\underbrace{\E\big[\Var(Y \mid \X)\big]}_{\text{błąd nieredukowalny}}
+\end{aligned}
+$$
+
+Nieredukowalny to średnia wariancja szumu $\varepsilon$ -- zależy od cech,
+nie od modelu
+([książka](https://rodakt.github.io/MAD_book/1-fundamenty/02-predyktory-optymalne.html#sec-blad-nieredukowalny)).
+
+## Inna strata -- inna odpowiedź
+
+Przy stracie absolutnej $|y-a|$ optimum to **mediana warunkowa**
+$\med(Y\mid\X=\x)$.
+
+```{python}
+#| fig-width: 9.5
+#| fig-height: 3.6
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+rng = np.random.default_rng(2024)
+
+# Skośny rozkład warunkowy -- jak w rysunku fig-strata-optima w książce.
+n = 20_000
+skladnik = rng.random(n) < 0.85
+y = np.where(skladnik,
+             rng.normal(2.0, 0.6, n),
+             rng.normal(9.0, 2.0, n))
+
+srednia = y.mean()
+mediana = np.median(y)
+
+siatka = np.linspace(0, 12, 400)
+ryzyko_kw = ((y[None, :] - siatka[:, None]) ** 2).mean(axis=1)
+ryzyko_abs = np.abs(y[None, :] - siatka[:, None]).mean(axis=1)
+
+fig, osie = plt.subplots(1, 2, figsize=(9.5, 3.6), sharex=True)
+for ax, ryzyko, opt, etykieta, tytul in [
+    (osie[0], ryzyko_kw, srednia, "średnia warunkowa", r"strata kwadratowa $(y-a)^2$"),
+    (osie[1], ryzyko_abs, mediana, "mediana warunkowa", r"strata absolutna $|y-a|$"),
+]:
+    ax.plot(siatka, ryzyko, color="#1B6CA8", lw=2)
+    ax.axvline(opt, color="#D7263D", ls="--", lw=1.5,
+               label=f"{etykieta} = {opt:.2f}")
+    ax.set_xlabel("predykcja $a$")
+    ax.set_title(tytul)
+    ax.legend(loc="upper center", frameon=False)
+osie[0].set_ylabel(r"ryzyko warunkowe $r(a \mid x)$")
+plt.tight_layout()
+plt.show()
+```
+
+**Wybór straty jest wyborem merytorycznym**, nie technicznym.
+
+::: notes
+Jeśli brakuje czasu: tylko jedno zdanie o medianie, bez rysunku.
+Dowód dla mediany -- w książce. Strata kwadratowa: 1 błąd 10 = 100 błędów 1;
+absolutna: = 10 błędów 1.
+:::
+
+## Strata 0--1: klasyfikator bayesowski
+
+Ryzyko warunkowe wskazania klasy $a$:
+$$
+r(a\mid\x)=\Prob(Y\neq a\mid\X=\x)=1-\eta_a(\x).
+$$
+
+::: {.definicja}
+**Twierdzenie.** Prawdopodobieństwo błędu minimalizuje
+**klasyfikator bayesowski**
+$$
+\Bayes(\x)=\argmax_k\,\eta_k(\x).
+$$
+:::
+
+Jego ryzyko to **błąd bayesowski**
+$$
+\Risk^{*}=\Prob\big(\Bayes(\X)\neq Y\big)=\E\Big[1-\max_k\eta_k(\X)\Big]
+$$
+-- błąd nieredukowalny dla straty 0--1.
+
+## Błąd bayesowski to nie wada modelu
+
+- Przy ustalonych cechach $\Risk^*$ nie zmniejszy **żaden** model, żadna
+  liczba danych ani moc obliczeniowa.
+- $\Risk^*>0$, gdy te same cechy występują u obiektów różnych klas.
+
+. . .
+
+Jeśli $\Risk^*=7\%$, a nasz klasyfikator ma błąd $7{,}2\%$, to dalsze
+strojenie da co najwyżej $0{,}2$ punktu procentowego. Większej poprawy
+trzeba szukać w **cechach**, nie w modelu.
+
+::: notes
+Ok. 20 min na cały blok -- rdzeń wykładu. Rozkład ryzyka dla straty
+0--1 (eq-rozklad-bledu-01) -- tylko słownie: ta sama budowa,
+optimum + nieujemna nadwyżka.
+:::
+
+# Od teorii do uczenia
+
+## Optimum jest nieosiągalne
+
+$\E(Y\mid\X=\x)$ i $\eta_k(\x)$ wymagają znajomości $P$. Reguła Bayesa
+nie jest algorytmem -- jest **wzorcem**, do którego algorytmy się
+zbliżają.
+
+```{python}
+#| fig-width: 6.5
+#| fig-height: 3.6
+
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import norm
+from sklearn.neighbors import KNeighborsClassifier
+
+# Ten sam eksperyment co fig-blad-bayesa w książce: dwie klasy N(-1,1), N(1,1),
+# ryzyko k-NN liczone dokładnie (całkowaniem), a nie na zbiorze testowym.
+rng = np.random.default_rng(7)
+mu = 1.0
+blad_bayesa = norm.cdf(-mu)
+
+def probka(n, rng):
+    y = rng.integers(0, 2, n)
+    x = rng.normal(np.where(y == 1, mu, -mu), 1.0)
+    return x.reshape(-1, 1), y
+
+siatka = np.linspace(-7, 7, 4001)
+gestosc_klasy1 = norm.pdf(siatka - mu)
+gestosc_klasy0 = norm.pdf(siatka + mu)
+
+def ryzyko_dokladne(klasyfikator):
+    etykiety = klasyfikator.predict(siatka.reshape(-1, 1))
+    return 0.5 * np.trapezoid(np.where(etykiety == 0, gestosc_klasy1, 0.0), siatka) \
+         + 0.5 * np.trapezoid(np.where(etykiety == 1, gestosc_klasy0, 0.0), siatka)
+
+licznosci = np.array([20, 50, 100, 300, 1000, 3000, 10_000])
+powtorzenia = 25
+bledy = np.empty((len(licznosci), powtorzenia))
+for i, n in enumerate(licznosci):
+    for j in range(powtorzenia):
+        X_tr, y_tr = probka(n, rng)
+        k = max(1, int(round(np.sqrt(n))))
+        klf = KNeighborsClassifier(n_neighbors=k).fit(X_tr, y_tr)
+        bledy[i, j] = ryzyko_dokladne(klf)
+
+srednie = bledy.mean(axis=1)
+kwantyle = np.quantile(bledy, [0.1, 0.9], axis=1)
+wasy = np.abs(kwantyle - srednie)
+
+fig, ax = plt.subplots(figsize=(6.5, 3.6))
+ax.errorbar(licznosci, srednie, yerr=wasy, marker="o", capsize=3,
+            color="#1B6CA8", label=r"$k$-NN, $k=\sqrt{n}$")
+ax.axhline(blad_bayesa, color="#D7263D", ls="--", lw=1.8,
+           label=rf"błąd bayesowski $\Phi(-\mu) = {blad_bayesa:.4f}$")
+ax.set_xscale("log")
+ax.set_xlabel("liczność próby uczącej $n$")
+ax.set_ylabel("ryzyko $R(g)$")
+ax.legend(frameon=False)
+plt.tight_layout()
+plt.show()
+```
+
+::: notes
+Dwie klasy N(-1,1) i N(1,1), reguła Bayesa: x > 0, błąd Phi(-1).
+Krzywa nigdy nie przecina czerwonej linii -- nie może.
+W realnym problemie czerwonej linii nie znamy: wypłaszczenie może znaczyć
+„granica zjawiska” albo „za słaby model”. Jeśli podwojenie danych nic nie
+daje, problemem nie jest liczba danych.
+:::
+
+## Trening: minimalizacja ryzyka empirycznego
+
+Zamiast nieznanego $\Risk$ minimalizujemy $\widehat\Risk_n$ w wybranej
+**klasie modeli** $\mathcal F$:
+
+$$
+\widehat f\in\argmin_{f\in\mathcal F}\;\widehat{\Risk}_n(f).
+$$
+
+- klasa $\mathcal F$ -- jakie predyktory dopuszczamy (np. tylko liniowe),
+- kryterium $\widehat\Risk_n$ -- jak je porównujemy,
+- algorytm -- jak znajdujemy minimum (często w przybliżeniu).
+
+Klasa zbyt wąska może nie zawierać dobrego opisu zależności.
+
+## Małe ryzyko empiryczne $\neq$ małe ryzyko
+
+Regresja jednego najbliższego sąsiada: na danych treningowych
+$\widehat\Risk_n=0$ (o ile cechy się nie powtarzają).
+
+. . .
+
+Dostatecznie bogata klasa **zapamiętuje** próbę -- razem z przypadkowymi
+odchyleniami, których nie da się przewidzieć dla nowych obiektów.
+
+To **nadmierne dopasowanie**: mały błąd treningowy, duży błąd na nowych
+danych.
+
+. . .
+
+Jak dobrać elastyczność modelu i jak rzetelnie oszacować jego ryzyko?
+
+::: notes
+Ok. 12 min na blok. Zadanie 13 z rozdziału 1 (wielomiany stopni 1--12)
+-- dobre na laboratorium.
+:::
+
+## Podsumowanie
+
+- Model opisuje **rozkład** $Y\mid\X=\x$, a nie pojedynczy wynik.
+- Jakość mierzy **ryzyko** -- oczekiwana strata; wybór straty jest
+  merytoryczny.
+- Optimum wyznacza się punktowo: funkcja regresji (strata kwadratowa),
+  mediana (absolutna), klasyfikator bayesowski (0--1).
+- Nawet optimum ma błąd -- **nieredukowalny przy danych cechach**.
+- Optimum wymaga $P$; w praktyce minimalizujemy $\widehat\Risk_n$
+  w klasie $\mathcal F$.
