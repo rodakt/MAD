@@ -1,0 +1,18 @@
+---
+title: "Laboratoria"
+listing:
+  contents:
+    - "*.qmd"
+    - "!index.qmd"
+  type: table
+  sort: filename
+  fields: [title, subtitle]
+  field-display-names:
+    title: Temat
+    subtitle: Rodzaj
+---
+
+Treść ćwiczeń jest w [książce](https://rodakt.github.io/MAD_book/).
+Karta laboratorium wskazuje, które ćwiczenia z książki rozwiązujemy,
+i dokłada część pythonową: dane, szkielet kodu, wskazówki do bibliotek
+i zasady oddawania.

@@ -1,0 +1,42 @@
+# Publikacja strony kursu na GitHub Pages.
+#
+# Stronę wystawiamy z gałęzi bieżącego semestru. Na początku kolejnego
+# semestru wystarczy zmienić nazwę gałęzi poniżej.
+# Wymaga jednorazowo: Settings -> Pages -> Source: "GitHub Actions".
+name: Publikacja strony kursu
+
+on:
+  push:
+    branches: [2026-27]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: quarto-dev/quarto-actions/setup@v2
+      # Bez Pythona: wyniki kodu pochodzą z commitowanego _freeze/.
+      - run: quarto render
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

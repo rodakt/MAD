@@ -1,0 +1,23 @@
+---
+title: "Modele analizy danych"
+subtitle: "Kurs 2026/27"
+---
+
+Strona kursu *Modele analizy danych* na studiach magisterskich kierunku
+Analiza Danych.
+
+## Książka
+
+Podstawą kursu jest podręcznik
+[*Modele analizy danych*](https://rodakt.github.io/MAD_book/). Zawiera całą
+teorię, wyprowadzenia i ćwiczenia. Ta strona zbiera materiały do zajęć:
+harmonogram, slajdy i karty laboratoriów.
+
+## Formy zajęć
+
+- **Wykład** -- slajdy, demonstracje i programowanie na żywo, wyprowadzenia
+  przy tablicy.
+- **Laboratorium tablicowe** -- ćwiczenia rachunkowe i koncepcyjne
+  z książki.
+- **Laboratorium komputerowe** -- ćwiczenia symulacyjne z książki,
+  realizowane w Pythonie według kart laboratoryjnych.

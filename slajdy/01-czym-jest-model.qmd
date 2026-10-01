@@ -1,0 +1,13 @@
+---
+title: "Czym jest model?"
+subtitle: "Rozdział 1"
+format:
+  revealjs:
+    slide-number: true
+    chalkboard: true
+---
+
+## Materiał
+
+Rozdział [Czym jest model?](https://rodakt.github.io/MAD_book/1-fundamenty/01-czym-jest-model.html)
+w książce.

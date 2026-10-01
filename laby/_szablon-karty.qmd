@@ -1,0 +1,21 @@
+---
+# Szablon karty laboratorium (plik z prefiksem `_` nie jest renderowany).
+# Skopiuj jako np. `laby/01-knn.qmd` i uzupełnij.
+title: "Temat laboratorium"
+subtitle: "komputerowe"   # albo: tablicowe
+---
+
+## Ćwiczenia z książki
+
+- [Ćwiczenie X.Y](https://rodakt.github.io/MAD_book/ROZDZIAL.html#exr-ETYKIETA)
+  -- jedno zdanie, o co chodzi.
+
+Treść ćwiczeń jest w książce; tutaj jej nie powtarzamy.
+
+## Python
+
+Dane, szkielet kodu, wskazówki do bibliotek (numpy, scikit-learn).
+
+## Oddanie
+
+Co, w jakiej formie i do kiedy.

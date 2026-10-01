@@ -1,59 +1,24 @@
-# Compressed files
-*.zip
-*.gz
-*.tar
-*.rar
-*.7z
+# Wyniki renderowania Quarto
+/_site/
+/.quarto/
+*_files/
+**/*.quarto_ipynb
 
-# Datasets (assuming common formats, add more if needed)
-*.csv
-*.xlsx
-*.json
-*.xml
-*.db
-*.sqlite
+# UWAGA: katalog _freeze/ celowo NIE jest ignorowany (CI renderuje z cache).
 
-# HTML files
-*.html
-!wyklad_[0-9].html
-!wyklad_[0-9][0-9].html
+# Rozwiązania nie trafiają do publicznego repo
+*solved*
+*solution*
 
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# Spyder project settings
-.spyderproject
-.spyproject
-
-# VS Code settings
-.vscode/
-
-# Python
+# Jupyter, Python
+.ipynb_checkpoints/
 __pycache__/
 *.py[cod]
-*$py.class
-
-# Python virtual environment
+.venv/
 venv/
-env/
-.env
 
-# PyCharm
-.idea/
-
-# macOS
+# System i edytory
 .DS_Store
-
-# Windows
-Thumbs.db
-
-# Logs
-*.log
-
-# Temporary files
-*.tmp
-*.bak
-*.swp
-
-# files containing `solved` in the name
-*solved*
+*~
+.vscode/
+.idea/

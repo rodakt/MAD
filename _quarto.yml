@@ -1,0 +1,43 @@
+project:
+  type: website
+  output-dir: _site
+  # Renderujemy tylko jawnie wskazane pliki -- w katalogu leżą też lokalne,
+  # nieśledzone notebooki z poprzednich edycji, które nie należą do strony.
+  render:
+    - index.qmd
+    - harmonogram.qmd
+    - slajdy/*.qmd
+    - laby/*.qmd
+
+lang: pl
+
+website:
+  title: "Modele analizy danych"
+  site-url: https://rodakt.github.io/MAD/
+  repo-url: https://github.com/rodakt/MAD
+  navbar:
+    left:
+      - href: index.qmd
+        text: Kurs
+      - href: harmonogram.qmd
+        text: Harmonogram
+      - href: slajdy/index.qmd
+        text: Slajdy
+      - href: laby/index.qmd
+        text: Laboratoria
+    right:
+      - href: https://rodakt.github.io/MAD_book/
+        text: Książka
+      - icon: github
+        href: https://github.com/rodakt/MAD
+        aria-label: Repozytorium kursu
+
+# Tak jak w książce: wyniki obliczeń są cache'owane w _freeze/ i commitowane,
+# więc GitHub Actions renderuje stronę bez środowiska Pythona.
+execute:
+  freeze: auto
+
+format:
+  html:
+    theme: cosmo
+    toc: true
