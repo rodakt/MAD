@@ -2,8 +2,25 @@
 title: "Harmonogram"
 ---
 
-Harmonogram zostanie uzupełniony przed rozpoczęciem semestru.
+::: {.callout-warning}
+## Wersja robocza
+Podział materiału na wykłady jest wstępny i może się zmienić w trakcie
+semestru. Daty i laboratoria zostaną uzupełnione.
+:::
 
 | Tydzień | Data | Wykład | Laboratorium |
 |---|---|---|---|
-| 1 | | | |
+| 1 | | Czym jest model? Predyktory optymalne i błąd nieredukowalny | |
+| 2 | | Klasyfikator $k$ najbliższych sąsiadów i kompromis obciążenie--wariancja | |
+| 3 | | Ocena modeli w praktyce | |
+| 4 | | Regresja liniowa I: model, estymacja, wnioskowanie | |
+| 5 | | Regresja liniowa II: zmienne jakościowe, interakcje, diagnostyka | |
+| 6 | | Selekcja i regularyzacja | |
+| 7 | | Regresja logistyczna | |
+| 8 | | Uogólnione modele liniowe i regresja Poissona | |
+| 9 | | Paradygmat bayesowski | |
+| 10 | | Modele generatywne: LDA, QDA i naiwny Bayes | |
+| 11 | | Perceptron wielowarstwowy I: architektura i zdolność aproksymacyjna | |
+| 12 | | Perceptron wielowarstwowy II: propagacja wsteczna i optymalizacja | |
+| 13 | | Analiza składowych głównych | |
+| 14 | | Grupowanie: $k$-średnich, GMM i algorytm EM | |
