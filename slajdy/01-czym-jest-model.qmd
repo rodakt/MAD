@@ -342,7 +342,11 @@ $$
 | kwadratowa | błąd średniokwadratowy $\E\big[(Y-f(\X))^2\big]$ |
 | 0--1 | prawdopodobieństwo błędu $\Prob\big(f(\X)\neq Y\big)$ |
 
-Jedno pojęcie, dwa podstawienia.
+Jedno pojęcie, dwa podstawienia. Przy stracie 0--1 wartość oczekiwana
+indykatora to prawdopodobieństwo zdarzenia:
+$$
+\E\big[\ind\big(f(\X)\neq Y\big)\big]=\Prob\big(f(\X)\neq Y\big).
+$$
 
 ## Ryzyko a błąd na danych treningowych
 
