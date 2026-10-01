@@ -301,11 +301,13 @@ Ok. 15 min na blok. Modele dyskryminacyjne vs generatywne (ramka
 
 ## Funkcja straty
 
+::: {.definicja}
 $\Loss(y,\widehat y)\ge 0$ -- koszt predykcji $\widehat y$, gdy wynikiem
 okazało się $y$; $\Loss(y,y)=0$.
+:::
 
 :::: {.columns}
-::: {.column width="50%"}
+::: {.column .karta width="50%"}
 **Regresja** -- strata kwadratowa
 $$
 \Loss(y,\widehat y)=(y-\widehat y)^2
@@ -313,7 +315,7 @@ $$
 Jeden błąd o wartości 10 kosztuje tyle, co sto błędów o wartości 1.
 :::
 
-::: {.column width="50%"}
+::: {.column .karta width="50%"}
 **Klasyfikacja** -- strata 0--1
 $$
 \Loss(y,\widehat y)=\ind(y\neq\widehat y)
@@ -322,7 +324,9 @@ Każda pomyłka kosztuje tyle samo.
 :::
 ::::
 
+::: {.wniosek}
 Koszt błędu wynika z celu i kontekstu, nie z danych.
+:::
 
 ## Ryzyko
 

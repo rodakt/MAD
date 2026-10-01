@@ -18,6 +18,30 @@ $link-color: $turkus;
   padding-left: 0.6em;
 }
 
+// Szpalty do porównania dwóch wariantów: każda na jasnym tle.
+.reveal .columns:has(> .karta) {
+  display: flex;
+  gap: 0.6em;
+}
+
+.reveal .karta {
+  flex: 1 1 0;
+  min-width: 0;
+  box-sizing: border-box;
+  background: rgba($granat, 0.06);
+  border-radius: 6px;
+  padding: 0.3em 0.7em;
+}
+
+// Wniosek, którym kończy się slajd.
+.reveal .wniosek {
+  margin-top: 0.8em;
+  padding-top: 0.4em;
+  border-top: 2px solid rgba($turkus, 0.5);
+  color: $turkus;
+  font-weight: 600;
+}
+
 // Slajdy otwierające część (tło nadaje filtr _sekcje.lua).
 .reveal .slides section.title-slide.level1 h1 {
   color: #fff;
