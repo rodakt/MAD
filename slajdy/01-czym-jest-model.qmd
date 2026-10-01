@@ -258,8 +258,10 @@ $$
 
 - Warunek $\E(\varepsilon\mid\X)=0$ wynika z definicji -- to nie
   założenie.
-- Notacja: $\fopt$ -- wielkość populacyjna (optymalna), $f$ -- dowolny
-  predyktor, $\widehat f$ -- predyktor wyznaczony z danych.
+- Notacja:
+  - $\fopt$ -- wielkość populacyjna (optymalna),
+  - $f$ -- dowolny predyktor,
+  - $\widehat f$ -- predyktor wyznaczony z danych.
 
 ## Klasyfikacja: prawdopodobieństwa klas
 
