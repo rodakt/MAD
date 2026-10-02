@@ -156,6 +156,12 @@ O rodzaju zadania decyduje **charakter** zmiennej $y$, nie postać cech.
 Średnia z dwóch gatunków rośliny nie jest żadnym gatunkiem, a pomyłka
 między klasami nie jest „mała” ani „duża”.
 
+::: notes
+Regresja i klasyfikacja to rodzaje zadań, nie rodziny algorytmów (drzewa,
+kNN, sieci mają obie wersje). Dlatego regresja logistyczna, mimo nazwy,
+jest metodą klasyfikacji.
+:::
+
 ## Pytanie {.pytanie}
 
 Przewidujemy **liczbę wizyt pacjenta w szpitalu w ciągu roku**:
@@ -174,26 +180,7 @@ Podział regresja/klasyfikacja $\neq$ podział ciągła/dyskretna.
 ::: notes
 Więcej przypadków granicznych (gwiazdki 1--5, województwo) -- zadanie 3
 z rozdziału 1.
-:::
 
-## Klasyfikacja w dwóch krokach
-
-1. Model szacuje prawdopodobieństwa klas
-   $$
-   \widehat\eta_k(\x)\approx\Prob(Y=k\mid\X=\x).
-   $$
-2. **Reguła decyzyjna** wybiera klasę, np. tę o największym
-   $\widehat\eta_k(\x)$.
-
-. . .
-
-Ten sam model, różne decyzje: w diagnostyce próg rozpoznania może być
-niższy niż $0{,}5$, gdy przeoczenie choroby kosztuje więcej niż fałszywy
-alarm.
-
-Dlatego regresja logistyczna, mimo nazwy, jest metodą klasyfikacji.
-
-::: notes
 Ok. 8 min na blok.
 :::
 
@@ -272,6 +259,9 @@ $$
 
 Dla dwóch klas:
 $Y\mid\X=\x\sim\operatorname{Bernoulli}\big(\eta(\x)\big)$.
+
+Klasę wybiera dopiero **reguła decyzyjna**, np. klasa $1$, gdy
+$\eta(\x)>1/2$.
 
 . . .
 
@@ -565,6 +555,10 @@ trzeba szukać w **cechach**, nie w modelu.
 Ok. 20 min na cały blok -- rdzeń wykładu. Rozkład ryzyka dla straty
 0--1 (eq-rozklad-bledu-01) -- tylko słownie: ta sama budowa,
 optimum + nieujemna nadwyżka.
+
+Jeśli padnie pytanie o inny próg (diagnostyka: przeoczenie choroby
+droższe niż fałszywy alarm) -- to inna strata, wrócimy przy regresji
+logistycznej (wykład 7).
 :::
 
 # Od teorii do uczenia
