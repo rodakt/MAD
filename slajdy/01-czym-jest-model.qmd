@@ -332,7 +332,7 @@ $$
 | kwadratowa | $\E\big[(Y-f(\X))^2\big]$ -- błąd średniokwadratowy |
 | 0--1 | $\E\big[\ind\big(f(\X)\neq Y\big)\big]$ |
 
-Jedno pojęcie, dwa podstawienia. Ponieważ $\E[\ind_A]=\Prob(A)$, przy
+Jedno pojęcie, dwa podstawienia. Ponieważ $\E[\ind(A)]=\Prob(A)$, przy
 stracie 0--1 ryzyko jest **prawdopodobieństwem błędu**:
 $$
 \Risk(f)=\Prob\big(f(\X)\neq Y\big).
