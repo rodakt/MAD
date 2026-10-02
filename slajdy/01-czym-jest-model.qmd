@@ -260,8 +260,8 @@ $$
 Dla dwóch klas:
 $Y\mid\X=\x\sim\operatorname{Bernoulli}\big(\eta(\x)\big)$.
 
-Klasę wybiera dopiero **reguła decyzyjna**, np. klasa $1$, gdy
-$\eta(\x)>1/2$.
+Klasę wybiera dopiero **reguła decyzyjna**, np. klasa o największym
+$\eta_k(\x)$ -- dla dwóch klas: klasa $1$, gdy $\eta(\x)>1/2$.
 
 . . .
 
