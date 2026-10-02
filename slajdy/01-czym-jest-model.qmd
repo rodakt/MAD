@@ -329,13 +329,14 @@ $$
 
 | strata | ryzyko |
 |---|---|
-| kwadratowa | błąd średniokwadratowy $\E\big[(Y-f(\X))^2\big]$ |
-| 0--1 | prawdopodobieństwo błędu $\Prob\big(f(\X)\neq Y\big)$ |
+| kwadratowa | $\E\big[(Y-f(\X))^2\big]$ -- błąd średniokwadratowy |
+| 0--1 | $\E\big[\ind\big(f(\X)\neq Y\big)\big]$ |
 
-Jedno pojęcie, dwa podstawienia. Przy stracie 0--1 wartość oczekiwana
-indykatora to prawdopodobieństwo zdarzenia:
+Jedno pojęcie, dwa podstawienia. Wartość oczekiwana indykatora to
+prawdopodobieństwo zdarzenia, więc przy stracie 0--1 ryzyko jest
+**prawdopodobieństwem błędu**:
 $$
-\E\big[\ind\big(f(\X)\neq Y\big)\big]=\Prob\big(f(\X)\neq Y\big).
+\Risk(f)=\Prob\big(f(\X)\neq Y\big).
 $$
 
 ## Ryzyko a błąd na danych treningowych
