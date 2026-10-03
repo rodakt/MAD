@@ -10,7 +10,7 @@ semestru. Daty i laboratoria zostaną uzupełnione.
 
 | Tydzień | Data | Wykład | Laboratorium |
 |---|---|---|---|
-| 1 | | Czym jest model? Predyktory optymalne i błąd nieredukowalny | |
+| 1 | | Czym jest model? Predyktory optymalne i błąd nieredukowalny | 5 X: [Prawdopodobieństwo warunkowe i ryzyko w symulacji](laby/01-ryzyko-symulacja.qmd) |
 | 2 | | Klasyfikator $k$ najbliższych sąsiadów i kompromis obciążenie--wariancja | |
 | 3 | | Ocena modeli w praktyce | |
 | 4 | | Regresja liniowa I: model, estymacja, wnioskowanie | |
