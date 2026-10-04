@@ -35,17 +35,6 @@ Treść ćwiczeń jest w książce; tutaj jej nie powtarzamy.
    ryzyko empiryczne na zbiorze treningowym a ryzyko na nowej próbie
    w zależności od stopnia wielomianu.
 
-Do domu:
-
-- [Ćwiczenie 1.10](https://rodakt.github.io/MAD_book/1-fundamenty/01-czym-jest-model.html#exr-regresja-dyskretna)
-  -- odpowiednik ćwiczenia 1.8 dla regresji: $\E(Y\mid X=x)$, szum
-  $\varepsilon$, cena pominięcia cechy;
-- [Ćwiczenie 1.12](https://rodakt.github.io/MAD_book/1-fundamenty/01-czym-jest-model.html#exr-urny),
-  punkt c);
-- [Ćwiczenie 2.8](https://rodakt.github.io/MAD_book/1-fundamenty/02-predyktory-optymalne.html#exr-taksowki)
-  -- taksówki: kiedy zeznanie świadka zmienia decyzję klasyfikatora
-  bayesowskiego.
-
 ## Python
 
 Notebook zawiera szkielet kodu; miejsca do uzupełnienia są oznaczone `...`.
