@@ -14,5 +14,4 @@ listing:
 
 Treść zadań jest w [książce](https://rodakt.github.io/MAD_book/).
 Karta laboratorium wskazuje, które zadania z książki rozwiązujemy,
-i dokłada część pythonową: dane, szkielet kodu, wskazówki do bibliotek
-i zasady oddawania.
+i dokłada część pythonową: dane, szkielet kodu i wskazówki do bibliotek.

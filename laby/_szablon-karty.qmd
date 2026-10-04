@@ -15,7 +15,3 @@ Treść zadań jest w książce; tutaj jej nie powtarzamy.
 ## Python
 
 Dane, szkielet kodu, wskazówki do bibliotek (numpy, scikit-learn).
-
-## Oddanie
-
-Co, w jakiej formie i do kiedy.
