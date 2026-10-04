@@ -11,8 +11,9 @@ nowej próbie.
 [Otwórz notebook w Colabie](https://colab.research.google.com/github/rodakt/MAD/blob/2026-27/laby/01-ryzyko-symulacja.ipynb){.btn .btn-primary}
 [Pobierz notebook](01-ryzyko-symulacja.ipynb){.btn .btn-outline-primary download="01-ryzyko-symulacja.ipynb"}
 
-Zapisz kopię notebooka na swoim Dysku (*Plik → Zapisz kopię na Dysku*),
-inaczej zmiany przepadną po zamknięciu karty.
+Notebook otwarty z tego linku nie jest zapisany na Twoim Dysku: po ponownym
+kliknięciu linku zobaczysz wersję wyjściową. Na początku zajęć zapisz kopię
+(*Plik → Zapisz kopię na Dysku*) i pracuj na niej.
 
 ## Ćwiczenia z książki
 
