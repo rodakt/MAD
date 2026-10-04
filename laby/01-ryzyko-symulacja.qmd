@@ -9,6 +9,7 @@ okazuje się frakcją w podpróbie, a ryzyko -- średnią stratą na dużej
 nowej próbie.
 
 [Otwórz notebook w Colabie](https://colab.research.google.com/github/rodakt/MAD/blob/2026-27/laby/01-ryzyko-symulacja.ipynb){.btn .btn-primary}
+[Pobierz notebook](01-ryzyko-symulacja.ipynb){.btn .btn-outline-primary download="01-ryzyko-symulacja.ipynb"}
 
 Zapisz kopię notebooka na swoim Dysku (*Plik → Zapisz kopię na Dysku*),
 inaczej zmiany przepadną po zamknięciu karty.

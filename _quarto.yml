@@ -8,6 +8,9 @@ project:
     - harmonogram.qmd
     - slajdy/*.qmd
     - laby/*.qmd
+  # Notebooki do pobrania z kart laboratoriów (kopiowane, nie renderowane).
+  resources:
+    - laby/*.ipynb
 
 lang: pl
 
