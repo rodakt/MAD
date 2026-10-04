@@ -5,12 +5,12 @@ title: "Temat laboratorium"
 subtitle: "komputerowe"   # albo: tablicowe
 ---
 
-## Ćwiczenia z książki
+## Zadania z książki
 
 - [Ćwiczenie X.Y](https://rodakt.github.io/MAD_book/ROZDZIAL.html#exr-ETYKIETA)
   -- jedno zdanie, o co chodzi.
 
-Treść ćwiczeń jest w książce; tutaj jej nie powtarzamy.
+Treść zadań jest w książce; tutaj jej nie powtarzamy.
 
 ## Python
 

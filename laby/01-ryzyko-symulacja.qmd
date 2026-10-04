@@ -3,18 +3,9 @@ title: "Prawdopodobieństwo warunkowe i ryzyko"
 subtitle: "tablicowe i komputerowe"
 ---
 
-Laboratorium do wykładu 1.
+## Zadania z książki
 
-[Otwórz notebook w Colabie](https://colab.research.google.com/github/rodakt/MAD/blob/2026-27/laby/01-ryzyko-symulacja.ipynb){.btn .btn-primary}
-[Pobierz notebook](01-ryzyko-symulacja.ipynb){.btn .btn-outline-primary download="01-ryzyko-symulacja.ipynb"}
-
-Notebook otwarty z tego linku nie jest zapisany na Twoim Dysku: po ponownym
-kliknięciu linku zobaczysz wersję wyjściową. Na początku zajęć zapisz kopię
-(*Plik → Zapisz kopię na Dysku*) i pracuj na niej.
-
-## Ćwiczenia z książki
-
-Treść ćwiczeń jest w książce; tutaj jej nie powtarzamy.
+Treść zadań jest w książce; tutaj jej nie powtarzamy.
 
 1. **Tabela rozkładu** (tablica, potem Colab) --
    [Ćwiczenie 1.8](https://rodakt.github.io/MAD_book/1-fundamenty/01-czym-jest-model.html#exr-tabela-rozkladu):
@@ -32,6 +23,13 @@ Treść ćwiczeń jest w książce; tutaj jej nie powtarzamy.
    [Ćwiczenie 1.14](https://rodakt.github.io/MAD_book/1-fundamenty/01-czym-jest-model.html#exr-wielomiany):
    ryzyko empiryczne na zbiorze treningowym a ryzyko na nowej próbie
    w zależności od stopnia wielomianu.
+
+[Otwórz notebook w Colabie](https://colab.research.google.com/github/rodakt/MAD/blob/2026-27/laby/01-ryzyko-symulacja.ipynb){.btn .btn-primary}
+[Pobierz notebook](01-ryzyko-symulacja.ipynb){.btn .btn-outline-primary download="01-ryzyko-symulacja.ipynb"}
+
+Notebook otwarty z tego linku nie jest zapisany na Twoim Dysku: po ponownym
+kliknięciu linku zobaczysz wersję wyjściową. Na początku zajęć zapisz kopię
+(*Plik → Zapisz kopię na Dysku*) i pracuj na niej.
 
 ## Python
 
