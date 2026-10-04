@@ -8,19 +8,19 @@ subtitle: "tablicowe i komputerowe"
 Treść zadań jest w książce; tutaj jej nie powtarzamy.
 
 1. **Tabela rozkładu** (tablica, potem Colab) --
-   [Ćwiczenie 1.8](https://rodakt.github.io/MAD_book/1-fundamenty/01-czym-jest-model.html#exr-tabela-rozkladu):
+   [Zadanie 1.8](https://rodakt.github.io/MAD_book/1-fundamenty/01-czym-jest-model.html#exr-tabela-rozkladu):
    z tabeli $p(x,y)$ wyznaczamy rozkład brzegowy, $\eta(x)$, błąd reguły
    $\eta(x)>1/2$ i klasyfikatora stałego. W części 1 notebooka losujemy
    próbę z tego rozkładu i porównujemy oszacowania z wynikami z tablicy;
    na koniec wyznaczamy regułę z małej próby i porównujemy jej błąd na tej
    próbie z prawdziwym prawdopodobieństwem błędu.
 2. **Urny** (tablica, potem Colab) --
-   [Ćwiczenie 1.12](https://rodakt.github.io/MAD_book/1-fundamenty/01-czym-jest-model.html#exr-urny),
+   [Zadanie 1.12](https://rodakt.github.io/MAD_book/1-fundamenty/01-czym-jest-model.html#exr-urny),
    punkty a) i b): rozkład dany jako $p(y)\,p(x\mid y)$ zamieniamy na tabelę
    $p(x,y)$ i na $p(y\mid x)$, a potem otrzymujemy te same liczby
    z częstości w symulacji.
 3. **Wielomiany** (Colab) --
-   [Ćwiczenie 1.14](https://rodakt.github.io/MAD_book/1-fundamenty/01-czym-jest-model.html#exr-wielomiany):
+   [Zadanie 1.14](https://rodakt.github.io/MAD_book/1-fundamenty/01-czym-jest-model.html#exr-wielomiany):
    ryzyko empiryczne na zbiorze treningowym a ryzyko na nowej próbie
    w zależności od stopnia wielomianu.
 

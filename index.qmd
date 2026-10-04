@@ -10,7 +10,7 @@ Analiza Danych.
 
 Podstawą kursu jest podręcznik
 [*Modele analizy danych*](https://rodakt.github.io/MAD_book/). Zawiera całą
-teorię, wyprowadzenia i ćwiczenia. Ta strona zbiera materiały do zajęć:
+teorię, wyprowadzenia i zadania. Ta strona zbiera materiały do zajęć:
 harmonogram, slajdy i karty laboratoriów.
 
 ## Wymagania

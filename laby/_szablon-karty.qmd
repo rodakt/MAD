@@ -7,7 +7,7 @@ subtitle: "komputerowe"   # albo: tablicowe
 
 ## Zadania z książki
 
-- [Ćwiczenie X.Y](https://rodakt.github.io/MAD_book/ROZDZIAL.html#exr-ETYKIETA)
+- [Zadanie X.Y](https://rodakt.github.io/MAD_book/ROZDZIAL.html#exr-ETYKIETA)
   -- jedno zdanie, o co chodzi.
 
 Treść zadań jest w książce; tutaj jej nie powtarzamy.
