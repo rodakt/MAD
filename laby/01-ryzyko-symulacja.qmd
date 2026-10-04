@@ -1,12 +1,9 @@
 ---
-title: "Prawdopodobieństwo warunkowe i ryzyko w symulacji"
+title: "Prawdopodobieństwo warunkowe i ryzyko"
 subtitle: "tablicowe i komputerowe"
 ---
 
-Laboratorium do wykładu 1. Rachunki z prawdopodobieństwa robimy najpierw
-na tablicy, a potem sprawdzamy je symulacją: prawdopodobieństwo warunkowe
-okazuje się frakcją w podpróbie, a ryzyko -- średnią stratą na dużej
-nowej próbie.
+Laboratorium do wykładu 1.
 
 [Otwórz notebook w Colabie](https://colab.research.google.com/github/rodakt/MAD/blob/2026-27/laby/01-ryzyko-symulacja.ipynb){.btn .btn-primary}
 [Pobierz notebook](01-ryzyko-symulacja.ipynb){.btn .btn-outline-primary download="01-ryzyko-symulacja.ipynb"}
