@@ -18,11 +18,13 @@ inaczej zmiany przepadną po zamknięciu karty.
 
 Treść ćwiczeń jest w książce; tutaj jej nie powtarzamy.
 
-1. **Tabela rozkładu** (tablica) --
+1. **Tabela rozkładu** (tablica, potem Colab) --
    [Ćwiczenie 1.8](https://rodakt.github.io/MAD_book/1-fundamenty/01-czym-jest-model.html#exr-tabela-rozkladu):
    z tabeli $p(x,y)$ wyznaczamy rozkład brzegowy, $\eta(x)$, błąd reguły
-   $\eta(x)>1/2$ i klasyfikatora stałego. Wyniki sprawdzamy w części 1
-   notebooka.
+   $\eta(x)>1/2$ i klasyfikatora stałego. W części 1 notebooka losujemy
+   próbę z tego rozkładu i porównujemy oszacowania z wynikami z tablicy;
+   na koniec wyznaczamy regułę z małej próby i porównujemy jej błąd na tej
+   próbie z prawdziwym prawdopodobieństwem błędu.
 2. **Urny** (tablica, potem Colab) --
    [Ćwiczenie 1.12](https://rodakt.github.io/MAD_book/1-fundamenty/01-czym-jest-model.html#exr-urny),
    punkty a) i b): rozkład dany jako $p(y)\,p(x\mid y)$ zamieniamy na tabelę
@@ -53,7 +55,13 @@ instalacji.
 - Losowanie: `rng = np.random.default_rng(ziarno)`, potem `rng.random(n)`
   (jednostajny na $[0,1)$), `rng.uniform(a, b, size=n)`,
   `rng.normal(m, s, size=n)`. Zdarzenie o prawdopodobieństwie $p$ to
-  `rng.random(n) < p`.
+  `rng.random(n) < p`. Wartości z zadanymi prawdopodobieństwami:
+  `rng.choice([1, 2, 3], size=n, p=p_x)`.
+- Indeksowanie tablicą: jeśli `eta` zawiera $\eta(1),\eta(2),\eta(3)$,
+  a `X` to próba wartości $1,2,3$, to `eta[X - 1]` daje $\eta(x)$ dla
+  każdej obserwacji (indeksy w Pythonie zaczynają się od 0).
+  `np.where(warunek, a, b)` wybiera element z `a` tam, gdzie warunek
+  zachodzi, i z `b` w pozostałych miejscach.
 - Maski logiczne: `kolor == 1` daje tablicę `True`/`False`;
   `np.mean(maska)` to frakcja, a `urna[kolor == 1]` wybiera urny tylko
   z tych powtórzeń, w których kula była czarna. Tak liczymy częstość
