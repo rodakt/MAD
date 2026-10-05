@@ -22,3 +22,8 @@ venv/
 *~
 .vscode/
 .idea/
+
+# Rozwiązania notebooków laboratoriów (lokalnie, nieśledzone)
+/laby/rozwiazania/
+# Własne rozwiązania notebooków (lokalnie, nieśledzone)
+/laby/sandbox/
