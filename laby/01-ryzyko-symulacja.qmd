@@ -59,6 +59,12 @@ instalacji.
   `np.mean(maska)` to frakcja, a `urna[kolor == 1]` wybiera urny tylko
   z tych powtórzeń, w których kula była czarna. Tak liczymy częstość
   warunkową.
+- Broadcasting (w funkcji `blad_prawdziwy`): działanie na tablicach
+  różnych kształtów rozciąga wymiary równe 1. Kolumna `y` kształtu
+  $(2,1)$ porównana z wierszem `klasyfikator` kształtu $(3,)$ daje maskę
+  $(2,3)$ o tym samym kształcie co tabela `p_xy`: w wierszu $y$ są
+  wartości `True` tam, gdzie predykcja różni się od $y$. Szczegóły:
+  [NumPy -- Broadcasting](https://numpy.org/doc/stable/user/basics.broadcasting.html).
 - Wielomiany: `f = Polynomial.fit(X, Y, deg=d)` z `numpy.polynomial`
   dopasowuje wielomian metodą najmniejszych kwadratów; `f(X)` zwraca
   jego wartości.
