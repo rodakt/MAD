@@ -11,7 +11,8 @@ Treść zadań jest w książce; tutaj jej nie powtarzamy.
    [Zadanie 1.8](https://rodakt.github.io/MAD_book/1-fundamenty/01-czym-jest-model.html#exr-tabela-rozkladu):
    z tabeli $p(x,y)$ wyznaczamy rozkład brzegowy, $\eta(x)$, błąd reguły
    $\eta(x)>1/2$ i klasyfikatora stałego. W części 1 notebooka losujemy
-   próbę z tego rozkładu i porównujemy oszacowania z wynikami z tablicy;
+   próbę wprost z tabeli $p(x,y)$ i porównujemy oszacowania z wynikami
+   z tablicy -- błąd w obliczeniach nie przeniesie się więc na próbę;
    na koniec wyznaczamy regułę z małej próby i porównujemy jej błąd na tej
    próbie z prawdziwym prawdopodobieństwem błędu.
 2. **Urny** (tablica, potem Colab) --
