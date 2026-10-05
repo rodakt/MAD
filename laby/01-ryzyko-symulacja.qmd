@@ -44,10 +44,16 @@ instalacji.
   `rng.normal(m, s, size=n)`. Zdarzenie o prawdopodobieństwie $p$ to
   `rng.random(n) < p`. Wartości z zadanymi prawdopodobieństwami:
   `rng.choice([1, 2, 3], size=n, p=p_x)`.
-- Indeksowanie tablicą: jeśli `eta` zawiera $\eta(1),\eta(2),\eta(3)$,
-  a `X` to próba wartości $1,2,3$, to `eta[X - 1]` daje $\eta(x)$ dla
-  każdej obserwacji (indeksy w Pythonie zaczynają się od 0).
-  `np.where(warunek, a, b)` wybiera element z `a` tam, gdzie warunek
+- Indeksowanie tablicą: jeśli w nawiasach zamiast jednej liczby wstawimy
+  tablicę liczb całkowitych, dostaniemy elementy spod kolejnych indeksów
+  z tej tablicy, z powtórzeniami. Dla `a = np.array([10, 20, 30])` wynik
+  `a[np.array([2, 0, 0, 1])]` to `[30, 10, 10, 20]`. W ten sposób każda
+  obserwacja dostaje wartość zależną od jej $x$: jeśli
+  `klasyfikator = np.array([0, 1, 1])` zawiera klasy wskazywane dla
+  $x=1,2,3$, a `X` to próba wartości $1,2,3$, to `klasyfikator[X - 1]`
+  daje predykcję dla każdej obserwacji. Odejmujemy $1$, bo indeksy
+  w Pythonie zaczynają się od 0.
+- `np.where(warunek, a, b)` wybiera element z `a` tam, gdzie warunek
   zachodzi, i z `b` w pozostałych miejscach.
 - Maski logiczne: `kolor == 1` daje tablicę `True`/`False`;
   `np.mean(maska)` to frakcja, a `urna[kolor == 1]` wybiera urny tylko
