@@ -1,0 +1,4 @@
+# Podgląd notebooków laboratoriów: renderujemy bez wykonywania kodu
+# (CI nie ma Pythona, a szkielety i tak nie mają wyników).
+execute:
+  enabled: false

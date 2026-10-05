@@ -26,6 +26,7 @@ index.qmd          strona główna
 harmonogram.qmd    harmonogram zajęć
 slajdy/            slajdy wykładów (revealjs)
 laby/              karty laboratoriów; szablon: laby/_szablon-karty.qmd
+laby/notebooki/    notebooki laboratoriów (Colab, pobranie, podgląd HTML bez wykonywania)
 _macros-html.html  makra matematyczne -- kopia pliku z repozytorium książki
 _makra.lua         filtr wstawiający te makra do slajdów revealjs
 _freeze/           cache obliczeń -- COMMITOWANY (CI renderuje bez Pythona)
