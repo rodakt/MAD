@@ -80,14 +80,20 @@ A model jest funkcją -- obu przypisze **tę samą** predykcję.
 
 ## Model opisuje grupę, nie przypadek
 
-Skoro obiekty o identycznych cechach mają różne wyniki, żadna pojedyncza
-odpowiedź nie będzie trafna dla wszystkich.
+Jedna predykcja dla chorego i zdrowego pacjenta: czy model musi się
+pomylić przy jednym z nich?
 
-Sprzeczności więc nie ma: model opisuje **grupę obiektów podobnych**, a nie
-pojedynczy przypadek.
+. . .
 
-- czas hospitalizacji -- wartość przeciętna (i przedział),
-- choroba -- ryzyko zamiast diagnozy.
+Nie, jeśli predykcja nie zgaduje wyniku konkretnego pacjenta, lecz opisuje
+**grupę wszystkich pacjentów o tych samych cechach**: jak rozkładają się
+w niej wyniki.
+
+„Na 100 takich pacjentów choruje 30” -- to zdanie jest prawdziwe zarówno
+dla chorego, jak i dla zdrowego.
+
+- czas hospitalizacji -- wartość przeciętna w grupie (i przedział),
+- choroba -- ryzyko (odsetek chorych w grupie) zamiast diagnozy.
 
 ## Słowo „model” w dwóch znaczeniach
 
@@ -268,14 +274,16 @@ $\eta_k(\x)$ -- dla dwóch klas: klasa $1$, gdy $\eta(\x)>1/2$.
 Jeżeli $0<\eta(\x)<1$, obie klasy są możliwe przy tych samych cechach:
 nawet **dokładna** znajomość $\eta$ nie daje bezbłędnej klasyfikacji.
 
-## Jeden opis, dwie charakterystyki
+## Jeden rozkład, dwa sposoby opisu
 
-Punkt wyjścia ten sam: rozkład $Y\mid\X=\x$. Różni się tylko to, co
-z niego odczytujemy.
+Punkt wyjścia ten sam: rozkład $Y\mid\X=\x$. Różni się tylko to, ile
+z niego podajemy.
 
-- **Regresja** -- „środek” rozkładu: $\fopt(\x)$ (albo mediana).
+- **Regresja** -- jedną charakterystykę: „środek” rozkładu $\fopt(\x)$
+  (albo medianę); resztę rozkładu pomijamy.
 - **Klasyfikacja** -- „środka” nie ma, podajemy cały wektor
-  $\big(\eta_1(\x),\ldots,\eta_K(\x)\big)$.
+  $\big(\eta_1(\x),\ldots,\eta_K(\x)\big)$, czyli **pełny rozkład**
+  $Y\mid\X=\x$. Do jednej klasy sprowadza go dopiero reguła decyzyjna.
 
 . . .
 
