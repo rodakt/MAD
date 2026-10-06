@@ -109,7 +109,7 @@ treningowych wybiera model dopasowany z klasy. Ten proces nazywamy
 dopasowaniem, uczeniem albo treningiem.
 
 ::: notes
-Ok. 10 min na blok. Zadanie 2 z rozdziału 1 (klasa / model / algorytm
+Ok. 10 min na blok. Zadanie 1.4 (klasa / model / algorytm
 dla regresji liniowej i kNN) dobrze nadaje się na pytanie do sali.
 :::
 
@@ -170,7 +170,7 @@ jest metodą klasyfikacji.
 
 ## Pytanie {.pytanie}
 
-Przewidujemy **liczbę wizyt pacjenta w szpitalu w ciągu roku**:
+Przewidujemy **liczbę wizyt pacjenta w przychodni w ciągu roku**:
 $0, 1, 2, \ldots$
 
 Zmienna jest dyskretna. Regresja czy klasyfikacja?
@@ -184,8 +184,7 @@ kategorii* należy pacjent.
 Podział regresja/klasyfikacja $\neq$ podział ciągła/dyskretna.
 
 ::: notes
-Więcej przypadków granicznych (gwiazdki 1--5, województwo) -- zadanie 3
-z rozdziału 1.
+Więcej przypadków granicznych (gwiazdki 1--5, województwo) -- zadanie 1.2.
 
 Ok. 8 min na blok.
 :::
@@ -241,15 +240,15 @@ lecz z **rozkładem** $Y\mid\X=\x$ -- jego część systematyczna plus szum.
 
 **Funkcja regresji** -- przeciętny wynik wśród obiektów o cechach $\x$:
 $$
-\fopt(\x)=\E(Y\mid\X=\x).
+\fopt(\x)=\E[Y\mid\X=\x].
 $$
 
 Definiując $\varepsilon=Y-\fopt(\X)$, dostajemy
 $$
-Y=\fopt(\X)+\varepsilon,\qquad\E(\varepsilon\mid\X)=0.
+Y=\fopt(\X)+\varepsilon,\qquad\E[\varepsilon\mid\X]=0.
 $$
 
-- Warunek $\E(\varepsilon\mid\X)=0$ wynika z definicji -- to nie
+- Warunek $\E[\varepsilon\mid\X]=0$ wynika z definicji -- to nie
   założenie.
 - Notacja:
   - $\fopt$ -- wielkość populacyjna (optymalna),
@@ -287,7 +286,7 @@ z niego podajemy.
 
 . . .
 
-Dla klas kodowanych $0/1$: $\E(Y\mid\X=\x)=\Prob(Y=1\mid\X=\x)$, czyli
+Dla klas kodowanych $0/1$: $\E[Y\mid\X=\x]=\Prob(Y=1\mid\X=\x)$, czyli
 $\fopt=\eta$.
 
 ::: notes
@@ -417,26 +416,31 @@ Na tablicy, jedna linijka.
 
 ## Co z tego wynika
 
-- Predykcje w różnych punktach $\x$ wybieramy **niezależnie** -- bez
-  kompromisów między obszarami przestrzeni cech.
-- **Każdy kompromis obserwowany w praktyce bierze się z ograniczeń klasy
-  modeli lub ze skończoności próby**, a nie z natury problemu.
+- Przy znanym $P$ predykcje w różnych punktach $\x$ wybieramy
+  **niezależnie** -- między obszarami przestrzeni cech nie ma czego godzić.
+- W praktyce te same parametry wyznaczają predykcje we wszystkich
+  punktach: prosta dopasowana do zakrzywionej funkcji regresji, poprawiana
+  w jednym obszarze, psuje się w innym.
+- Takie kompromisy biorą się **z ograniczenia klasy modeli i z globalnego
+  dopasowania do całej próby**, a nie z samego problemu predykcji.
 - Optymalna predykcja w $\x$ zależy tylko od $Y\mid\X=\x$. Rozkład cech
   $p(\x)$ jedynie waży, ile wnosi błąd w danym obszarze.
 
 . . .
 
 Zostaje pytanie: dla danej straty i danego rozkładu $Y\mid\X=\x$, która
-liczba $a$ minimalizuje $r(a\mid\x)$?
+liczba $a$ minimalizuje $r(a\mid\x)$? Strata wyznacza, jaką
+charakterystykę rozkładu zwraca optimum: średnią, medianę, najbardziej
+prawdopodobną klasę.
 
 ## Strata kwadratowa: funkcja regresji
 
 ::: {.definicja}
-**Twierdzenie.** Przy $\Loss(y,a)=(y-a)^2$ i $\E Y^2<\infty$ ryzyko
-minimalizuje funkcja regresji $\fopt(\x)=\E(Y\mid\X=\x)$.
+**Twierdzenie.** Przy $\Loss(y,a)=(y-a)^2$ i $\E[Y^2]<\infty$ ryzyko
+minimalizuje funkcja regresji $\fopt(\x)=\E[Y\mid\X=\x]$.
 :::
 
-Niech $m=\E(Y\mid\X=\x)$; wtedy $Y-a=(Y-m)+(m-a)$, więc
+Niech $m=\E[Y\mid\X=\x]$; wtedy $Y-a=(Y-m)+(m-a)$, więc
 
 $$
 \begin{aligned}
@@ -452,7 +456,8 @@ Pierwszy składnik nie zależy od $a$, drugi zeruje się dokładnie dla $a=m$.
 . . .
 
 ::: {.wniosek}
-Nawet optymalny predyktor ma niezerowe ryzyko: $\Var(Y\mid\X=\x)$.
+Dla $a=m$ ryzyko warunkowe wynosi $\Var(Y\mid\X=\x)$: optymalny predyktor
+ma **dodatnie ryzyko**, o ile $Y$ nie jest wyznaczone przez $\X$.
 :::
 
 ## Rozkład ryzyka (strata kwadratowa)
@@ -477,43 +482,63 @@ $$
 ## Inna strata -- inna odpowiedź
 
 Przy stracie absolutnej $|y-a|$ optimum to **mediana warunkowa**
-$\med(Y\mid\X=\x)$.
+$\med(Y\mid\X=\x)$. Przykład: $Y\mid\X=\x$ to mieszanina
+$0{,}85\,\Nrozk(2,\,0{,}6^2)+0{,}15\,\Nrozk(9,\,2^2)$.
 
 ```{python}
-#| fig-width: 9.5
-#| fig-height: 3.6
+#| fig-width: 11
+#| fig-height: 3.4
 
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.optimize import brentq
+from scipy.stats import norm
 
-rng = np.random.default_rng(2024)
+# Ten sam rozkład co w rysunku fig-strata-optima w książce;
+# oba ryzyka liczone dokładnie ze wzorów dla rozkładu normalnego.
+w = np.array([0.85, 0.15])
+mu = np.array([2.0, 9.0])
+sd = np.array([0.6, 2.0])
 
-# Skośny rozkład warunkowy -- jak w rysunku fig-strata-optima w książce.
-n = 20_000
-skladnik = rng.random(n) < 0.85
-y = np.where(skladnik,
-             rng.normal(2.0, 0.6, n),
-             rng.normal(9.0, 2.0, n))
+def gestosc(y):
+    return (w * norm.pdf(y[:, None], mu, sd)).sum(axis=1)
 
-srednia = y.mean()
-mediana = np.median(y)
+def dystrybuanta(y):
+    return (w * norm.cdf(y, mu, sd)).sum()
 
-siatka = np.linspace(0, 12, 400)
-ryzyko_kw = ((y[None, :] - siatka[:, None]) ** 2).mean(axis=1)
-ryzyko_abs = np.abs(y[None, :] - siatka[:, None]).mean(axis=1)
+srednia = (w * mu).sum()
+wariancja = (w * (sd**2 + mu**2)).sum() - srednia**2
+mediana = brentq(lambda a: dystrybuanta(a) - 0.5, mu.min(), mu.max())
 
-fig, osie = plt.subplots(1, 2, figsize=(9.5, 3.6), sharex=True)
-for ax, ryzyko, opt, etykieta, tytul in [
-    (osie[0], ryzyko_kw, srednia, "średnia warunkowa", r"strata kwadratowa $(y-a)^2$"),
-    (osie[1], ryzyko_abs, mediana, "mediana warunkowa", r"strata absolutna $|y-a|$"),
+siatka = np.linspace(0, 12, 500)
+ryzyko_kw = wariancja + (siatka - srednia) ** 2
+z = (siatka[:, None] - mu) / sd
+ryzyko_abs = (w * sd * (2 * norm.pdf(z) + z * (2 * norm.cdf(z) - 1))).sum(axis=1)
+
+fig, osie = plt.subplots(1, 3, figsize=(11, 3.4), sharex=True)
+
+osie[0].fill_between(siatka, gestosc(siatka), color="#BBBBBB")
+osie[0].axvline(srednia, color="#D7263D", ls="--", lw=1.5,
+                label=f"średnia = {srednia:.2f}")
+osie[0].axvline(mediana, color="#2E8B57", ls=":", lw=1.8,
+                label=f"mediana = {mediana:.2f}")
+osie[0].set_title(r"gęstość $Y \mid X = x$")
+osie[0].set_xlabel("$y$")
+osie[0].legend(loc="upper right", frameon=False)
+
+for ax, ryzyko, opt, kolor, styl, etykieta, tytul in [
+    (osie[1], ryzyko_kw, srednia, "#D7263D", "--", "średnia warunkowa",
+     r"strata kwadratowa $(y-a)^2$"),
+    (osie[2], ryzyko_abs, mediana, "#2E8B57", ":", "mediana warunkowa",
+     r"strata absolutna $|y-a|$"),
 ]:
     ax.plot(siatka, ryzyko, color="#1B6CA8", lw=2)
-    ax.axvline(opt, color="#D7263D", ls="--", lw=1.5,
-               label=f"{etykieta} = {opt:.2f}")
+    ax.axvline(opt, color=kolor, ls=styl, lw=1.5, label=etykieta)
     ax.set_xlabel("predykcja $a$")
     ax.set_title(tytul)
     ax.legend(loc="upper center", frameon=False)
-osie[0].set_ylabel(r"ryzyko warunkowe $r(a \mid x)$")
+
+osie[1].set_ylabel(r"ryzyko warunkowe $r(a \mid x)$")
 plt.tight_layout()
 plt.show()
 ```
@@ -573,7 +598,7 @@ logistycznej (wykład 7).
 
 ## Optimum jest nieosiągalne
 
-$\E(Y\mid\X=\x)$ i $\eta_k(\x)$ wymagają znajomości $P$. Reguła Bayesa
+$\E[Y\mid\X=\x]$ i $\eta_k(\x)$ wymagają znajomości $P$. Reguła Bayesa
 nie jest algorytmem -- jest **wzorcem**, do którego algorytmy się
 zbliżają.
 
@@ -656,6 +681,30 @@ $$
 
 Klasa zbyt wąska może nie zawierać dobrego opisu zależności.
 
+## Strata uczenia a strata oceny
+
+Kryterium dopasowania nie musi być stratą, którą oceniamy predykcje.
+
+Klasyfikacja w dwóch etapach:
+
+- model prawdopodobieństw klas dopasowujemy, minimalizując średnią
+  **straty logarytmicznej** -- ujemnego logarytmu prawdopodobieństwa
+  przypisanego zaobserwowanej klasie,
+- etykiety po regule decyzyjnej oceniamy **stratą 0--1**.
+
+. . .
+
+Strata 0--1 słabo nadaje się do dopasowania: mała zmiana parametrów
+zwykle nie zmienia liczby błędów, więc nie wskazuje, w którą stronę
+poprawiać model. Strata logarytmiczna reaguje na każdą zmianę
+prawdopodobieństw.
+
+::: notes
+Dlaczego minimalizacja straty logarytmicznej daje sensowne
+prawdopodobieństwa (straty właściwe, największa wiarygodność) --
+wykład 7, regresja logistyczna.
+:::
+
 ## Małe ryzyko empiryczne $\neq$ małe ryzyko
 
 Regresja jednego najbliższego sąsiada: na danych treningowych
@@ -674,7 +723,7 @@ danych.
 Jak dobrać elastyczność modelu i jak rzetelnie oszacować jego ryzyko?
 
 ::: notes
-Ok. 12 min na blok. Zadanie 13 z rozdziału 1 (wielomiany stopni 1--12)
+Ok. 12 min na blok. Zadanie 1.14 (wielomiany stopni 1--12)
 -- dobre na laboratorium.
 :::
 
