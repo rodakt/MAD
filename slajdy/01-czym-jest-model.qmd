@@ -414,15 +414,35 @@ Dowód: nierówność punktowa zachowuje się przy uśrednianiu po X.
 Na tablicy, jedna linijka.
 :::
 
+## Brak danych w punkcie
+
+Zasada mówi, **co** estymować -- średnią warunkową, medianę, $\eta(\x)$ --
+ale nie **jak**.
+
+- Rozkładu $Y\mid\X=\x$ nie znamy, a przy cechach ciągłych
+  $\Prob(\X=\x)=0$: w próbie prawie na pewno nie ma obserwacji o cechach
+  dokładnie $\x$.
+- Informację trzeba **pożyczać** z innych punktów: z otoczenia $\x$
+  (np. $k$ najbliższych sąsiadów) albo z całej próby naraz (model
+  parametryczny).
+
+. . .
+
+Pożyczanie sprzęga predykcje w różnych punktach -- stąd **kompromisy**:
+
+- prosta dopasowana do zakrzywionej funkcji regresji poprawia się w jednym
+  obszarze kosztem innego,
+- uśrednianie lokalne: małe otoczenie ma mało obserwacji, duże miesza
+  punkty o różnych rozkładach warunkowych.
+
+::: notes
+Wyjątek: cechy o niewielu wartościach, każda obserwowana wiele razy --
+wtedy optimum można szacować w każdym punkcie osobno (średnia wyników
+w punkcie).
+:::
+
 ## Co z tego wynika
 
-- Przy znanym $P$ predykcje w różnych punktach $\x$ wybieramy
-  **niezależnie** -- między obszarami przestrzeni cech nie ma czego godzić.
-- W praktyce te same parametry wyznaczają predykcje we wszystkich
-  punktach: prosta dopasowana do zakrzywionej funkcji regresji, poprawiana
-  w jednym obszarze, psuje się w innym.
-- Takie kompromisy biorą się **z ograniczenia klasy modeli i z globalnego
-  dopasowania do całej próby**, a nie z samego problemu predykcji.
 - Optymalna predykcja w $\x$ zależy tylko od $Y\mid\X=\x$. Rozkład cech
   $p(\x)$ jedynie waży, ile wnosi błąd w danym obszarze.
 
