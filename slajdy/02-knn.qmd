@@ -1,0 +1,776 @@
+---
+title: "Metoda $k$ najbliższych sąsiadów"
+subtitle: "Rozdział 3"
+format:
+  revealjs:
+    slide-number: true
+    chalkboard: true
+    footer: "[Strona kursu](../index.html) · [Slajdy](index.html)"
+    theme: [default, _slajdy.scss]
+execute:
+  echo: false
+---
+
+## Materiał
+
+- Rozdział [Metoda $k$ najbliższych sąsiadów](https://rodakt.github.io/MAD_book/1-fundamenty/03-knn.html)
+- Sekcja [Metody parametryczne i nieparametryczne](https://rodakt.github.io/MAD_book/1-fundamenty/01-czym-jest-model.html#sec-parametryczne-nieparametryczne)
+  z rozdziału 1
+
+Dowody, remisy, cechy jakościowe i zadania są w książce.
+
+```{python}
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import norm
+from sklearn.linear_model import LinearRegression
+from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+
+
+def f_prawdziwa(x):
+    """Funkcja regresji z przykładów jednowymiarowych w rozdziale 3."""
+    return np.sin(2 * np.pi * x) + 0.5 * x
+
+
+sigma = 0.3
+```
+
+# Uśrednianie lokalne
+
+## Parametryczne i nieparametryczne
+
+:::: {.columns}
+::: {.column .karta width="50%"}
+**Parametryczne**
+$$
+\mathcal F=\{f_\theta:\theta\in\Theta\},\quad \Theta\subseteq\R^d
+$$
+Wymiar $d$ jest ustalony i nie rośnie z $n$.
+
+Prosta $\beta_0+\beta_1x$: dane zmieniają jej położenie i nachylenie, ale
+nie pozwalają jej się zakrzywić.
+:::
+
+::: {.column .karta width="50%"}
+**Nieparametryczne**
+
+Złożoność opisu może rosnąć z $n$: więcej danych pozwala odtworzyć
+drobniejsze szczegóły zależności.
+
+Cena mieszkania o metrażu $x$ to średnia cen $k$ mieszkań o najbliższym
+metrażu.
+:::
+::::
+
+. . .
+
+Nieparametryczny nie znaczy „bez założeń”. Zakładamy, że obiekty bliskie
+według wybranych cech mają zbliżone średnie wyniki.
+
+## Ta sama próba, dwa podejścia
+
+```{python}
+#| fig-width: 10
+#| fig-height: 4
+
+# Ten sam przykład co fig-parametryczne-nieparametryczne w rozdziale 1.
+rng = np.random.default_rng(18)
+x = np.sort(rng.uniform(-3, 3, 180))
+y = 0.5 * x + np.sin(1.5 * x) + rng.normal(0, 0.3, 180)
+siatka = np.linspace(-3, 3, 600)
+
+modele = [
+    ("parametryczny: regresja liniowa", LinearRegression(), "#D7263D"),
+    ("nieparametryczny: 15 sąsiadów", KNeighborsRegressor(n_neighbors=15), "#0072B2"),
+]
+fig, osie = plt.subplots(1, 2, figsize=(10, 4), sharex=True, sharey=True)
+for ax, (tytul, model, kolor) in zip(osie, modele):
+    model.fit(x[:, None], y)
+    ax.scatter(x, y, s=12, color="0.55", alpha=0.5, label="dane treningowe")
+    ax.plot(siatka, 0.5 * siatka + np.sin(1.5 * siatka), "--", color="0.15",
+            lw=1.8, label="średnia warunkowa")
+    ax.plot(siatka, model.predict(siatka[:, None]), color=kolor, lw=2,
+            label="dopasowany model")
+    ax.set(title=tytul, xlabel="$x$")
+osie[0].set_ylabel("$y$")
+osie[0].legend(fontsize=8, loc="lower right", frameon=False)
+fig.tight_layout()
+plt.show()
+```
+
+Prosta nie odtworzy zakrzywienia przy żadnej liczbie danych. Średnia
+z sąsiadów podąża za nim, ale także za lokalnymi odchyleniami próby.
+
+## Z „$\X=\x$” do „$\X$ blisko $\x$”
+
+Optimum to $\fopt(\x)=\E[Y\mid\X=\x]$, ale w próbie zwykle nie ma
+obserwacji o cechach dokładnie $\x$. Warunek „$\X=\x$” zastępujemy
+słabszym, „$\X$ blisko $\x$”, i uśredniamy wyniki najbliższych obserwacji.
+
+```{python}
+#| fig-width: 6.5
+#| fig-height: 3.6
+
+rng = np.random.default_rng(3)
+n = 60
+x = rng.uniform(0, 1, n)
+y = f_prawdziwa(x) + rng.normal(0, sigma, n)
+
+x0, k = 0.30, 7
+sasiedzi = np.argsort(np.abs(x - x0))[:k]
+predykcja = y[sasiedzi].mean()
+
+siatka = np.linspace(0, 1, 400)
+fig, ax = plt.subplots(figsize=(6.5, 3.6))
+ax.plot(siatka, f_prawdziwa(siatka), color="black", ls="--", lw=1.2,
+        label=r"funkcja regresji $f^*$")
+ax.scatter(x, y, s=18, color="0.6", label="próba ucząca")
+ax.scatter(x[sasiedzi], y[sasiedzi], s=30, color="#D7263D",
+           label=f"{k} najbliższych sąsiadów $x_0$")
+ax.hlines(predykcja, x[sasiedzi].min(), x[sasiedzi].max(),
+          color="#1B6CA8", lw=2.5, label="średnia wyników sąsiadów")
+ax.axvline(x0, color="0.3", lw=0.8, ls=":")
+ax.plot([x0], [predykcja], "o", color="#1B6CA8", ms=7)
+ax.plot([x0], [f_prawdziwa(x0)], "o", mfc="white", mec="black", ms=7)
+ax.set_xlabel("$x$")
+ax.set_ylabel("$y$")
+ax.legend(frameon=False, fontsize=8, loc="lower left")
+plt.tight_layout()
+plt.show()
+```
+
+## Dwa źródła błędu
+
+Średnia sąsiadów (niebieski punkt) nie trafia dokładnie w $\fopt(x_0)$
+(pusty punkt), bo:
+
+- **szum** -- siedem obserwacji to za mało, by uśrednić losowe odchylenia
+  wyników;
+- **szerokość otoczenia** -- $\fopt$ nie jest stała na przedziale
+  zajmowanym przez sąsiadów, więc uśredniamy jej wartości z okolicy $x_0$,
+  a nie z samego $x_0$.
+
+. . .
+
+::: {.wniosek}
+Większe $k$ osłabia pierwszy efekt i wzmacnia drugi.
+:::
+
+::: notes
+Ustalamy liczbę sąsiadów $k$, a nie promień $h$: tam, gdzie danych jest
+dużo, otoczenie jest wąskie, tam, gdzie mało -- szerokie, ale nigdy
+puste.
+:::
+
+# Reguła $k$-NN
+
+## Reguła $k$ najbliższych sąsiadów
+
+$N_k(\x)$ -- indeksy $k$ obserwacji uczących najbliższych $\x$ według
+odległości $d$.
+
+::: {.definicja}
+Regresja:
+$$
+\widehat f(\x)=\frac1k\sum_{i\in N_k(\x)}y_i
+$$
+
+Klasyfikacja:
+$$
+\widehat\eta_c(\x)=\frac1k\sum_{i\in N_k(\x)}\ind(y_i=c),\qquad
+\widehat g(\x)=\argmax_c\,\widehat\eta_c(\x)
+$$
+:::
+
+Częstość klasy to średnia zmiennej $\ind(Y=c)$, więc oba wzory są tym
+samym uśrednianiem.
+
+## Reguła podstawienia
+
+:::: {.columns}
+::: {.column .karta width="50%"}
+**Klasyfikator bayesowski**
+$$
+\Bayes(\x)=\argmax_c\,\eta_c(\x)
+$$
+:::
+
+::: {.column .karta width="50%"}
+**Klasyfikator $k$-NN**
+$$
+\widehat g(\x)=\argmax_c\,\widehat\eta_c(\x)
+$$
+:::
+::::
+
+Ta sama postać, a nieznane $\eta_c$ zastępuje oszacowanie z danych.
+To jest **reguła podstawienia** (*plug-in rule*).
+
+. . .
+
+$k$-NN **nie** minimalizuje ryzyka empirycznego w żadnej klasie
+$\mathcal F$, tylko naśladuje postać predyktora optymalnego. Ryzyko
+empiryczne pojawi się dopiero przy wyborze $k$.
+
+::: notes
+$\widehat\eta$ można podstawić do reguły kosztowej albo reguły Chowa,
+ale przyjmuje tylko $k+1$ wartości $0, 1/k, \ldots, 1$, więc progi
+między kolejnymi wielokrotnościami $1/k$ dają tę samą regułę
+(zadanie w książce).
+:::
+
+# Co znaczy „blisko”
+
+## Pytanie {.pytanie}
+
+Mieszkania opisane metrażem (m²) i liczbą pokoi, odległość euklidesowa.
+
+| | metraż | pokoje |
+|---|---|---|
+| A | 50 | 2 |
+| B | 52 | 4 |
+| C | 56 | 2 |
+
+Które mieszkanie jest bliżej A: B czy C?
+
+. . .
+
+**B**: $\sqrt{2^2+2^2}\approx2{,}8$, a C: $6$ -- choć B ma inny układ.
+W cm² różnica metraży A i B rośnie do $20\,000$ i pokoje przestają się
+liczyć. Zmiana jednostek nie zmienia informacji w danych, a zmienia
+predykcje $k$-NN.
+
+## Standaryzacja
+
+Odległość należy do modelu tak samo jak $k$. Najprostszy sposób
+wyrównania skal to **standaryzacja** każdej cechy:
+$$
+\tilde x_j=\frac{x_j-\bar x_j}{s_j}.
+$$
+
+- $\bar x_j$ i $s_j$ liczymy **tylko na zbiorze uczącym** i tymi samymi
+  wartościami przekształcamy nowe obserwacje.
+- Wyznaczenie ich na danych, na których oceniamy model, to subtelne
+  podglądanie danych testowych.
+
+## Standaryzacja w działaniu
+
+```{python}
+#| fig-width: 9.5
+#| fig-height: 4.2
+
+rng = np.random.default_rng(11)
+
+
+def probka_skala(n, rng):
+    """Klasa zależy od cechy 1; cecha 2 to szum w dużych jednostkach."""
+    y = rng.integers(0, 2, n)
+    x1 = rng.normal(np.where(y == 1, 1.0, -1.0), 1.0)
+    x2 = rng.normal(0, 100, n)
+    return np.column_stack([x1, x2]), y
+
+
+X_tr, y_tr = probka_skala(300, rng)
+X_te, y_te = probka_skala(20_000, rng)
+
+modele = {
+    "bez standaryzacji": KNeighborsClassifier(n_neighbors=5),
+    "ze standaryzacją": make_pipeline(StandardScaler(),
+                                      KNeighborsClassifier(n_neighbors=5)),
+}
+
+# Wspólny układ współrzędnych do rysowania: zmienne standaryzowane.
+skaler = StandardScaler().fit(X_tr)
+Z_tr = skaler.transform(X_tr)
+u = np.linspace(-3.2, 3.2, 250)
+U1, U2 = np.meshgrid(u, u)
+siatka_x = skaler.inverse_transform(np.column_stack([U1.ravel(), U2.ravel()]))
+
+fig, osie = plt.subplots(1, 2, figsize=(9.5, 4.2), sharey=True)
+for ax, (nazwa, model) in zip(osie, modele.items()):
+    model.fit(X_tr, y_tr)
+    blad = np.mean(model.predict(X_te) != y_te)
+    eta_hat = model.predict_proba(siatka_x)[:, 1].reshape(U1.shape)
+    ax.contourf(U1, U2, eta_hat, levels=np.linspace(0, 1, 11),
+                cmap="RdBu_r", alpha=0.35)
+    ax.scatter(Z_tr[:, 0], Z_tr[:, 1], c=y_tr, cmap="RdBu_r",
+               s=12, edgecolor="k", linewidth=0.3)
+    ax.set_title(f"{nazwa}: błąd {blad:.3f}")
+    ax.set_xlabel("cecha 1 (standaryzowana)")
+osie[0].set_ylabel("cecha 2 (standaryzowana)")
+plt.tight_layout()
+plt.show()
+```
+
+Klasę wyznacza tylko cecha 1; cecha 2 to szum o odchyleniu $100$.
+
+. . .
+
+Standaryzacja wyrównuje skale, ale **nie odróżnia** cech istotnych od
+szumu: prawa granica jest poszarpana.
+
+::: notes
+Błąd bayesowski $\Phi(-1)\approx0{,}159$ -- prawy panel jest blisko.
+Cechy jakościowe (kodowanie 0/1, odległość Hamminga) -- tylko w książce.
+:::
+
+# Rola liczby sąsiadów
+
+## $k$ to hiperparametr
+
+$k$ nie jest wyznaczane w trakcie uczenia, tylko ustalane przed nim.
+
+- $k=1$ -- predykcją jest wynik najbliższej obserwacji. Błąd na zbiorze
+  uczącym wynosi zero, ale predykcja przejmuje cały szum jednej
+  obserwacji.
+- $k=n$ -- predykcja nie zależy od $\x$: średnia wszystkich wyników albo
+  klasa najczęstsza. Bardzo stabilna, ale ignoruje cechy.
+
+. . .
+
+Pomiędzy skrajnościami $k$ reguluje stopień **wygładzenia**.
+
+## Klasyfikacja: $k = 1, 15, 100$
+
+```{python}
+#| fig-width: 11
+#| fig-height: 3.8
+
+from sklearn.datasets import make_moons
+
+X_tr, y_tr = make_moons(n_samples=200, noise=0.30, random_state=0)
+X_te, y_te = make_moons(n_samples=20_000, noise=0.30, random_state=1)
+
+u1 = np.linspace(-2.0, 3.0, 300)
+u2 = np.linspace(-1.6, 2.1, 300)
+U1, U2 = np.meshgrid(u1, u2)
+siatka = np.column_stack([U1.ravel(), U2.ravel()])
+
+fig, osie = plt.subplots(1, 3, figsize=(11, 3.8), sharey=True)
+for ax, k in zip(osie, [1, 15, 100]):
+    klf = KNeighborsClassifier(n_neighbors=k).fit(X_tr, y_tr)
+    eta_hat = klf.predict_proba(siatka)[:, 1].reshape(U1.shape)
+    blad_tr = np.mean(klf.predict(X_tr) != y_tr)
+    blad_te = np.mean(klf.predict(X_te) != y_te)
+    ax.contourf(U1, U2, eta_hat, levels=np.linspace(0, 1, 11),
+                cmap="RdBu_r", alpha=0.35)
+    ax.contour(U1, U2, eta_hat, levels=[0.5], colors="k", linewidths=1.2)
+    ax.scatter(X_tr[:, 0], X_tr[:, 1], c=y_tr, cmap="RdBu_r",
+               s=12, edgecolor="k", linewidth=0.3)
+    ax.set_title(f"$k = {k}$: uczący {blad_tr:.2f}, testowy {blad_te:.2f}",
+                 fontsize=10)
+    ax.set_xlabel("$x_1$")
+osie[0].set_ylabel("$x_2$")
+plt.tight_layout()
+plt.show()
+```
+
+- $k=1$: wysepki wokół pojedynczych punktów, błąd uczący $0$.
+- $k=15$: granica oddaje kształt półksiężyców.
+- $k=100$: otoczenia sięgają do drugiego półksiężyca i oba błędy rosną.
+
+## Regresja: $k = 1, 10, 50$
+
+```{python}
+#| fig-width: 11
+#| fig-height: 3.4
+
+rng = np.random.default_rng(5)
+n = 100
+x = rng.uniform(0, 1, n)
+y = f_prawdziwa(x) + rng.normal(0, sigma, n)
+siatka = np.linspace(0, 1, 1000)
+
+fig, osie = plt.subplots(1, 3, figsize=(11, 3.4), sharey=True)
+for ax, k in zip(osie, [1, 10, 50]):
+    reg = KNeighborsRegressor(n_neighbors=k).fit(x.reshape(-1, 1), y)
+    ax.scatter(x, y, s=10, color="0.6")
+    ax.plot(siatka, f_prawdziwa(siatka), color="black", ls="--", lw=1.2)
+    ax.plot(siatka, reg.predict(siatka.reshape(-1, 1)),
+            color="#1B6CA8", lw=1.6, drawstyle="steps-mid")
+    ax.set_title(f"$k = {k}$")
+    ax.set_xlabel("$x$")
+osie[0].set_ylabel("$y$")
+plt.tight_layout()
+plt.show()
+```
+
+Przy małym $k$ schodki podążają za szumem. Przy dużym $k$ predyktor
+spłaszcza $\fopt$, najmocniej na krańcach, gdzie sąsiedzi leżą tylko po
+jednej stronie.
+
+::: notes
+Slajd do pominięcia, jeśli brakuje czasu -- ten sam wniosek co dla
+klasyfikacji.
+:::
+
+## Ryzyko a błąd na zbiorze uczącym
+
+```{python}
+#| fig-width: 6.5
+#| fig-height: 3.8
+
+rng = np.random.default_rng(8)
+n, powtorzenia = 100, 50
+wartosci_k = np.array([1, 2, 3, 5, 7, 10, 15, 20, 30, 50, 100])
+siatka = np.linspace(0, 1, 2001)
+f_siatka = f_prawdziwa(siatka)
+
+blad_uczacy = np.empty((len(wartosci_k), powtorzenia))
+ryzyko = np.empty((len(wartosci_k), powtorzenia))
+for j in range(powtorzenia):
+    x = rng.uniform(0, 1, n)
+    y = f_prawdziwa(x) + rng.normal(0, sigma, n)
+    for i, k in enumerate(wartosci_k):
+        reg = KNeighborsRegressor(n_neighbors=k).fit(x.reshape(-1, 1), y)
+        blad_uczacy[i, j] = np.mean((reg.predict(x.reshape(-1, 1)) - y) ** 2)
+        # Ryzyko = całka z kwadratu odchylenia od f* + błąd nieredukowalny.
+        odchylenie = reg.predict(siatka.reshape(-1, 1)) - f_siatka
+        ryzyko[i, j] = np.trapezoid(odchylenie ** 2, siatka) + sigma ** 2
+
+fig, ax = plt.subplots(figsize=(6.5, 3.8))
+ax.plot(n / wartosci_k, blad_uczacy.mean(axis=1), "o-", color="0.45",
+        label="błąd na zbiorze uczącym")
+ax.plot(n / wartosci_k, ryzyko.mean(axis=1), "o-", color="#1B6CA8",
+        label="ryzyko")
+ax.axhline(sigma ** 2, color="#D7263D", ls="--", lw=1.5,
+           label=r"błąd nieredukowalny $\sigma^2$")
+ax.set_xscale("log")
+ax.set_xlabel("$n/k$ (efektywna liczba parametrów)")
+ax.set_ylabel("średni kwadrat błędu")
+ax.legend(frameon=False)
+plt.tight_layout()
+plt.show()
+```
+
+$n/k$ to w przybliżeniu liczba grup, w których predyktor uśrednia. Na
+prawo rośnie elastyczność; ryzyko ma kształt litery U.
+
+::: notes
+Rozkład znamy, więc ryzyko policzono dokładnie (całka po $x$ plus
+$\sigma^2$), średnio z 50 prób uczących. Lewy kraniec: zbyt sztywny
+predyktor, prawy: odtwarza głównie szum. Rozkład tego U na obciążenie
+i wariancję -- rozdział 4.
+:::
+
+## Pytanie {.pytanie}
+
+Krzywą ryzyka narysowaliśmy, bo znamy rozkład. W zastosowaniach mamy
+tylko dane.
+
+Które $k$ wskaże błąd na zbiorze uczącym?
+
+. . .
+
+**Zawsze $k=1$**, czyli wybór najgorszy z możliwych.
+
+Krzywą w kształcie U rozkłada na dwa składniki rozdział
+[Obciążenie i wariancja](https://rodakt.github.io/MAD_book/1-fundamenty/04-bias-wariancja.html).
+Zostaje pytanie: jak wybrać $k$, mając tylko dane?
+
+# Zbieżność do optimum
+
+## Twierdzenie Stone'a
+
+::: {.definicja}
+**Twierdzenie (zgodność uniwersalna $k$-NN).** Jeżeli
+$$
+k_n\to\infty\qquad\text{oraz}\qquad k_n/n\to0\qquad (n\to\infty),
+$$
+to dla **każdego** rozkładu $(\X,Y)$:
+$\E\big[\Risk(\widehat g_n)\big]\to\Risk(\Bayes)$ w klasyfikacji oraz
+$\E\big[\Risk(\widehat f_n)\big]\to\Risk(\fopt)$ w regresji (gdy
+$\E[Y^2]<\infty$).
+:::
+
+. . .
+
+Warunki odpowiadają dwóm źródłom błędu:
+
+- $k_n\to\infty$ -- uśredniamy coraz więcej obserwacji, więc szum przestaje
+  mieć znaczenie;
+- $k_n/n\to0$ -- otoczenie kurczy się do punktu $\x$.
+
+$k=\sqrt n$ spełnia oba warunki.
+
+::: notes
+$\E$ dotyczy losowości zbioru uczącego. Dowód -- Devroye i in. (1996),
+Györfi i in. (2002). Siła: słowo „każdego” -- bez ciągłości, bez
+gęstości. Odpowiedź na „optimum jest nieosiągalne” z wykładu 1: bez $P$
+nie wyznaczymy go, ale osiągniemy w granicy, mając tylko dane.
+:::
+
+## A jeśli $k$ nie rośnie?
+
+::: {.definicja}
+**Twierdzenie Covera--Harta.** Dla dwóch klas ryzyko reguły 1-NN dąży do
+granicy $\Risk_{1\text{NN}}$, która spełnia
+$$
+\Risk^*\le\Risk_{1\text{NN}}\le2\Risk^*(1-\Risk^*)\le2\Risk^*.
+$$
+:::
+
+- 1-NN myli się asymptotycznie **co najwyżej dwa razy** częściej niż
+  reguła optymalna.
+- Ale nie jest zgodna: przy $\Risk^*>0$ etykieta jednego sąsiada pozostaje
+  losowa nawet przy nieskończonej próbie.
+
+::: notes
+Szkic dowodu: etykieta sąsiada i etykieta punktu to dwa niezależne
+losowania z Bernoulli($\eta(\x)$), różnią się z prawdopodobieństwem
+$2\eta(1-\eta)$; reszta to nierówność Jensena. W książce.
+:::
+
+## Obie reguły na znanym rozkładzie
+
+```{python}
+#| fig-width: 6.5
+#| fig-height: 3.9
+
+rng = np.random.default_rng(17)
+mu = 1.0
+
+
+def probka(n, rng):
+    """Losuje n obserwacji z równoliczną mieszanką N(-mu,1) i N(mu,1)."""
+    y = rng.integers(0, 2, n)
+    x = rng.normal(np.where(y == 1, mu, -mu), 1.0)
+    return x.reshape(-1, 1), y
+
+
+siatka = np.linspace(-7, 7, 4001)
+gestosc_klasy1 = norm.pdf(siatka - mu)
+gestosc_klasy0 = norm.pdf(siatka + mu)
+
+
+def ryzyko_dokladne(klasyfikator):
+    """Prawdopodobieństwo błędu klasyfikatora, liczone całkowaniem."""
+    etykiety = klasyfikator.predict(siatka.reshape(-1, 1))
+    return 0.5 * np.trapezoid(np.where(etykiety == 0, gestosc_klasy1, 0.0), siatka) \
+         + 0.5 * np.trapezoid(np.where(etykiety == 1, gestosc_klasy0, 0.0), siatka)
+
+
+# Granica ryzyka 1-NN: E[2 eta(X) (1 - eta(X))] po rozkładzie brzegowym X.
+eta = gestosc_klasy1 / (gestosc_klasy1 + gestosc_klasy0)
+gestosc_x = 0.5 * (gestosc_klasy1 + gestosc_klasy0)
+ryzyko_1nn_granica = np.trapezoid(2 * eta * (1 - eta) * gestosc_x, siatka)
+blad_bayesa = norm.cdf(-mu)
+
+licznosci = np.array([20, 50, 100, 300, 1000, 3000, 10_000])
+powtorzenia = 25
+ryzyko_1nn = np.empty((len(licznosci), powtorzenia))
+ryzyko_knn = np.empty((len(licznosci), powtorzenia))
+for i, n in enumerate(licznosci):
+    for j in range(powtorzenia):
+        X_tr, y_tr = probka(n, rng)
+        k = max(1, int(round(np.sqrt(n))))
+        ryzyko_1nn[i, j] = ryzyko_dokladne(
+            KNeighborsClassifier(n_neighbors=1).fit(X_tr, y_tr))
+        ryzyko_knn[i, j] = ryzyko_dokladne(
+            KNeighborsClassifier(n_neighbors=k).fit(X_tr, y_tr))
+
+fig, ax = plt.subplots(figsize=(6.5, 3.9))
+ax.plot(licznosci, ryzyko_1nn.mean(axis=1), "o-", color="0.45", label="1-NN")
+ax.plot(licznosci, ryzyko_knn.mean(axis=1), "o-", color="#1B6CA8",
+        label=r"$k$-NN, $k=\sqrt{n}$")
+ax.axhline(2 * blad_bayesa * (1 - blad_bayesa), color="0.3", ls=":", lw=1.3,
+           label=r"$2R^*(1-R^*)$")
+ax.axhline(ryzyko_1nn_granica, color="0.45", ls="--", lw=1.3,
+           label="granica ryzyka 1-NN")
+ax.axhline(blad_bayesa, color="#D7263D", ls="--", lw=1.6,
+           label=r"błąd bayesowski $R^*$")
+ax.set_xscale("log")
+ax.set_xlabel("liczność próby uczącej $n$")
+ax.set_ylabel("ryzyko")
+ax.set_ylim(0.15, 0.31)
+ax.legend(frameon=False, fontsize=8, ncol=2, loc="upper right")
+plt.tight_layout()
+plt.show()
+```
+
+Zbieżność nie znaczy jednak „szybko”: bez założeń o rozkładzie nie ma
+żadnej gwarancji tempa, a dla gładkich $\fopt$ tempo maleje z liczbą
+cech $p$.
+
+::: notes
+Dwie klasy $\Nrozk(\pm1,1)$, jak na wykładzie 1: $\Risk^*\approx0{,}159$,
+granica 1-NN $\approx0{,}225$, ograniczenie $\approx0{,}267$.
+1-NN stabilizuje się na granicy, $\sqrt n$-NN schodzi niżej i powoli
+zbliża się do $\Risk^*$.
+:::
+
+# Przekleństwo wymiarowości
+
+## Otoczenie przestaje być lokalne
+
+Cechy jednostajne w $[0,1]^p$. Kostka-otoczenie, które obejmuje ułamek
+$r$ danych, ma bok
+$$
+b=r^{1/p}.
+$$
+
+:::: {.columns}
+::: {.column width="40%"}
+Dla $r=1\%$:
+
+| $p$ | bok $b$ |
+|---|---|
+| 1 | 0,01 |
+| 2 | 0,1 |
+| 10 | 0,63 |
+| 100 | 0,955 |
+:::
+
+::: {.column width="60%"}
+Przy $p=10$, aby zebrać $1\%$ danych, trzeba objąć $63\%$ zakresu
+**każdej** cechy.
+
+::: {.fragment}
+Otoczenie o boku $0{,}1$ z dziesięcioma obserwacjami wymaga
+$n=10\cdot10^p$ obserwacji: tysiąc dla $p=2$, sto miliardów dla $p=10$.
+:::
+:::
+::::
+
+::: notes
+Objętość ucieka do narożników i brzegów (kula w kostce, warstwa przy
+brzegu) -- tylko w książce.
+:::
+
+## Odległości przestają się różnić
+
+```{python}
+#| fig-width: 6.5
+#| fig-height: 3.6
+
+rng = np.random.default_rng(23)
+wymiary = np.array([1, 2, 3, 5, 10, 20, 50, 100, 200, 500, 1000])
+n, zapytania = 1000, 50
+iloraz = np.empty(len(wymiary))
+for i, p in enumerate(wymiary):
+    punkty = rng.random((n, p))
+    q = rng.random((zapytania, p))
+    # Kwadraty odległości euklidesowych między zapytaniami a punktami.
+    d2 = (q ** 2).sum(1)[:, None] + (punkty ** 2).sum(1)[None, :] - 2 * q @ punkty.T
+    d = np.sqrt(np.maximum(d2, 0))
+    iloraz[i] = np.mean(d.min(axis=1) / d.max(axis=1))
+
+fig, ax = plt.subplots(figsize=(6.5, 3.6))
+ax.semilogx(wymiary, iloraz, "o-", color="#1B6CA8")
+ax.axhline(1, color="0.5", lw=0.8, ls=":")
+ax.set_ylim(0, 1.05)
+ax.set_xlabel("wymiar $p$")
+ax.set_ylabel(r"$d_{\min} / d_{\max}$")
+plt.tight_layout()
+plt.show()
+```
+
+$n=1000$ punktów jednostajnych w $[0,1]^p$: iloraz odległości do
+najbliższego i najdalszego punktu dąży do $1$. Gdy wszyscy są niemal
+równo odlegli, „najbliższy sąsiad” przestaje nieść informację o $\x$.
+
+## Skutek: cechy nieistotne
+
+```{python}
+#| fig-width: 6.5
+#| fig-height: 3.8
+
+rng = np.random.default_rng(29)
+a = 1.0   # klasy mają środki (a, a) i (-a, -a) w dwóch cechach istotnych
+
+
+def probka_szum(n, liczba_szumowych, rng):
+    """Dwie cechy istotne i podana liczba cech szumowych N(0, 1)."""
+    y = rng.integers(0, 2, n)
+    srodek = np.where(y == 1, a, -a)[:, None]
+    istotne = rng.normal(srodek, 1.0, (n, 2))
+    szum = rng.normal(0, 1.0, (n, liczba_szumowych))
+    return np.hstack([istotne, szum]), y
+
+
+# Rzut na kierunek (1, 1)/sqrt(2) daje N(+-a*sqrt(2), 1).
+blad_bayesa_2d = norm.cdf(-a * np.sqrt(2))
+
+liczby_szumowych = np.array([0, 1, 3, 8, 18, 48, 98, 198, 498, 998])
+powtorzenia = 5
+bledy = np.empty((len(liczby_szumowych), powtorzenia))
+for i, m in enumerate(liczby_szumowych):
+    for j in range(powtorzenia):
+        X_tr, y_tr = probka_szum(500, m, rng)
+        X_te, y_te = probka_szum(10_000, m, rng)
+        klf = KNeighborsClassifier(n_neighbors=15).fit(X_tr, y_tr)
+        bledy[i, j] = np.mean(klf.predict(X_te) != y_te)
+
+fig, ax = plt.subplots(figsize=(6.5, 3.8))
+ax.plot(liczby_szumowych + 2, bledy.mean(axis=1), "o-", color="#1B6CA8",
+        label="15-NN")
+ax.axhline(blad_bayesa_2d, color="#D7263D", ls="--", lw=1.6,
+           label="błąd bayesowski")
+ax.axhline(0.5, color="0.5", ls=":", lw=1.3, label="klasyfikator losowy")
+ax.set_xscale("log")
+ax.set_xlabel("liczba cech $p$ (w tym dwie istotne)")
+ax.set_ylabel("błąd klasyfikacji")
+ax.set_ylim(0, 0.55)
+ax.legend(frameon=False)
+plt.tight_layout()
+plt.show()
+```
+
+Klasy różnią się tylko w dwóch cechach, reszta to szum. Informacja jest
+cały czas w tych samych dwóch kolumnach, ale $k$-NN nie ma sposobu, by
+się o tym dowiedzieć.
+
+## Co z tego wynika
+
+- Twierdzenie Stone'a nadal obowiązuje, ale potrzebna liczba obserwacji
+  rośnie z wymiarem tak szybko, że w praktyce jest nieosiągalna.
+- Metoda, która nic nie zakłada o postaci zależności, musi każdy jej
+  szczegół „odkryć” w danych.
+
+. . .
+
+Wyjściem są **założenia strukturalne**. Model liniowy zakłada stały,
+addytywny wpływ każdej cechy i szacuje $p+1$ współczynników zamiast
+wypełniać obserwacjami całą przestrzeń cech.
+
+::: notes
+Dlaczego $k$-NN mimo to bywa skuteczny: dane rzeczywiste skupiają się
+blisko struktur o małym **wymiarze wewnętrznym** (zdjęcia twarzy wśród
+wszystkich obrazów) -- to on decyduje o trudności, nie liczba kolumn.
+:::
+
+# $k$-NN w praktyce
+
+## Model to dane
+
+- **Uczenie** to zapamiętanie zbioru uczącego. Koszt przenosi się na
+  predykcję: naiwnie $n$ odległości w $p$ wymiarach na każdy punkt.
+- **Model zajmuje tyle co dane**, a jego udostępnienie oznacza
+  udostępnienie danych -- problem, gdy dotyczą osób.
+- **Standaryzacja i klasyfikator w jednym potoku** -- parametry
+  standaryzacji wyznacza tylko `fit`:
+
+```{.python}
+model = make_pipeline(StandardScaler(), KNeighborsClassifier(n_neighbors=15))
+model.fit(X_tr, y_tr)
+model.predict_proba(X_te)   # oszacowania eta_c(x)
+```
+
+::: notes
+Ważenie sąsiadów odwrotnością odległości (`weights="distance"`) i drzewa
+$k$-d (`algorithm`) -- w książce.
+:::
+
+## Podsumowanie
+
+- $k$-NN szacuje $\fopt$ i $\eta_c$ niemal wprost z definicji: warunek
+  „$\X=\x$” zastępuje „$\X$ blisko $\x$”.
+- „Blisko” to część modelu: odległość i skala cech decydują o tym, kto
+  jest sąsiadem.
+- $k$ steruje wygładzeniem; błąd uczący wskazuje zawsze $k=1$.
+- Przy $k_n\to\infty$, $k_n/n\to0$ ryzyko dąży do optimum dla **każdego**
+  rozkładu, ale tempo maleje z wymiarem.
+- W wielu wymiarach brakuje danych: potrzebne są założenia o postaci
+  zależności.
