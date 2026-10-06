@@ -66,8 +66,9 @@ metrażu.
 
 . . .
 
-Nieparametryczny nie znaczy „bez założeń”. Zakładamy, że obiekty bliskie
-według wybranych cech mają zbliżone średnie wyniki.
+Nieparametryczny nie znaczy „bez założeń”. Zakładamy, że średnia
+warunkowa $\E[Y\mid X=x]$ zmienia się niewiele, gdy $x$ zmienia się
+niewiele -- dlatego wyniki sąsiadów mówią coś o punkcie $x$.
 
 ## Ta sama próba, dwa podejścia
 
