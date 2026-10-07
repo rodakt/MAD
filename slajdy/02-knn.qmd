@@ -461,7 +461,7 @@ i wariancję -- rozdział 4.
 Krzywą ryzyka narysowaliśmy, bo znamy rozkład. W zastosowaniach mamy
 tylko dane.
 
-Które $k$ wskaże błąd na zbiorze uczącym?
+Przy którym $k$ błąd na zbiorze uczącym jest najmniejszy?
 
 . . .
 
