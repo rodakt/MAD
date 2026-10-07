@@ -250,10 +250,8 @@ $$
 
 - Warunek $\E[\varepsilon\mid\X]=0$ wynika z definicji -- to nie
   założenie.
-- Notacja:
-  - $\fopt$ -- wielkość populacyjna (optymalna),
-  - $f$ -- dowolny predyktor,
-  - $\widehat f$ -- predyktor wyznaczony z danych.
+- Gwiazdka: $\fopt$ to wielkość populacyjna (predyktor optymalny),
+  a nie funkcja wyznaczona z danych.
 
 ## Klasyfikacja: prawdopodobieństwa klas
 
@@ -275,8 +273,8 @@ nawet **dokładna** znajomość $\eta$ nie daje bezbłędnej klasyfikacji.
 
 ## Jeden rozkład, dwa sposoby opisu
 
-Punkt wyjścia ten sam: rozkład $Y\mid\X=\x$. Różni się tylko to, ile
-z niego podajemy.
+Punkt wyjścia ten sam: rozkład $Y\mid\X=\x$. Różni się tylko to, co
+z niego odczytujemy jako opis zależności.
 
 - **Regresja** -- jedną charakterystykę: „środek” rozkładu $\fopt(\x)$
   (albo medianę); resztę rozkładu pomijamy.
@@ -333,6 +331,8 @@ $$
 \Risk(f)=\E\big[\Loss\big(Y,f(\X)\big)\big].
 $$
 :::
+
+$f$ bez gwiazdki ani daszka -- dowolny predyktor.
 
 | strata | ryzyko |
 |---|---|
