@@ -1,0 +1,69 @@
+---
+title: "Reguła Bayesa i metoda k najbliższych sąsiadów"
+subtitle: "tablicowe i komputerowe"
+---
+
+## Zadania z książki
+
+Treść zadań jest w książce; tutaj jej nie powtarzamy.
+
+1. **$k$-NN ręcznie** (tablica, potem Colab) --
+   [Zadanie 3.1](https://rodakt.github.io/MAD_book/1-fundamenty/03-knn.html#exr-knn-reczny)
+   i [Zadanie 3.2](https://rodakt.github.io/MAD_book/1-fundamenty/03-knn.html#exr-knn-skalowanie):
+   odległości, zbiory sąsiadów, klasyfikacja i regresja $k$-NN, remisy
+   przy odległości miejskiej, zmiana jednostek i standaryzacja. W części 1
+   notebooka piszemy $k$-NN w numpy, sprawdzamy wyniki z tablicy, a potem
+   liczymy to samo biblioteką scikit-learn.
+2. **Taksówki** (tablica) --
+   [Zadanie 2.8](https://rodakt.github.io/MAD_book/1-fundamenty/02-predyktory-optymalne.html#exr-taksowki),
+   punkty a)--c): $\eta(x)$ ze wzoru Bayesa, klasyfikator bayesowski i jego
+   błąd na tle reguły „wierz świadkowi” i klasyfikatora stałego. Rozkład
+   jest zadany jako $p(y)\,p(x\mid y)$, jak w zadaniu o urnach.
+3. **Rola $k$** (Colab) -- przykład z
+   [Zadania 1.14](https://rodakt.github.io/MAD_book/1-fundamenty/01-czym-jest-model.html#exr-wielomiany),
+   tym razem z regresją $k$-NN zamiast wielomianów: błąd na zbiorze
+   uczącym i ryzyko w zależności od $k$. Przy okazji
+   [Zadanie 1.6](https://rodakt.github.io/MAD_book/1-fundamenty/01-czym-jest-model.html#exr-ryzyko-1nn)
+   i wniosek z
+   [Zadania 3.3](https://rodakt.github.io/MAD_book/1-fundamenty/03-knn.html#exr-knn-skrajne-k).
+4. **Klasy niezrównoważone** (Colab) --
+   [Zadanie 2.4](https://rodakt.github.io/MAD_book/1-fundamenty/02-predyktory-optymalne.html#exr-niezrownowazone-klasy):
+   błąd bayesowski przy prawdopodobieństwach a priori $0{,}9$ i $0{,}1$,
+   klasyfikator trywialny i ryzyko $k$-NN w zależności od liczności próby.
+
+Jeśli zostanie czas:
+[Zadanie 3.7](https://rodakt.github.io/MAD_book/1-fundamenty/03-knn.html#exr-promien-otoczenia),
+punkty a) i b), na tablicy.
+
+[Otwórz notebook w Colabie](https://colab.research.google.com/github/rodakt/MAD/blob/2026-27/laby/notebooki/02-knn.ipynb){.btn .btn-primary target="_blank"}
+[Podgląd notebooka](notebooki/02-knn.html){.btn .btn-outline-primary target="_blank"}
+[Pobierz notebook](notebooki/02-knn.ipynb){.btn .btn-outline-primary download="02-knn.ipynb"}
+
+Notebook otwarty z tego linku nie jest zapisany na Twoim Dysku: po ponownym
+kliknięciu linku zobaczysz wersję wyjściową. Na początku zajęć zapisz kopię
+(*Plik → Zapisz kopię na Dysku*) i pracuj na niej.
+
+## Python
+
+Notebook zawiera szkielet kodu; miejsca do uzupełnienia są oznaczone `...`.
+Potrzebne są `numpy`, `matplotlib`, `scipy` i `scikit-learn`, dostępne
+w Colabie bez instalacji.
+
+- Macierz odległości przez broadcasting: dla `X_nowe` kształtu $(m,p)$
+  i `X_ucz` kształtu $(n,p)$ wyrażenie
+  `X_nowe[:, None, :] - X_ucz[None, :, :]` ma kształt $(m,n,p)$; suma
+  kwadratów (albo wartości bezwzględnych) po `axis=2` daje macierz $m\times n$.
+- `np.argsort(D, axis=1, kind="stable")[:, :k]` zwraca w każdym wierszu
+  indeksy $k$ najmniejszych odległości. Przy `kind="stable"` z równych
+  odległości pierwsza jest obserwacja o niższym indeksie.
+- Indeksowanie tablicą działa też dla macierzy indeksów: `y_ucz[idx]`
+  dla `idx` kształtu $(m,k)$ to macierz $(m,k)$ wyników sąsiadów.
+- scikit-learn: `KNeighborsClassifier(n_neighbors=k).fit(X, y)`, potem
+  `predict`, `predict_proba` (kolejność klas w `classes_`) i `kneighbors`;
+  `KNeighborsRegressor` analogicznie. Cechy muszą być macierzą $n\times p$,
+  przy jednej cesze `X.reshape(-1, 1)`.
+- Standaryzacja: `skaler = StandardScaler().fit(X_ucz)` wyznacza średnie
+  i odchylenia na zbiorze uczącym, `skaler.transform(...)` stosuje je
+  do zbioru uczącego i do nowych punktów.
+- Rozkład normalny: `scipy.stats.norm.cdf` (dystrybuanta $\Phi$)
+  i `norm.pdf` (gęstość). Całkę po siatce liczy `np.trapezoid(wartosci, siatka)`.
