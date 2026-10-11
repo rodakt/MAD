@@ -91,6 +91,9 @@ w Colabie bez instalacji.
   i `X_ucz` kształtu $(n,p)$ wyrażenie
   `X_nowe[:, None, :] - X_ucz[None, :, :]` ma kształt $(m,n,p)$; suma
   kwadratów (albo wartości bezwzględnych) po `axis=2` daje macierz $m\times n$.
+  `None` wstawia nową oś długości 1 (tablica $(m,p)$ staje się $(m,1,p)$,
+  czyli zanurzamy ją w tablicy trójwymiarowej), a broadcasting rozciąga
+  osie długości 1 tak, że każdy wiersz `X_nowe` spotyka każdy wiersz `X_ucz`.
 - `np.argsort(D, axis=1, kind="stable")[:, :k]` zwraca w każdym wierszu
   indeksy $k$ najmniejszych odległości. Przy `kind="stable"` z równych
   odległości pierwsza jest obserwacja o niższym indeksie.
