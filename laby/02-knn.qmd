@@ -3,6 +3,45 @@ title: "Reguła Bayesa i metoda k najbliższych sąsiadów"
 subtitle: "tablicowe i komputerowe"
 ---
 
+## Przed zajęciami
+
+Spróbuj odpowiedzieć na podane niżej pytania. Jeżeli sprawiają Ci
+trudność, przeczytaj fragmenty wskazane pod pytaniami.
+
+1. `A = np.array([[1, 2], [3, 4]])`. Co zwraca `A.shape`, a co
+   `A.sum(axis=1)`?
+2. `X` ma kształt `(3, 2)`, `Z` ma kształt `(5, 2)`. Jaki kształt ma
+   `X[:, None, :] - Z[None, :, :]`?
+3. Co zwraca `np.argsort([3, 1, 2])`? A `y[idx]` dla
+   `y = np.array([10, 20, 30])` i `idx = np.array([[2, 0], [1, 1]])`?
+4. Choroba występuje u 1% osób. Test wykrywa ją u 90% chorych, a u 5%
+   zdrowych daje wynik fałszywie dodatni. Jakie jest prawdopodobieństwo
+   choroby przy wyniku dodatnim?
+
+::: {.callout-note collapse="true" title="Odpowiedzi"}
+1. `(2, 2)` i `[3, 7]` -- sumy w wierszach.
+2. `(3, 5, 2)`: dla każdej z 3 par (wiersz `X`, wiersz `Z`) wektor różnic.
+3. `[1, 2, 0]` -- indeksy elementów od najmniejszego; `[[30, 10], [20, 20]]`.
+4. $\frac{0{,}01\cdot 0{,}9}{0{,}01\cdot 0{,}9 + 0{,}99\cdot 0{,}05}\approx 0{,}15$.
+:::
+
+Do każdego pytania wystarczą jeden albo dwa krótkie fragmenty, po kilka
+akapitów:
+
+1. [Kształt tablicy](https://numpy.org/doc/stable/user/absolute_beginners.html#how-do-you-know-the-shape-and-size-of-an-array)
+   i [sumy po osiach](https://numpy.org/doc/stable/user/absolute_beginners.html#more-useful-array-operations).
+2. [Nowa oś](https://numpy.org/doc/stable/user/absolute_beginners.html#how-to-convert-a-1d-array-into-a-2d-array-how-to-add-a-new-axis-to-an-array)
+   i [przykład z odległościami](https://numpy.org/doc/stable/user/basics.broadcasting.html#a-practical-example-vector-quantization)
+   -- to ten sam rachunek, którym w $k$-NN szukamy najbliższych sąsiadów.
+3. [`np.argsort`](https://numpy.org/doc/stable/reference/generated/numpy.argsort.html)
+   (pierwsze przykłady na dole strony) i
+   [indeksowanie tablicą indeksów](https://numpy.org/doc/stable/user/basics.indexing.html#integer-array-indexing)
+   (pierwsze dwa przykłady).
+4. Zadanie o urnach z laboratorium 1
+   ([Zadanie 1.12](https://rodakt.github.io/MAD_book/1-fundamenty/01-czym-jest-model.html#exr-urny))
+   -- to ten sam rachunek: rozkład zadany jako $p(y)\,p(x\mid y)$
+   zamieniamy na $p(y\mid x)$. Przyda się w zadaniu o taksówkach.
+
 ## Zadania z książki
 
 Treść zadań jest w książce; tutaj jej nie powtarzamy.
