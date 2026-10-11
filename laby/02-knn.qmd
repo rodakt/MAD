@@ -8,10 +8,9 @@ subtitle: "tablicowe i komputerowe"
 Treść zadań jest w książce; tutaj jej nie powtarzamy.
 
 1. **$k$-NN ręcznie** (tablica, potem Colab) --
-   [Zadanie 3.1](https://rodakt.github.io/MAD_book/1-fundamenty/03-knn.html#exr-knn-reczny)
-   i [Zadanie 3.2](https://rodakt.github.io/MAD_book/1-fundamenty/03-knn.html#exr-knn-skalowanie):
+   [Zadanie 3.1](https://rodakt.github.io/MAD_book/1-fundamenty/03-knn.html#exr-knn-reczny):
    odległości, zbiory sąsiadów, klasyfikacja i regresja $k$-NN, remisy
-   przy odległości miejskiej, zmiana jednostek i standaryzacja. W części 1
+   przy odległości miejskiej. W części 1
    notebooka piszemy $k$-NN w numpy, sprawdzamy wyniki z tablicy, a potem
    liczymy to samo biblioteką scikit-learn.
 2. **Taksówki** (tablica) --
@@ -62,8 +61,5 @@ w Colabie bez instalacji.
   `predict`, `predict_proba` (kolejność klas w `classes_`) i `kneighbors`;
   `KNeighborsRegressor` analogicznie. Cechy muszą być macierzą $n\times p$,
   przy jednej cesze `X.reshape(-1, 1)`.
-- Standaryzacja: `skaler = StandardScaler().fit(X_ucz)` wyznacza średnie
-  i odchylenia na zbiorze uczącym, `skaler.transform(...)` stosuje je
-  do zbioru uczącego i do nowych punktów.
 - Rozkład normalny: `scipy.stats.norm.cdf` (dystrybuanta $\Phi$)
   i `norm.pdf` (gęstość). Całkę po siatce liczy `np.trapezoid(wartosci, siatka)`.
