@@ -5,6 +5,25 @@ title: "Temat laboratorium"
 subtitle: "komputerowe"   # albo: tablicowe
 ---
 
+## Przed zajęciami
+
+Spróbuj odpowiedzieć na podane niżej pytania. Jeżeli sprawiają Ci
+trudność, przeczytaj fragmenty wskazane pod pytaniami.
+
+1. Pytanie o operację z notebooka (numpy, scikit-learn) albo o pojęcie
+   z wykładu, potrzebne w zadaniach.
+
+::: {.callout-note collapse="true" title="Odpowiedzi"}
+1. Krótka odpowiedź.
+:::
+
+Do każdego pytania wystarczą jeden albo dwa krótkie fragmenty, po kilka
+akapitów:
+
+1. [Fragment dokumentacji](https://numpy.org/doc/stable/...#sekcja)
+   -- link do konkretnej sekcji, nie do całej strony; matematyka
+   i probabilistyka -- do sekcji albo zadania z książki.
+
 ## Zadania z książki
 
 - [Zadanie X.Y](https://rodakt.github.io/MAD_book/ROZDZIAL.html#exr-ETYKIETA)
