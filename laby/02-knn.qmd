@@ -102,4 +102,4 @@ w Colabie bez instalacji.
   macierzami z jednym wierszem na obserwację: jeden punkt to
   `x.reshape(1, -1)`, jedna cecha -- `X.reshape(-1, 1)`.
 - Rozkład normalny: `scipy.stats.norm.cdf` (dystrybuanta $\Phi$)
-  i `norm.pdf` (gęstość). Całkę po siatce liczy `np.trapezoid(wartosci, siatka)`.
+  i `norm.pdf` (gęstość). Całkę po siatce liczy `np.trapezoid(values, grid)`.
