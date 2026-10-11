@@ -87,21 +87,19 @@ Notebook zawiera szkielet kodu; miejsca do uzupełnienia są oznaczone `...`.
 Potrzebne są `numpy`, `matplotlib`, `scipy` i `scikit-learn`, dostępne
 w Colabie bez instalacji.
 
-- Macierz odległości przez broadcasting: dla `X_nowe` kształtu $(m,p)$
-  i `X_ucz` kształtu $(n,p)$ wyrażenie
-  `X_nowe[:, None, :] - X_ucz[None, :, :]` ma kształt $(m,n,p)$; suma
-  kwadratów (albo wartości bezwzględnych) po `axis=2` daje macierz $m\times n$.
-  `None` wstawia nową oś długości 1 (tablica $(m,p)$ staje się $(m,1,p)$,
-  czyli zanurzamy ją w tablicy trójwymiarowej), a broadcasting rozciąga
-  osie długości 1 tak, że każdy wiersz `X_nowe` spotyka każdy wiersz `X_ucz`.
-- `np.argsort(D, axis=1, kind="stable")[:, :k]` zwraca w każdym wierszu
-  indeksy $k$ najmniejszych odległości. Przy `kind="stable"` z równych
-  odległości pierwsza jest obserwacja o niższym indeksie.
-- Indeksowanie tablicą działa też dla macierzy indeksów: `y_ucz[idx]`
-  dla `idx` kształtu $(m,k)$ to macierz $(m,k)$ wyników sąsiadów.
+- Odległości od jednego punktu: dla macierzy `X_tr` kształtu $(n,p)$
+  i wektora `x` długości $p$ wyrażenie `X_tr - x` odejmuje `x` od każdego
+  wiersza (broadcasting). Suma kwadratów (albo wartości bezwzględnych)
+  po `axis=1` daje wektor $n$ odległości.
+- `np.argsort(d, kind="stable")[:k]` zwraca indeksy $k$ najmniejszych
+  odległości. Przy `kind="stable"` z równych odległości pierwsza jest
+  obserwacja o niższym indeksie.
+- Indeksowanie tablicą: `y_reg_tr[idx]` to wyniki sąsiadów o indeksach `idx`,
+  a `np.mean(y_tr[idx] == "B")` -- frakcja sąsiadów z klasą B.
 - scikit-learn: `KNeighborsClassifier(n_neighbors=k).fit(X, y)`, potem
   `predict`, `predict_proba` (kolejność klas w `classes_`) i `kneighbors`;
-  `KNeighborsRegressor` analogicznie. Cechy muszą być macierzą $n\times p$,
-  przy jednej cesze `X.reshape(-1, 1)`.
+  `KNeighborsRegressor` analogicznie. Cechy i nowe punkty muszą być
+  macierzami z jednym wierszem na obserwację: jeden punkt to
+  `x.reshape(1, -1)`, jedna cecha -- `X.reshape(-1, 1)`.
 - Rozkład normalny: `scipy.stats.norm.cdf` (dystrybuanta $\Phi$)
   i `norm.pdf` (gęstość). Całkę po siatce liczy `np.trapezoid(wartosci, siatka)`.
