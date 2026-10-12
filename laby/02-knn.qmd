@@ -75,7 +75,7 @@ punkty a) i b), na tablicy.
 
 [Otwórz notebook w Colabie](https://colab.research.google.com/github/rodakt/MAD/blob/2026-27/laby/notebooki/02-knn.ipynb){.btn .btn-primary target="_blank"}
 [Podgląd notebooka](notebooki/02-knn.html){.btn .btn-outline-primary target="_blank"}
-[Pobierz notebook](notebooki/02-knn.ipynb){.btn .btn-outline-primary download="02-knn.ipynb"}
+[Pobierz notebook](https://rodakt.github.io/MAD/laby/notebooki/02-knn.ipynb){.btn .btn-outline-primary download="02-knn.ipynb"}
 
 Notebook otwarty z tego linku nie jest zapisany na Twoim Dysku: po ponownym
 kliknięciu linku zobaczysz wersję wyjściową. Na początku zajęć zapisz kopię
