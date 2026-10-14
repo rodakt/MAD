@@ -232,9 +232,11 @@ $$
 $$
 :::
 
-Dowód na tablicy: $Y_0-\fD(\x_0)
-=(Y_0-\fopt)+(\fopt-\bar f)+(\bar f-\fD)$,
-iloczyny mieszane znikają.
+Szkic dowodu: wstawiamy $\fopt$ i $\bar f$,
+$Y_0-\fD(\x_0)=(Y_0-\fopt)+(\fopt-\bar f)+(\bar f-\fD)$.
+Pierwszy składnik zależy tylko od $Y_0$, trzeci tylko od $\mathcal D$;
+oba mają średnią zero, środkowy jest stałą. Po podniesieniu do kwadratu
+iloczyny mieszane mają średnią zero i zostają trzy kwadraty.
 
 . . .
 
@@ -245,8 +247,7 @@ wariancję zero przy dowolnie zaszumionych danych.
 :::
 
 ::: notes
-Pierwszy składnik zależy tylko od $Y_0$, trzeci tylko od $\mathcal D$,
-oba mają średnią zero, środkowy jest stałą. $\E[AC]=\E[A]\E[C]=0$ wymaga
+$\E[AC]=\E[A]\E[C]=0$ wymaga
 niezależności $Y_0$ od $\mathcal D$ -- tej samej, od której zależy cała
 druga część wykładu (zbiór testowy). To rozkład ryzyka z wykładu 1,
 uśredniony po zbiorach uczących: błąd redukowalny rozpadł się na dwa
