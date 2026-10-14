@@ -649,6 +649,82 @@ Objętość ucieka do narożników i brzegów (kula w kostce, warstwa przy
 brzegu) -- tylko w książce.
 :::
 
+## Przeciętny pilot nie istnieje
+
+:::: {.columns}
+::: {.column width="42%"}
+Siły Powietrzne USA, 1950: pomiary $4063$ pilotów. G. S. Daniels
+wybrał $10$ wymiarów ciała (wzrost, obwód klatki, długość rękawa, ...).
+„Przeciętny” w jednym wymiarze to środkowe ok. $27\%$ pilotów.
+
+Ilu pilotów jest przeciętnych we wszystkich $10$ wymiarach?
+
+::: {.fragment fragment-index=1}
+**Ani jeden.** Już w $3$ wymiarach tylko $3{,}5\%$.
+
+To rachunek z poprzedniego slajdu odwrócony: w każdym wymiarze
+„szeroko”, razem prawie nic.
+:::
+:::
+
+::: {.column width="58%"}
+::: {.fragment fragment-index=1}
+```{python}
+#| fig-width: 6
+#| fig-height: 3.8
+
+# Daniels (1952), The "Average Man"?, WADC TN WCRD 53-7: eliminacja krok
+# po kroku i liczba przeciętnych w każdym wymiarze osobno (tabela I).
+n_pilotow = 4063
+pozostali = np.array([1055, 302, 143, 73, 28, 12, 6, 3, 2, 0])
+przecietni_osobno = np.array([1055, 1023, 1253, 1105, 1093, 1113, 1713,
+                              990, 1114, 1008])
+kroki = np.arange(1, 11)
+niezalezne = n_pilotow * np.cumprod(przecietni_osobno / n_pilotow)
+podloga = 0.003  # zero nie mieści się na osi logarytmicznej
+
+fig, ax = plt.subplots(figsize=(6, 3.8))
+ax.plot(kroki, niezalezne, "--", color="0.5",
+        label="gdyby wymiary były niezależne")
+ax.plot(kroki[:-1], pozostali[:-1], "o-", color="#1B6CA8",
+        label="dane Danielsa")
+ax.plot(kroki[-2:], [pozostali[-2], podloga], ":", color="#1B6CA8")
+ax.plot(kroki[-1], podloga, "v", color="#D7263D", ms=10)
+ax.annotate("0", (kroki[-1], podloga), xytext=(-14, 0),
+            textcoords="offset points", ha="right", va="center",
+            color="#D7263D", fontsize=13)
+ax.axhline(1, color="0.5", lw=0.8, ls=":")
+ax.set_yscale("log")
+ax.set_ylim(podloga / 1.6, 6000)
+ax.set_xticks(kroki)
+ax.set_yticks([0.01, 0.1, 1, 10, 100, 1000],
+              ["0,01", "0,1", "1", "10", "100", "1000"])
+ax.minorticks_off()
+ax.set_xlabel("liczba wymiarów")
+ax.set_ylabel("pilotów przeciętnych we wszystkich")
+ax.legend(frameon=False)
+plt.tight_layout()
+plt.show()
+```
+:::
+:::
+::::
+
+::: notes
+Źródło: G. S. Daniels, *The "Average Man"?*, WADC Technical Note
+WCRD 53-7, grudzień 1952. „Przeciętny” to $\pm0{,}3$ odchylenia
+standardowego od średniej; w praktyce 24--31% pilotów w wymiarze
+(obwód szyi 42%: granice zaokrąglano do pełnych centymetrów, a jego
+odchylenie to tylko 1,9 cm).
+Eliminacja: 4063, 1055, 302, 143, 73, 28, 12, 6, 3, 2, 0. Wymiary
+wybrano do projektowania odzieży; Daniels zaznacza, że wymiary do
+kokpitu dałyby to samo. Dane leżą nad linią niezależności, bo wymiary
+ciała są dodatnio skorelowane, ale korelacja tylko opóźnia spadek.
+Historię spopularyzował T. Rose, *The End of Average* (2016). U niego
+dochodzą wypadki odrzutowców i skutek: regulowane fotele, pedały i pasy,
+projektowanie pod zakres zamiast pod średnią. Tego nie ma w raporcie.
+:::
+
 ## Odległości przestają się różnić
 
 ```{python}
