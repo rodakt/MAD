@@ -622,7 +622,7 @@ $$
 
 :::: {.columns}
 ::: {.column width="40%"}
-Dla $r=1\%$:
+Dla $r=1\%$ (np. $k=10$ sąsiadów przy $n=1000$):
 
 | $p$ | bok $b$ |
 |---|---|
@@ -637,8 +637,9 @@ Przy $p=10$, aby zebrać $1\%$ danych, trzeba objąć $63\%$ zakresu
 **każdej** cechy.
 
 ::: {.fragment}
-Otoczenie o boku $0{,}1$ z dziesięcioma obserwacjami wymaga
-$n=10\cdot10^p$ obserwacji: tysiąc dla $p=2$, sto miliardów dla $p=10$.
+Odwrotnie: aby przy każdym $p$ utrzymać otoczenie jak dla $p=2$ (bok
+$0{,}1$, średnio $10$ obserwacji), potrzeba $n=10\cdot10^p$: tysiąc dla
+$p=2$, sto miliardów dla $p=10$.
 :::
 :::
 ::::
