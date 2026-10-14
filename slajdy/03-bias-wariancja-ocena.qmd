@@ -16,8 +16,9 @@ execute:
 - Rozdział [Kompromis obciążenie--wariancja](https://rodakt.github.io/MAD_book/1-fundamenty/04-bias-wariancja.html)
 - Rozdział [Ocena modeli w praktyce](https://rodakt.github.io/MAD_book/1-fundamenty/05-ocena-modeli.html)
 
-Dowody, błąd aproksymacji i estymacji, tempo zbieżności $k$-NN,
-klasyfikacja, estymatory .632, test McNemara i zadania są w książce.
+Pełne dowody, błąd aproksymacji i estymacji, tempo zbieżności $k$-NN,
+obciążenie i wariancja w klasyfikacji, estymatory .632, test McNemara
+i zadania są w książce. Bootstrap -- na wykładzie 4.
 
 ```{python}
 import numpy as np
@@ -26,127 +27,122 @@ from numpy.polynomial import Polynomial
 from sklearn.neighbors import KNeighborsRegressor
 
 
-def f_prawdziwa(x):
+def f_true(x):
     """Funkcja regresji z rozdziałów 3--5."""
     return np.sin(2 * np.pi * x) + 0.5 * x
 
 
 sigma = 0.3
-siatka = np.linspace(0, 1, 1001)
-f_siatka = f_prawdziwa(siatka)
+grid = np.linspace(0, 1, 1001)
+f_grid = f_true(grid)
 
 
-def probka(n, rng):
+def draw_sample(n, rng):
     """Losuje n obserwacji: X ~ U[0, 1], Y = f*(X) + szum N(0, sigma^2)."""
     x = rng.uniform(0, 1, n)
-    return x, f_prawdziwa(x) + rng.normal(0, sigma, n)
+    return x, f_true(x) + rng.normal(0, sigma, n)
 
 
-def ryzyko(predyktor):
+def risk(predictor):
     """Ryzyko przy stracie kwadratowej, policzone całkowaniem po X ~ U[0, 1]."""
-    return np.trapezoid((predyktor(siatka) - f_siatka) ** 2, siatka) + sigma ** 2
+    return np.trapezoid((predictor(grid) - f_grid) ** 2, grid) + sigma ** 2
 ```
 
 # Błąd uczący a ryzyko
 
-## Regresja wielomianowa
-
-Druga metoda z pokrętłem elastyczności. Dla $x\in\R$ i stopnia $d$:
-$$
-\mathcal F_d=\big\{\beta_0+\beta_1x+\dots+\beta_dx^d\big\},
-\qquad
-\widehat f\in\argmin_{f\in\mathcal F_d}\widehat\Risk_n(f).
-$$
-
-- Metoda parametryczna z $d+1$ współczynnikami; $d$ to **hiperparametr**,
-  jak $k$ w $k$-NN.
-- Klasy są zagnieżdżone: $\mathcal F_0\subset\mathcal F_1\subset\cdots$, więc
-  **błąd uczący nie rośnie z $d$** -- dla każdej próby, nie tylko przeciętnie.
-
-. . .
-
-Gdy $d+1$ dogania liczbę różnych $x_i$, wielomian przechodzi przez wszystkie
-punkty i błąd uczący spada do zera.
-
 ## Dwie metody, jeden obraz
+
+Obok $k$-NN druga metoda z pokrętłem elastyczności: **regresja
+wielomianowa** stopnia $d$.
 
 ```{python}
 #| fig-width: 11
-#| fig-height: 3.8
+#| fig-height: 3.3
 
 # Wielomiany: n = 50, stopnie 0..12, 1000 prób. Sumy predykcji na siatce
 # wystarczą do predyktora przeciętnego i wariancji w dalszej części.
 rng = np.random.default_rng(1)
-n_wiel, powt_wiel = 50, 1000
-stopnie = np.arange(13)
-suma_wiel = np.zeros((len(stopnie), len(siatka)))
-suma_kw_wiel = np.zeros_like(suma_wiel)
-blad_uczacy_wiel = np.zeros(len(stopnie))
-ryzyko_wiel = np.zeros(len(stopnie))
-for _ in range(powt_wiel):
-    x, y = probka(n_wiel, rng)
-    for i, d in enumerate(stopnie):
-        wielomian = Polynomial.fit(x, y, d)
-        pred = wielomian(siatka)
-        suma_wiel[i] += pred
-        suma_kw_wiel[i] += pred ** 2
-        blad_uczacy_wiel[i] += np.mean((wielomian(x) - y) ** 2)
-        ryzyko_wiel[i] += ryzyko(wielomian)
-blad_uczacy_wiel /= powt_wiel
-ryzyko_wiel /= powt_wiel
+n_poly, reps_poly = 50, 1000
+degrees = np.arange(13)
+sum_poly = np.zeros((len(degrees), len(grid)))
+sumsq_poly = np.zeros_like(sum_poly)
+train_err_poly = np.zeros(len(degrees))
+risk_poly = np.zeros(len(degrees))
+for _ in range(reps_poly):
+    x, y = draw_sample(n_poly, rng)
+    for i, d in enumerate(degrees):
+        poly = Polynomial.fit(x, y, d)
+        pred = poly(grid)
+        sum_poly[i] += pred
+        sumsq_poly[i] += pred ** 2
+        train_err_poly[i] += np.mean((poly(x) - y) ** 2)
+        risk_poly[i] += risk(poly)
+train_err_poly /= reps_poly
+risk_poly /= reps_poly
 
 # k-NN: n = 100, 500 prób; te same sumy do dekompozycji.
 rng = np.random.default_rng(8)
-n_knn, powt_knn = 100, 500
-wartosci_k = np.array([1, 2, 3, 5, 7, 10, 15, 20, 30, 50, 100])
-suma_knn = np.zeros((len(wartosci_k), len(siatka)))
-suma_kw_knn = np.zeros_like(suma_knn)
-blad_uczacy_knn = np.zeros(len(wartosci_k))
-ryzyko_knn = np.zeros(len(wartosci_k))
-for _ in range(powt_knn):
-    x, y = probka(n_knn, rng)
-    for i, k in enumerate(wartosci_k):
+n_knn, reps_knn = 100, 500
+k_values = np.array([1, 2, 3, 5, 7, 10, 15, 20, 30, 50, 100])
+sum_knn = np.zeros((len(k_values), len(grid)))
+sumsq_knn = np.zeros_like(sum_knn)
+train_err_knn = np.zeros(len(k_values))
+risk_knn = np.zeros(len(k_values))
+for _ in range(reps_knn):
+    x, y = draw_sample(n_knn, rng)
+    for i, k in enumerate(k_values):
         reg = KNeighborsRegressor(n_neighbors=k).fit(x.reshape(-1, 1), y)
-        pred = reg.predict(siatka.reshape(-1, 1))
-        suma_knn[i] += pred
-        suma_kw_knn[i] += pred ** 2
-        blad_uczacy_knn[i] += np.mean((reg.predict(x.reshape(-1, 1)) - y) ** 2)
-        ryzyko_knn[i] += np.trapezoid((pred - f_siatka) ** 2, siatka) + sigma ** 2
-blad_uczacy_knn /= powt_knn
-ryzyko_knn /= powt_knn
+        pred = reg.predict(grid.reshape(-1, 1))
+        sum_knn[i] += pred
+        sumsq_knn[i] += pred ** 2
+        train_err_knn[i] += np.mean((reg.predict(x.reshape(-1, 1)) - y) ** 2)
+        risk_knn[i] += np.trapezoid((pred - f_grid) ** 2, grid) + sigma ** 2
+train_err_knn /= reps_knn
+risk_knn /= reps_knn
 
-fig, osie = plt.subplots(1, 2, figsize=(11, 3.8))
-osie[0].plot(n_knn / wartosci_k, blad_uczacy_knn, "o-", color="0.45",
+fig, axes = plt.subplots(1, 2, figsize=(11, 3.3))
+# Przy k = 1 błąd uczący wynosi 0 -- poza osią logarytmiczną.
+train_err_knn_plot = np.where(train_err_knn > 0, train_err_knn, np.nan)
+axes[0].plot(n_knn / k_values, train_err_knn_plot, "o-", color="0.45",
              label="błąd na zbiorze uczącym")
-osie[0].plot(n_knn / wartosci_k, ryzyko_knn, "o-", color="#1B6CA8", label="ryzyko")
-osie[0].set_xscale("log")
-osie[0].set_xlabel("$n/k$ (efektywna liczba parametrów)")
-osie[0].set_title("$k$-NN, $n = 100$")
-osie[1].plot(stopnie, blad_uczacy_wiel, "o-", color="0.45",
+axes[0].plot(n_knn / k_values, risk_knn, "o-", color="#1B6CA8", label="ryzyko")
+axes[0].text(0.03, 0.05, "$k = 1$: błąd uczący $= 0$", transform=axes[0].transAxes,
+             ha="left", va="bottom", fontsize=9, color="0.35")
+axes[0].set_xscale("log")
+axes[0].set_xlabel("$n/k$ (efektywna liczba parametrów)")
+axes[0].set_title("$k$-NN, $n = 100$")
+axes[1].plot(degrees, train_err_poly, "o-", color="0.45",
              label="błąd na zbiorze uczącym")
-osie[1].plot(stopnie, ryzyko_wiel, "o-", color="#1B6CA8", label="ryzyko")
-osie[1].set_xlabel("stopień wielomianu $d$")
-osie[1].set_title("regresja wielomianowa, $n = 50$")
-for ax in osie:
+axes[1].plot(degrees, risk_poly, "o-", color="#1B6CA8", label="ryzyko")
+axes[1].set_xlabel("stopień wielomianu $d$")
+axes[1].set_title("regresja wielomianowa, $n = 50$")
+for ax in axes:
     ax.axhline(sigma ** 2, color="#D7263D", ls="--", lw=1.5,
                label=r"błąd nieredukowalny $\sigma^2$")
     ax.set_yscale("log")
-osie[0].set_ylabel("średni kwadrat błędu")
-osie[1].legend(frameon=False, fontsize=8)
+axes[0].set_ylabel("średni kwadrat błędu")
+axes[1].legend(frameon=False, fontsize=8)
 plt.tight_layout()
 plt.show()
 ```
 
-- Lewy kraniec: **niedopasowanie** -- oba błędy duże i bliskie sobie.
-- Prawy kraniec: **nadmierne dopasowanie** -- błąd uczący schodzi pod
-  $\sigma^2$, ryzyko rośnie o rzędy wielkości.
+- Z lewej **niedopasowanie**: oba błędy duże i bliskie sobie.
+- Z prawej **nadmierne dopasowanie**: błąd uczący pod $\sigma^2$, ryzyko rośnie.
 
 ::: notes
+Na wykładzie 2 była krzywa U dla $k$-NN; teraz ten sam obraz dla
+drugiej metody. Regresja wielomianowa:
+$\widehat f\in\argmin_{f\in\mathcal F_d}\widehat\Risk_n(f)$,
+$\mathcal F_d=\{\beta_0+\beta_1x+\dots+\beta_dx^d\}$, czyli najmniejsze
+kwadraty; $d$ to hiperparametr, jak $k$. Klasy wielomianów są zagnieżdżone, $\mathcal F_0\subset\mathcal F_1\subset\cdots$,
+więc błąd uczący nie rośnie z $d$ -- dla każdej próby, nie tylko
+przeciętnie; gdy $d+1$ osiąga liczbę różnych $x_i$, spada do zera.
 Ryzyko liczone dokładnie (całka po $x$ plus $\sigma^2$), średnio po
 próbach. Różnica ryzyko -- błąd uczący to **optymizm**: $\widehat f(x_i)$
-zależy od $y_i$, z którym je porównujemy. Dla $k$-NN optymizm wynosi
-$2\sigma^2/k$ (zadanie w książce). Błąd uczący nie mówi, *dlaczego*
-ryzyko po prawej rośnie -- trzeba zobaczyć, jak predyktor zależy od próby.
+zależy od $y_i$, z którym je porównujemy. Dla $k$-NN w ustalonym układzie
+optymizm wynosi $2\sigma^2/k$ (zadanie w książce). Błąd uczący nie mówi,
+*dlaczego* ryzyko po prawej rośnie -- trzeba zobaczyć, jak predyktor
+zależy od próby.
 :::
 
 # Zbiór uczący jest losowy
@@ -158,19 +154,19 @@ ryzyko po prawej rośnie -- trzeba zobaczyć, jak predyktor zależy od próby.
 #| fig-height: 3.3
 
 rng = np.random.default_rng(2)
-proby = [probka(n_wiel, rng) for _ in range(20)]
+samples = [draw_sample(n_poly, rng) for _ in range(20)]
 
-fig, osie = plt.subplots(1, 3, figsize=(11, 3.3), sharey=True)
-for ax, d in zip(osie, [1, 3, 10]):
-    for x, y in proby:
-        ax.plot(siatka, Polynomial.fit(x, y, d)(siatka), color="0.55",
+fig, axes = plt.subplots(1, 3, figsize=(11, 3.3), sharey=True)
+for ax, d in zip(axes, [1, 3, 10]):
+    for x, y in samples:
+        ax.plot(grid, Polynomial.fit(x, y, d)(grid), color="0.55",
                 lw=0.7, alpha=0.8)
-    ax.plot(siatka, f_siatka, color="black", ls="--", lw=1.4)
-    ax.plot(siatka, suma_wiel[d] / powt_wiel, color="#1B6CA8", lw=2.4)
+    ax.plot(grid, f_grid, color="black", ls="--", lw=1.4)
+    ax.plot(grid, sum_poly[d] / reps_poly, color="#1B6CA8", lw=2.4)
     ax.set_ylim(-2.2, 2.2)
     ax.set_title(f"$d = {d}$")
     ax.set_xlabel("$x$")
-osie[0].set_ylabel("$y$")
+axes[0].set_ylabel("$y$")
 plt.tight_layout()
 plt.show()
 ```
@@ -186,154 +182,54 @@ z 1000 dopasowań (gruba). $d=3$ pośrodku: średnia bliska $\fopt$, rozrzut
 niewielki. Ryzyko z poprzedniego slajdu łączy oba rodzaje błędu.
 :::
 
-## Predyktor przeciętny
+## Obciążenie i wariancja predyktora
 
 Obserwacje są niezależnymi losowaniami z $P$, więc zbiór uczący
-$\mathcal D$ jest losowy, a z nim predyktor $\widehat f_{\mathcal D}$.
-W ustalonym $\x$ wartość $\widehat f_{\mathcal D}(\x)$ jest zmienną losową.
+$\mathcal D$ jest losowy, a z nim predyktor $\widehat f_{\!\mathcal D}$.
 
 ::: {.definicja}
-**Predyktor przeciętny**
-$$
-\bar f(\x)=\E_{\mathcal D}\big[\widehat f_{\mathcal D}(\x)\big]
-$$
--- średnia predykcji w $\x$ po wszystkich zbiorach uczących liczności $n$.
+**Predyktor przeciętny** -- średnia predykcji w $\x$ po zbiorach uczących
+liczności $n$:
+$\;\bar f(\x)=\E_{\mathcal D}\big[\widehat f_{\!\mathcal D}(\x)\big]$.
+
+W ustalonym punkcie $\x_0$:
+
+- **obciążenie** $\;b(\x_0)=\bar f(\x_0)-\fopt(\x_0)$,
+- **wariancja** $\;v(\x_0)=\Var_{\mathcal D}\,\widehat f_{\!\mathcal D}(\x_0)$.
 :::
 
 . . .
 
-Konstrukcja myślowa: w praktyce mamy jeden zbiór uczący i jeden predyktor.
-W symulacji, gdzie $P$ znamy, $\bar f$ to gruba linia na poprzednim slajdzie.
-
-## Obciążenie i wariancja estymatora
-
-$\widehat\theta$ -- estymator nieznanej liczby $\theta$, obliczany z próby.
-
-:::: {.columns}
-::: {.column .karta width="50%"}
-**Obciążenie**
-$$
-b(\widehat\theta)=\E[\widehat\theta]-\theta
-$$
-gdzie estymator trafia przeciętnie
-:::
-
-::: {.column .karta width="50%"}
-**Wariancja**
-$$
-\Var\widehat\theta
-$$
-jak bardzo rozrzuca się wokół swojej średniej
-:::
-::::
-
-Błąd średniokwadratowy łączy oba składniki:
-$$
-\operatorname{MSE}(\widehat\theta)=\E\big[(\widehat\theta-\theta)^2\big]
-= b(\widehat\theta)^2+\Var\widehat\theta .
-$$
+Na wachlarzu wielomianów: obciążenie to pionowa odległość grubej linii
+od przerywanej, wariancja -- rozrzut cienkich linii wokół grubej. Obie
+są funkcjami punktu: wielomian stopnia $10$ ma dużą wariancję przy
+krańcach i małą w środku.
 
 ::: notes
-Ta sama tożsamość co w dowodzie o funkcji regresji (wykład 1): średni
-kwadrat odległości zmiennej od stałej = wariancja + kwadrat odległości
-średniej. Rozpisać $\widehat\theta-\theta=(\widehat\theta-\E\widehat\theta)
-+(\E\widehat\theta-\theta)$, iloczyn mieszany ma średnią zero.
+Konstrukcja myślowa: w praktyce mamy jeden zbiór uczący i jeden
+predyktor. W symulacji, gdzie $P$ znamy, $\bar f$ to gruba linia.
+To obciążenie i wariancja estymatora $\widehat f_{\!\mathcal D}(\x_0)$
+liczby $\theta=\fopt(\x_0)$; ogólnie
+$\operatorname{MSE}=b^2+\Var$ i estymator obciążony bywa lepszy --
+przykład ze ściąganiem $c\bar Y$ na wykładzie 6 (regularyzacja).
 :::
 
-## Pytanie {.pytanie}
-
-$Y_1,\dots,Y_{10}$ -- próba z rozkładu o średniej $\mu=1$ i odchyleniu
-$\sigma=3$. Szacujemy $\mu$.
-
-Co jest lepsze: średnia z próby $\bar Y$ czy jej połowa, $\tfrac12\bar Y$?
-
-. . .
-
-$\bar Y$: obciążenie $0$, wariancja $\sigma^2/n=0{,}9$, więc
-$\operatorname{MSE}=0{,}9$.
-
-$c\bar Y$: obciążenie $(c-1)\mu$, wariancja $c^2\sigma^2/n$, więc
-$$
-\operatorname{MSE}(c\bar Y)=(1-c)^2\mu^2+c^2\,\frac{\sigma^2}{n}
-\quad\Rightarrow\quad
-c^*=\frac{\mu^2}{\mu^2+\sigma^2/n}\approx0{,}53,\quad
-\operatorname{MSE}\approx0{,}47 .
-$$
-
-::: {.wniosek}
-Estymator obciążony może być prawie dwa razy dokładniejszy od
-nieobciążonego -- jeśli małe obciążenie kupuje dużą redukcję wariancji.
-:::
-
-::: notes
-Słabość: $c^*$ zależy od nieznanego $\mu$. Ale zasada wróci: regresja
-grzbietowa (rozdz. 7) ściąga współczynniki do zera właśnie po to, a ile
-ściągać, ustala się walidacją krzyżową -- druga część dzisiejszego wykładu.
-:::
-
-## Obciążenie i wariancja predyktora w punkcie
-
-Ustalmy $\x_0$ i potraktujmy predykcję $\widehat f_{\mathcal D}(\x_0)$
-jako estymator liczby $\theta=\fopt(\x_0)$:
-$$
-b(\x_0)=\bar f(\x_0)-\fopt(\x_0),
-\qquad
-v(\x_0)=\Var_{\mathcal D}\,\widehat f_{\mathcal D}(\x_0).
-$$
-
-Na wachlarzu wielomianów:
-
-- obciążenie -- pionowa odległość grubej linii od przerywanej,
-- wariancja -- rozrzut cienkich linii wokół grubej.
-
-. . .
-
-Obie wielkości są funkcjami punktu: wielomian stopnia $10$ ma dużą
-wariancję przy krańcach przedziału i małą w środku.
-
-# Rozkład na obciążenie i wariancję
-
-## Twierdzenie
+## Rozkład na obciążenie i wariancję
 
 ::: {.definicja}
-**Rozkład na obciążenie i wariancję.** Niech $\x_0$ będzie ustalone,
-$Y_0$ ma rozkład $Y\mid\X=\x_0$ i jest niezależne od $\mathcal D$. Wtedy
+**Twierdzenie.** Niech $Y_0$ ma rozkład $Y\mid\X=\x_0$ i będzie
+niezależne od $\mathcal D$. Wtedy
 $$
-\E\big[(Y_0-\widehat f_{\mathcal D}(\x_0))^2\big]
+\E\big[(Y_0-\widehat f_{\!\mathcal D}(\x_0))^2\big]
 =\underbrace{\Var(Y\mid\X=\x_0)}_{\text{błąd nieredukowalny}}
 +\underbrace{b(\x_0)^2}_{\text{obciążenie}^2}
 +\underbrace{v(\x_0)}_{\text{wariancja}} .
 $$
 :::
 
-. . .
-
-Szkic dowodu:
-$$
-Y_0-\widehat f_{\mathcal D}(\x_0)
-=\underbrace{(Y_0-\fopt(\x_0))}_{A}
-+\underbrace{(\fopt(\x_0)-\bar f(\x_0))}_{B}
-+\underbrace{(\bar f(\x_0)-\widehat f_{\mathcal D}(\x_0))}_{C}
-$$
-$A$ zależy tylko od $Y_0$, $C$ tylko od $\mathcal D$, oba mają średnią zero,
-$B$ jest stałą. Iloczyny mieszane znikają.
-
-::: notes
-$\E[AC]=\E[A]\E[C]=0$ wymaga niezależności $Y_0$ od $\mathcal D$ -- to ta
-sama niezależność, od której będzie zależeć cała druga część wykładu
-(zbiór testowy). Jest to rozkład ryzyka z wykładu 1, uśredniony po zbiorach
-uczących: błąd redukowalny rozpadł się na dwa składniki.
-:::
-
-## Trzy uśrednienia
-
-We wzorze występują trzy źródła losowości:
-
-- **wynik $Y$ przy ustalonych cechach** -- $\Var(Y\mid\X)$, cecha zjawiska
-  i zestawu cech;
-- **zbiór uczący $\mathcal D$** -- odpowiada za $v(\x)$ i wyznacza $\bar f$,
-  cecha metody i liczności próby;
-- **punkt $\X$, w którym przewidujemy** -- po nim uśredniamy na końcu.
+Dowód na tablicy: $Y_0-\widehat f_{\!\mathcal D}(\x_0)
+=(Y_0-\fopt)+(\fopt-\bar f)+(\bar f-\widehat f_{\!\mathcal D})$,
+iloczyny mieszane znikają.
 
 . . .
 
@@ -343,13 +239,24 @@ uczących, nie wariancja szumu. Predyktor stały $\widehat f\equiv0$ ma
 wariancję zero przy dowolnie zaszumionych danych.
 :::
 
+::: notes
+Pierwszy składnik zależy tylko od $Y_0$, trzeci tylko od $\mathcal D$,
+oba mają średnią zero, środkowy jest stałą. $\E[AC]=\E[A]\E[C]=0$ wymaga
+niezależności $Y_0$ od $\mathcal D$ -- tej samej, od której zależy cała
+druga część wykładu (zbiór testowy). To rozkład ryzyka z wykładu 1,
+uśredniony po zbiorach uczących: błąd redukowalny rozpadł się na dwa
+składniki. Trzy źródła losowości: $Y$ przy ustalonych cechach (cecha
+zjawiska), $\mathcal D$ (cecha metody i $n$), punkt $\X$ (uśredniamy na
+końcu).
+:::
+
 ## Ryzyko modelu a ryzyko metody
 
 :::: {.columns}
 ::: {.column .karta width="50%"}
 **Ryzyko modelu**
 $$
-\Risk(\widehat f_{\mathcal D})
+\Risk(\widehat f_{\!\mathcal D})
 $$
 liczba zależna od tego, jaki zbiór uczący wylosowaliśmy
 :::
@@ -357,7 +264,7 @@ liczba zależna od tego, jaki zbiór uczący wylosowaliśmy
 ::: {.column .karta width="50%"}
 **Ryzyko metody**
 $$
-\overline{\Risk}_n=\E_{\mathcal D}\big[\Risk(\widehat f_{\mathcal D})\big]
+\overline{\Risk}_n=\E_{\mathcal D}\big[\Risk(\widehat f_{\!\mathcal D})\big]
 $$
 własność procedury uczenia na próbach liczności $n$
 :::
@@ -375,27 +282,6 @@ o kompromisie. Kompromis to obserwacja, jak składniki zależą od elastycznośc
 
 # Kompromis
 
-## $k$-NN: wzory jawne
-
-Uproszczenie: punkty $\x_1,\dots,\x_n$ ustalone, losowe tylko
-$Y_i=\fopt(\x_i)+\varepsilon_i$ z $\Var\varepsilon_i=\sigma^2$. Predykcja
-jest średnią $k$ niezależnych zmiennych, więc
-$$
-b(\x_0)=\frac1k\sum_{i\in N_k(\x_0)}\fopt(\x_i)-\fopt(\x_0),
-\qquad
-v(\x_0)=\frac{\sigma^2}{k}.
-$$
-
-- Wariancja maleje jak $1/k$: szum każdego sąsiada znaczy mniej.
-- Obciążenie rośnie z $k$: otoczenie się poszerza, a $\fopt$ nie jest w nim
-  stała.
-
-. . .
-
-$k=1$: obciążenie małe, wariancja $\sigma^2$, błąd $\approx2\sigma^2$ --
-to samo podwojenie co u Covera--Harta. $k=n$: wariancja $\sigma^2/n$,
-obciążenie równe odległości $\fopt(\x_0)$ od średniej wszystkich $\fopt(\x_i)$.
-
 ## Dekompozycja: $k$-NN i wielomiany
 
 ```{python}
@@ -403,116 +289,112 @@ obciążenie równe odległości $\fopt(\x_0)$ od średniej wszystkich $\fopt(\x
 #| fig-height: 3.9
 
 
-def obciazenie_wariancja(suma, suma_kw, powtorzenia):
+def bias_variance(sums, sumsq, reps):
     """Całkowite obciążenie^2 i wariancja z sum predykcji na siatce."""
-    srednia = suma / powtorzenia
-    wariancja = suma_kw / powtorzenia - srednia ** 2
-    obc2 = np.trapezoid((srednia - f_siatka) ** 2, siatka, axis=1)
-    war = np.trapezoid(wariancja, siatka, axis=1)
-    return obc2, war
+    mean_pred = sums / reps
+    var_pred = sumsq / reps - mean_pred ** 2
+    bias2 = np.trapezoid((mean_pred - f_grid) ** 2, grid, axis=1)
+    var = np.trapezoid(var_pred, grid, axis=1)
+    return bias2, var
 
 
-obc2_knn, war_knn = obciazenie_wariancja(suma_knn, suma_kw_knn, powt_knn)
-obc2_wiel, war_wiel = obciazenie_wariancja(suma_wiel, suma_kw_wiel, powt_wiel)
+bias2_knn, var_knn = bias_variance(sum_knn, sumsq_knn, reps_knn)
+bias2_poly, var_poly = bias_variance(sum_poly, sumsq_poly, reps_poly)
 
-fig, osie = plt.subplots(1, 2, figsize=(11, 3.9))
-for ax, os_x, obc2, war in [(osie[0], n_knn / wartosci_k, obc2_knn, war_knn),
-                            (osie[1], stopnie, obc2_wiel, war_wiel)]:
-    ax.plot(os_x, obc2, "o-", color="#E07B39", ms=4, label="obciążenie$^2$")
-    ax.plot(os_x, war, "o-", color="#3A9D5D", ms=4, label="wariancja")
-    ax.plot(os_x, obc2 + war + sigma ** 2, "o-", color="#1B6CA8", ms=4,
+fig, axes = plt.subplots(1, 2, figsize=(11, 3.9))
+for ax, x_axis, bias2, var in [(axes[0], n_knn / k_values, bias2_knn, var_knn),
+                               (axes[1], degrees, bias2_poly, var_poly)]:
+    ax.plot(x_axis, bias2, "o-", color="#E07B39", ms=4, label="obciążenie$^2$")
+    ax.plot(x_axis, var, "o-", color="#3A9D5D", ms=4, label="wariancja")
+    ax.plot(x_axis, bias2 + var + sigma ** 2, "o-", color="#1B6CA8", ms=4,
             label="ryzyko")
     ax.axhline(sigma ** 2, color="#D7263D", ls="--", lw=1.5,
                label=r"błąd nieredukowalny $\sigma^2$")
     ax.set_yscale("log")
-osie[0].plot(n_knn / wartosci_k, sigma ** 2 / wartosci_k, ":", color="#3A9D5D",
+axes[0].plot(n_knn / k_values, sigma ** 2 / k_values, ":", color="#3A9D5D",
              lw=1.3, label=r"$\sigma^2/k$")
-osie[0].set_xscale("log")
-osie[0].set_xlabel("$n/k$ (efektywna liczba parametrów)")
-osie[0].set_ylabel("średni kwadrat błędu")
-osie[0].set_title("$k$-NN")
-osie[0].legend(frameon=False, fontsize=8, loc="lower left")
-osie[1].set_ylim(1e-5, 1e2)
-osie[1].set_xlabel("stopień wielomianu $d$")
-osie[1].set_title("regresja wielomianowa")
+axes[0].set_xscale("log")
+axes[0].set_xlabel("$n/k$ (efektywna liczba parametrów)")
+axes[0].set_ylabel("średni kwadrat błędu")
+axes[0].set_title("$k$-NN")
+axes[0].legend(frameon=False, fontsize=8, loc="lower left")
+axes[1].set_ylim(1e-5, 1e2)
+axes[1].set_xlabel("stopień wielomianu $d$")
+axes[1].set_title("regresja wielomianowa")
 plt.tight_layout()
 plt.show()
 ```
 
 Obciążenie maleje, wariancja rośnie; ryzyko to ich suma plus $\sigma^2$.
-Litera U jest sumą dwóch monotonicznych krzywych biegnących w przeciwne
-strony -- w dwu metodach, które nie mają ze sobą nic wspólnego.
+Krzywa w kształcie litery U jest sumą dwóch monotonicznych krzywych
+biegnących w przeciwne strony -- w dwóch metodach, które nie mają ze
+sobą nic wspólnego.
 
 ::: notes
-$k$-NN: wariancja bliska $\sigma^2/k$ (nieco większa, bo cechy losowe);
-optimum $k\approx7$--$10$, gdzie składniki porównywalne. Wielomiany:
-obciążenie spada schodkami, bo $\fopt-1/4$ jest nieparzysta wokół $1/2$ --
-stopnie parzyste nic nie wnoszą, a kosztują wariancję ($d=4$ gorszy od
-$d=3$). Od $d=5$ obciążenie praktycznie zero; wzrost powyżej $d=8$ to
-artefakt symulacji (błąd oszacowania $\bar f$ z 1000 prób).
+$k$-NN w ustalonym układzie: predykcja to średnia $k$ niezależnych
+wyników, więc $v=\sigma^2/k$, a obciążenie rośnie z $k$, bo otoczenie
+się poszerza ($k=1$: błąd $\approx2\sigma^2$, podwojenie jak
+u Covera--Harta). Przy losowych cechach wariancja jest bliska
+$\sigma^2/k$ przy małym $k$, a przy dużym wyraźnie większa (zmienia się
+też zbiór sąsiadów); optimum $k\approx7$--$10$. Wielomiany: obciążenie
+spada schodkami, bo $\fopt-1/4$ jest nieparzysta wokół $1/2$ -- stopnie
+parzyste nic nie wnoszą, a kosztują wariancję ($d=4$ gorszy od $d=3$).
+Od $d=5$ obciążenie praktycznie zero; wzrost powyżej $d=8$ to artefakt
+symulacji (błąd oszacowania $\bar f$ z 1000 prób).
 :::
 
 ## Krzywe uczenia
 
 ```{python}
 #| fig-width: 11
-#| fig-height: 3.8
+#| fig-height: 3.0
 
 rng = np.random.default_rng(4)
-licznosci_lc = np.array([40, 60, 100, 200, 500, 1000, 3000])
-powt_lc = 300
-gesta = np.linspace(0, 1, 20_001)
+n_values_lc = np.array([40, 60, 100, 200, 500, 1000, 3000])
+reps_lc = 300
+dense = np.linspace(0, 1, 20_001)
 
-fig, osie = plt.subplots(1, 2, figsize=(11, 3.8), sharey=True)
-for ax, d in zip(osie, [1, 9]):
-    blad_uczacy = np.zeros(len(licznosci_lc))
-    ryzyko_lc = np.zeros(len(licznosci_lc))
-    for i, n in enumerate(licznosci_lc):
-        for _ in range(powt_lc):
-            x, y = probka(n, rng)
-            wielomian = Polynomial.fit(x, y, d)
-            blad_uczacy[i] += np.mean((wielomian(x) - y) ** 2)
-            ryzyko_lc[i] += ryzyko(wielomian)
-    blad_uczacy /= powt_lc
-    ryzyko_lc /= powt_lc
+fig, axes = plt.subplots(1, 2, figsize=(11, 3.0), sharey=True)
+for ax, d in zip(axes, [1, 9]):
+    train_err = np.zeros(len(n_values_lc))
+    risk_lc = np.zeros(len(n_values_lc))
+    for i, n in enumerate(n_values_lc):
+        for _ in range(reps_lc):
+            x, y = draw_sample(n, rng)
+            poly = Polynomial.fit(x, y, d)
+            train_err[i] += np.mean((poly(x) - y) ** 2)
+            risk_lc[i] += risk(poly)
+    train_err /= reps_lc
+    risk_lc /= reps_lc
     # Najlepszy wielomian klasy: najmniejsze kwadraty do samej f* na gęstej siatce.
-    f_klasa = Polynomial.fit(gesta, f_prawdziwa(gesta), d)
-    granica = ryzyko(f_klasa)
+    f_class = Polynomial.fit(dense, f_true(dense), d)
+    limit = risk(f_class)
 
-    ax.plot(licznosci_lc, blad_uczacy, "o-", color="0.45",
+    ax.plot(n_values_lc, train_err, "o-", color="0.45",
             label="błąd na zbiorze uczącym")
-    ax.plot(licznosci_lc, ryzyko_lc, "o-", color="#1B6CA8", label="ryzyko")
-    ax.axhline(granica, color="0.2", ls="--", lw=1.3,
+    ax.plot(n_values_lc, risk_lc, "o-", color="#1B6CA8", label="ryzyko")
+    ax.axhline(limit, color="0.2", ls="--", lw=1.3,
                label=r"$\sigma^2$ + błąd aproksymacji")
     ax.axhline(sigma ** 2, color="#D7263D", ls=":", lw=1.5, label=r"$\sigma^2$")
     ax.set_xscale("log")
     ax.set_yscale("log")
     ax.set_title(f"$d = {d}$")
     ax.set_xlabel("liczność próby uczącej $n$")
-osie[0].set_ylabel("średni kwadrat błędu")
-osie[0].legend(frameon=False, fontsize=8)
+axes[0].set_ylabel("średni kwadrat błędu")
+axes[0].legend(frameon=False, fontsize=8)
 plt.tight_layout()
 plt.show()
 ```
 
-Ustalona metoda, rosnące $n$. Ryzyko maleje do granicy
-$\sigma^2+$ błąd aproksymacji (najlepszy wielomian klasy wciąż mija się
-z $\fopt$); błąd uczący rośnie do tej samej granicy od dołu.
-
-## Diagnostyka z krzywej uczenia
-
 :::: {.columns}
 ::: {.column .karta width="50%"}
-**Szeroka szczelina** między ryzykiem a błędem uczącym
-
-Dominuje wariancja. Pomoże więcej danych albo prostszy model.
+**Szeroka szczelina** ($d=9$, małe $n$): dominuje wariancja. Pomoże
+więcej danych albo prostszy model.
 :::
 
 ::: {.column .karta width="50%"}
-**Wąska szczelina, obie krzywe wysoko**
-
-Dominuje obciążenie. Więcej danych nie pomoże -- trzeba bogatszej klasy
-albo innych cech.
+**Wąska szczelina, obie krzywe wysoko** ($d=1$): dominuje obciążenie.
+Więcej danych nie pomoże -- trzeba bogatszej klasy albo innych cech.
 :::
 ::::
 
@@ -524,19 +406,16 @@ dziesięć razy mniejsze niż wielomian stopnia $9$, przy $n=100$ -- trzy
 razy większe.
 :::
 
-. . .
-
-Pokrętło elastyczności tylko przesuwa błąd między składnikami. Oba naraz
-zmniejszają **więcej danych** albo **trafne założenie strukturalne**;
-nietrafne wprowadza obciążenie, którego żadna ilość danych nie usunie.
-
 ::: notes
-Tylko w książce: rozkład na błąd aproksymacji i estymacji (działa dla
-każdej straty, wymaga ustalonej klasy), tempo $n^{-2/(p+2)}$ dla $k$-NN
-(przekleństwo wymiarowości w języku obciążenia: szerokie otoczenia =
-duże obciążenie; Stone 1982 -- żadna metoda bez założeń nie zrobi lepiej),
-klasyfikacja (składniki się nie sumują, obciążenie nie kosztuje, dopóki
-nie przeprowadzi $\bar\eta$ przez próg $1/2$), podwójne zejście.
+Ustalona metoda, rosnące $n$. Ryzyko maleje do granicy $\sigma^2+$ błąd
+aproksymacji (najlepszy wielomian klasy wciąż mija się z $\fopt$), błąd
+uczący rośnie do niej od dołu. Pokrętło elastyczności tylko przesuwa błąd
+między składnikami; oba naraz zmniejsza tylko więcej danych albo trafne
+założenie strukturalne, a nietrafne wprowadza obciążenie, którego żadna
+ilość danych nie usunie. Z danych krzywą uczenia szacuje się walidacją
+krzyżową (`learning_curve` w scikit-learn) -- laboratorium.
+Tylko w książce: błąd aproksymacji i estymacji, tempo $n^{-2/(p+2)}$ dla
+$k$-NN (Stone 1982), klasyfikacja, podwójne zejście.
 :::
 
 # Jak to zmierzyć z danych
@@ -567,7 +446,7 @@ za to płacimy.
   jednakowe dla wszystkich.
 - **Ocena** -- ile wynosi ryzyko wybranego modelu? Potrzebna **wartość**;
   obciążenie jest błędem.
-- **Model czy metoda** -- $\Risk(\widehat f_{\mathcal D})$ tego modelu,
+- **Model czy metoda** -- $\Risk(\widehat f_{\!\mathcal D})$ tego modelu,
   czy $\overline{\Risk}_n$ procedury?
 
 . . .
@@ -583,10 +462,14 @@ drugie, choć wszystkie nazywa się „błędem modelu”.
 | ryzyko ustalonego modelu | zbiór testowy |
 | wybór spośród kandydatów | zbiór walidacyjny, walidacja krzyżowa |
 | ryzyko modelu wybranego z danych | zagnieżdżona walidacja krzyżowa albo nietknięty zbiór testowy |
-| niepewność dowolnej wielkości z próby | bootstrap |
 
 Wspólna zasada wszystkich narzędzi: oceniamy na obserwacjach, które nie
 miały wpływu na predyktor.
+
+::: notes
+Czwarty wiersz tabeli w książce -- bootstrap, niepewność dowolnej
+wielkości z próby -- na wykładzie 4.
+:::
 
 # Zbiór testowy i walidacyjny
 
@@ -612,34 +495,18 @@ liczba błędów ma rozkład dwumianowy i $\tau^2=\Risk(1-\Risk)$.
 - Szacuje ryzyko **tego** predyktora, nie ryzyko metody.
 - Niezależność od $\mathcal D$ jest wszystkim: jedna obserwacja testowa
   w zbiorze uczącym i wraca optymizm błędu uczącego.
-
-## Ile obserwacji testowych
-
-Błąd standardowy w klasyfikacji:
-$\;\widehat{\mathrm{se}}=\sqrt{\widehat\Risk_{\mathrm{test}}(1-\widehat\Risk_{\mathrm{test}})/m}$,
-przedział $\widehat\Risk_{\mathrm{test}}\pm1{,}96\,\widehat{\mathrm{se}}$.
-
-Dla ryzyka ok. $10\%$:
-
-| $m$ | $\widehat{\mathrm{se}}$ | przedział $95\%$ |
-|---|---|---|
-| 100 | 0,030 | 4%--16% |
-| 3 500 | 0,005 | 9%--11% |
-| 14 000 | 0,0025 | 9,5%--10,5% |
-
-. . .
-
-Dokładność rośnie jak $\sqrt m$: dwukrotnie węższy przedział kosztuje
-cztery razy więcej danych. Obserwacje odłożone do testu nie uczą --
-oceniamy model uczony na $n-m$ zamiast $n$ obserwacjach.
+- Dokładność rośnie jak $\sqrt m$: przy błędzie $10\%$ i $m=100$ przedział
+  $95\%$ to $4\%$--$16\%$; dwa razy węższy kosztuje cztery razy więcej danych.
 
 ::: notes
-Potrzebne $m\approx1{,}96^2\Risk(1-\Risk)/h^2$ dla połowy szerokości $h$.
-Regresja: $\tau^2$ z próby strat, kwadraty błędów skośne, więc większe $m$.
-Porównanie dwóch modeli: różnica strat na **tych samych** obserwacjach
-(kowariancja odejmuje się), test McNemara -- w książce.
-Druga cena: każde spojrzenie na błąd testowy, po którym zmieniamy model,
-zużywa zbiór testowy -- wraca za chwilę.
+$\widehat{\mathrm{se}}=\sqrt{\widehat\Risk(1-\widehat\Risk)/m}$; dla
+połowy szerokości $h$ potrzeba $m\approx1{,}96^2\Risk(1-\Risk)/h^2$
+($h=0{,}01$: ok. 3500, $h=0{,}005$: ok. 14 000). Obserwacje odłożone do
+testu nie biorą udziału w uczeniu -- oceniamy model uczony na $n-m$
+obserwacjach. Porównanie dwóch modeli: różnica strat na **tych samych**
+obserwacjach (kowariancja się odejmuje), test McNemara -- w książce.
+Każde spojrzenie na błąd testowy, po którym zmieniamy model, zużywa zbiór
+testowy -- wraca przy optymizmie wyboru.
 :::
 
 ## Zbiór walidacyjny
@@ -653,37 +520,37 @@ Gdy oprócz oceny trzeba **wybrać** ($k$, $d$, metodę): trzy części --
 #| fig-height: 3.1
 
 rng = np.random.default_rng(1)
-x_w, y_w = probka(100, rng)
-stopnie_w = np.arange(1, 11)
+x_val, y_val = draw_sample(100, rng)
+degrees_val = np.arange(1, 11)
 
 
-def podzial_walidacyjny(x, y, rng):
+def holdout_split(x, y, rng):
     """Błąd walidacyjny i ryzyko wielomianów uczonych na losowej połowie próby."""
     perm = rng.permutation(len(x))
-    ucz, wal = perm[: len(x) // 2], perm[len(x) // 2:]
-    bledy, ryzyka = [], []
-    for d in stopnie_w:
-        wielomian = Polynomial.fit(x[ucz], y[ucz], d)
-        bledy.append(np.mean((wielomian(x[wal]) - y[wal]) ** 2))
-        ryzyka.append(ryzyko(wielomian))
-    return np.array(bledy), np.array(ryzyka)
+    idx_tr, idx_va = perm[: len(x) // 2], perm[len(x) // 2:]
+    val_errs, risks = [], []
+    for d in degrees_val:
+        poly = Polynomial.fit(x[idx_tr], y[idx_tr], d)
+        val_errs.append(np.mean((poly(x[idx_va]) - y[idx_va]) ** 2))
+        risks.append(risk(poly))
+    return np.array(val_errs), np.array(risks)
 
 
-fig, osie = plt.subplots(1, 2, figsize=(11, 3.1), sharey=True)
-bledy, ryzyka = podzial_walidacyjny(x_w, y_w, rng)
-osie[0].plot(stopnie_w, bledy, "o-", color="#1B6CA8", label="błąd walidacyjny")
-osie[0].plot(stopnie_w, ryzyka, "o--", color="0.45", label="ryzyko")
-osie[0].legend(frameon=False, fontsize=8)
-osie[0].set_title("jeden podział")
+fig, axes = plt.subplots(1, 2, figsize=(11, 3.1), sharey=True)
+val_errs, risks = holdout_split(x_val, y_val, rng)
+axes[0].plot(degrees_val, val_errs, "o-", color="#1B6CA8", label="błąd walidacyjny")
+axes[0].plot(degrees_val, risks, "o--", color="0.45", label="ryzyko")
+axes[0].legend(frameon=False, fontsize=8)
+axes[0].set_title("jeden podział")
 for _ in range(10):
-    bledy, _ = podzial_walidacyjny(x_w, y_w, rng)
-    osie[1].plot(stopnie_w, bledy, "o-", ms=3, lw=1, alpha=0.8)
-osie[1].set_title("dziesięć podziałów tej samej próby")
-for ax in osie:
+    val_errs, _ = holdout_split(x_val, y_val, rng)
+    axes[1].plot(degrees_val, val_errs, "o-", ms=3, lw=1, alpha=0.8)
+axes[1].set_title("dziesięć podziałów tej samej próby")
+for ax in axes:
     ax.axhline(sigma ** 2, color="#D7263D", ls="--", lw=1.2)
     ax.set_yscale("log")
     ax.set_xlabel("stopień wielomianu $d$")
-osie[0].set_ylabel("średni kwadrat błędu")
+axes[0].set_ylabel("średni kwadrat błędu")
 plt.tight_layout()
 plt.show()
 ```
@@ -715,8 +582,8 @@ fig, ax = plt.subplots(figsize=(7, 1.4))
 K = 5
 for k in range(K):
     for j in range(K):
-        kolor = "#D7263D" if j == k else "#1B6CA8"
-        ax.add_patch(plt.Rectangle((j, K - 1 - k), 1, 0.8, color=kolor,
+        color = "#D7263D" if j == k else "#1B6CA8"
+        ax.add_patch(plt.Rectangle((j, K - 1 - k), 1, 0.8, color=color,
                                    alpha=0.85 if j == k else 0.35))
     ax.text(-0.3, K - 1 - k + 0.4, f"$k={k+1}$", ha="right", va="center",
             fontsize=9)
@@ -729,12 +596,17 @@ plt.tight_layout()
 plt.show()
 ```
 
-Każda obserwacja oceniana **raz**, przez predyktor, który jej nie widział;
-uczy $K-1$ razy. Koszt: $K$ dopasowań.
+Każda obserwacja jest oceniana **raz**, przez predyktor, który jej nie
+widział, i bierze udział w uczeniu $K-1$ razy. Koszt: $K$ dopasowań.
+W klasyfikacji podział **warstwowy**: proporcje klas w każdej części jak
+w próbie.
 
 ::: notes
 Kandydatów porównujemy na tym samym podziale -- porównanie sparowane,
 losowość podziału działa na wszystkich podobnie. Stone (1974).
+Bez warstwowania rzadka klasa może nie trafić do części. Wybór straty
+w klasyfikacji (0--1 a straty właściwe, log-loss przy $k$-NN z
+$\widehat\eta=0$ albo $1$) -- laboratorium.
 :::
 
 ## Ile części
@@ -749,52 +621,52 @@ której użyjemy.
 #| fig-height: 3.0
 
 rng = np.random.default_rng(5)
-n_cv, d_cv, powt_cv = 50, 3, 500
-wartosci_K = [2, 5, 10, n_cv]
+n_cv, d_cv, reps_cv = 50, 3, 500
+K_values = [2, 5, 10, n_cv]
 
 
-def walidacja_krzyzowa(x, y, d, K, rng):
+def cv_losses(x, y, d, K, rng):
     """Straty poszczególnych obserwacji w K-krotnej walidacji krzyżowej."""
-    straty = np.empty(len(x))
-    for czesc in np.array_split(rng.permutation(len(x)), K):
-        ucz = np.ones(len(x), dtype=bool)
-        ucz[czesc] = False
-        wielomian = Polynomial.fit(x[ucz], y[ucz], d)
-        straty[czesc] = (wielomian(x[czesc]) - y[czesc]) ** 2
-    return straty
+    losses = np.empty(len(x))
+    for fold in np.array_split(rng.permutation(len(x)), K):
+        is_tr = np.ones(len(x), dtype=bool)
+        is_tr[fold] = False
+        poly = Polynomial.fit(x[is_tr], y[is_tr], d)
+        losses[fold] = (poly(x[fold]) - y[fold]) ** 2
+    return losses
 
 
-cv = np.zeros((powt_cv, len(wartosci_K)))
-blad_std_naiwny = np.zeros(powt_cv)
-ryzyko_modelu = np.zeros(powt_cv)
-for r in range(powt_cv):
-    x, y = probka(n_cv, rng)
-    ryzyko_modelu[r] = ryzyko(Polynomial.fit(x, y, d_cv))
-    for j, K in enumerate(wartosci_K):
-        straty = walidacja_krzyzowa(x, y, d_cv, K, rng)
-        cv[r, j] = straty.mean()
+cv = np.zeros((reps_cv, len(K_values)))
+naive_se = np.zeros(reps_cv)
+model_risk = np.zeros(reps_cv)
+for r in range(reps_cv):
+    x, y = draw_sample(n_cv, rng)
+    model_risk[r] = risk(Polynomial.fit(x, y, d_cv))
+    for j, K in enumerate(K_values):
+        losses = cv_losses(x, y, d_cv, K, rng)
+        cv[r, j] = losses.mean()
         if K == 10:
-            blad_std_naiwny[r] = straty.std(ddof=1) / np.sqrt(n_cv)
+            naive_se[r] = losses.std(ddof=1) / np.sqrt(n_cv)
 
 
-def ryzyko_oczekiwane(n, rng, powtorzenia=3000):
+def expected_risk(n, rng, reps=3000):
     """Ryzyko metody (wielomian stopnia d_cv) przy liczności próby n."""
-    return np.mean([ryzyko(Polynomial.fit(*probka(n, rng), d_cv))
-                    for _ in range(powtorzenia)])
+    return np.mean([risk(Polynomial.fit(*draw_sample(n, rng), d_cv))
+                    for _ in range(reps)])
 
 
-ryzyka_mniejsze = [ryzyko_oczekiwane(n_cv * (K - 1) // K, rng) for K in wartosci_K]
+risks_smaller = [expected_risk(n_cv * (K - 1) // K, rng) for K in K_values]
 
 fig, ax = plt.subplots(figsize=(6.5, 3.0))
-pozycje = np.arange(len(wartosci_K))
-ax.errorbar(pozycje, cv.mean(axis=0), yerr=cv.std(axis=0), fmt="o",
+positions = np.arange(len(K_values))
+ax.errorbar(positions, cv.mean(axis=0), yerr=cv.std(axis=0), fmt="o",
             color="#1B6CA8", capsize=4, label=r"$\mathrm{CV}_K$: średnia $\pm$ odch. std.")
-ax.plot(pozycje, ryzyka_mniejsze, "_", color="#E07B39", ms=18, mew=2.5,
+ax.plot(positions, risks_smaller, "_", color="#E07B39", ms=18, mew=2.5,
         label=r"$\overline{R}_{n(K-1)/K}$")
-ax.axhline(ryzyko_modelu.mean(), color="0.3", ls="--", lw=1.2,
+ax.axhline(model_risk.mean(), color="0.3", ls="--", lw=1.2,
            label=r"$\overline{R}_{n}$, $n = 50$")
-ax.set_xticks(pozycje, [f"$K={K}$" if K < n_cv else "$K=n$ (LOOCV)"
-                        for K in wartosci_K])
+ax.set_xticks(positions, [f"$K={K}$" if K < n_cv else "$K=n$ (LOOCV)"
+                          for K in K_values])
 ax.set_ylabel("średni kwadrat błędu")
 ax.legend(frameon=False, fontsize=8, loc="upper right")
 plt.tight_layout()
@@ -818,56 +690,54 @@ przy metodach niestabilnych. LOOCV z jednego dopasowania dla $k$-NN
 #| fig-width: 10
 #| fig-height: 3.4
 
-j10 = wartosci_K.index(10)
+j10 = K_values.index(10)
 fig, (ax, ax_txt) = plt.subplots(1, 2, figsize=(10, 3.4),
                                  gridspec_kw={"width_ratios": [1, 1.1]})
-ax.scatter(ryzyko_modelu, cv[:, j10], s=8, color="#1B6CA8", alpha=0.5)
-srednia = ryzyko_modelu.mean()
-ax.axvline(srednia, color="0.3", ls="--", lw=1)
-ax.axhline(srednia, color="0.3", ls="--", lw=1)
-granice = [0.03, 0.2]
-ax.plot(granice, granice, ":", color="#D7263D", lw=1.5)
-ax.set_xlim(granice)
-ax.set_ylim(granice)
+ax.scatter(model_risk, cv[:, j10], s=8, color="#1B6CA8", alpha=0.5)
+mean_risk = model_risk.mean()
+ax.axvline(mean_risk, color="0.3", ls="--", lw=1)
+ax.axhline(mean_risk, color="0.3", ls="--", lw=1)
+lims = [0.03, 0.2]
+ax.plot(lims, lims, ":", color="#D7263D", lw=1.5)
+ax.set_xlim(lims)
+ax.set_ylim(lims)
 ax.set_aspect("equal")
 ax.set_xlabel(r"ryzyko dopasowanego modelu $R(\widehat f_{\mathcal{D}})$")
 ax.set_ylabel(r"oszacowanie $\mathrm{CV}_{10}$")
 
-korelacja = np.corrcoef(ryzyko_modelu, cv[:, j10])[0, 1]
-pokrycie = np.mean(np.abs(cv[:, j10] - srednia) < 1.96 * blad_std_naiwny)
+corr = np.corrcoef(model_risk, cv[:, j10])[0, 1]
+coverage = np.mean(np.abs(cv[:, j10] - mean_risk) < 1.96 * naive_se)
 ax_txt.axis("off")
-wiersze = [
-    ("odch. std. ryzyka modelu", f"{ryzyko_modelu.std():.4f}"),
+rows = [
+    ("odch. std. ryzyka modelu", f"{model_risk.std():.4f}"),
     (r"odch. std. $\mathrm{CV}_{10}$", f"{cv[:, j10].std():.4f}"),
-    ("korelacja", f"{korelacja:.3f}"),
-    ("naiwny błąd standardowy (średnia)", f"{blad_std_naiwny.mean():.4f}"),
-    (r"pokrycie przedziału $\pm 1{,}96\,\mathrm{se}$", f"{pokrycie:.2f}"),
+    ("korelacja", f"{corr:.3f}"),
 ]
-for i, (opis, wartosc) in enumerate(wiersze):
-    ax_txt.text(0.0, 0.9 - 0.17 * i, opis, fontsize=11, va="center")
-    ax_txt.text(1.0, 0.9 - 0.17 * i, wartosc, fontsize=11, va="center", ha="right")
+for i, (label, value) in enumerate(rows):
+    ax_txt.text(0.0, 0.8 - 0.25 * i, label, fontsize=12, va="center")
+    ax_txt.text(1.0, 0.8 - 0.25 * i, value, fontsize=12, va="center", ha="right")
 plt.tight_layout()
 plt.show()
 ```
 
 Chmura wydłużona w pionie, nie wzdłuż przekątnej: ryzyko modelu zmienia
-się mało, oszacowanie ponad dwa razy bardziej, i są **nieskorelowane**.
+się mało, oszacowanie ponad dwa razy bardziej, i są **praktycznie
+nieskorelowane**.
 
 . . .
 
 ::: {.wniosek}
 Walidacja krzyżowa trafia w $\overline{\Risk}_n$: ocenia **procedurę**, nie
-model, który mamy w ręku. Ten ocenia tylko niezależny zbiór testowy.
+model, który mamy w ręku. Konkretny model ocenia tylko niezależny zbiór
+testowy.
 :::
 
 ::: notes
 Większość rozrzutu CV to szum w $n$ obserwacjach, na których ją liczymy.
 Bates, Hastie, Tibshirani (2024): dla najmniejszych kwadratów CV szacuje
 ryzyko uśrednione po hipotetycznych próbach. To konkretna treść ramki
-„ryzyko modelu a ryzyko metody”. Naiwny błąd standardowy (odch. std.
-strat$/\sqrt n$) zaniżony o ok. 10%, przedział nominalnie 95% pokrywa
-w 89% -- straty z różnych części nie są niezależne (Bengio, Grandvalet
-2004: nieobciążony estymator wariancji CV nie istnieje).
+„ryzyko modelu a ryzyko metody”. Do selekcji to wystarcza: kandydatów
+porównujemy na tych samych danych.
 :::
 
 ## Reguła jednego błędu standardowego
@@ -888,19 +758,62 @@ Różnice mniejsze niż błąd standardowy mogą być przypadkowe; w razie
 wątpliwości prostszy model ma mniejszą wariancję i jest łatwiejszy
 w interpretacji.
 
-## Walidacja krzyżowa w klasyfikacji
+::: notes
+W symulacji z poprzedniego slajdu naiwny błąd standardowy jest zaniżony
+o ok. 10%, a przedział nominalnie 95% pokrywa $\overline{\Risk}_n$
+w `{python} f"{coverage:.0%}"` prób. Bengio, Grandvalet (2004):
+nieobciążony estymator wariancji CV nie istnieje.
+:::
 
-- Podział **warstwowy** (*stratified*): proporcje klas w każdej części
-  takie jak w próbie. Inaczej rzadka klasa może nie trafić do części.
-- Strata 0--1 jest zgrubna: zmienia się skokami $1/n$ i nie odróżnia
-  pomyłki przy $\widehat\eta=0{,}51$ od pomyłki przy $0{,}99$.
-- Gdy model ma zwracać prawdopodobieństwa, oceniaj **stratą właściwą**
-  (Briera, logarytmiczną).
+## Reguła jednego błędu standardowego w działaniu
 
-. . .
+```{python}
+#| fig-width: 10
+#| fig-height: 3.6
 
-Pułapka: $k$-NN zwraca $\widehat\eta\in\{0,1\}$, gdy wszyscy sąsiedzi są
-z jednej klasy. Jedna taka pomyłka to strata logarytmiczna nieskończona.
+# Ta sama próba n = 100 co na slajdzie o zbiorze walidacyjnym. Ten sam
+# podział na części dla wszystkich kandydatów (ten sam seed).
+losses_1se = np.array([cv_losses(x_val, y_val, d, 10, np.random.default_rng(0))
+                       for d in degrees_val])
+cv_1se = losses_1se.mean(axis=1)
+se_1se = losses_1se.std(axis=1, ddof=1) / np.sqrt(len(x_val))
+i_min = np.argmin(cv_1se)
+threshold = cv_1se[i_min] + se_1se[i_min]
+i_1se = np.argmax(cv_1se <= threshold)          # najmniejszy stopień pod progiem
+d_min, d_1se = degrees_val[i_min], degrees_val[i_1se]
+risks_full = [risk(Polynomial.fit(x_val, y_val, d)) for d in degrees_val]
+
+fig, ax = plt.subplots(figsize=(10, 3.6))
+ax.errorbar(degrees_val, cv_1se, yerr=se_1se, fmt="o-", color="#1B6CA8",
+            capsize=4, label=r"$\mathrm{CV}_{10}\pm$ błąd std.")
+ax.plot(degrees_val, risks_full, "o--", color="0.55", ms=4,
+        label="ryzyko (znane tylko w symulacji)")
+ax.axhline(threshold, color="#E07B39", ls=":", lw=1.5,
+           label="minimum + jeden błąd std.")
+ax.plot(d_min, cv_1se[i_min], "o", ms=13, mfc="none", mec="#D7263D", mew=2,
+        label=f"minimum: $d = {d_min}$")
+ax.plot(d_1se, cv_1se[i_1se], "s", ms=13, mfc="none", mec="#3A9D5D", mew=2,
+        label=f"reguła 1 SE: $d = {d_1se}$")
+ax.set_yscale("log")
+ax.set_xticks(degrees_val)
+ax.set_xlabel("stopień wielomianu $d$")
+ax.set_ylabel("średni kwadrat błędu")
+ax.legend(frameon=False, fontsize=8, loc="upper right")
+plt.tight_layout()
+plt.show()
+```
+
+Jedna próba, $n=100$, dziesięciokrotna walidacja krzyżowa.
+Minimum wypada przy stopniu `{python} int(d_min)`, reguła wybiera stopień
+`{python} int(d_1se)`.
+
+::: notes
+Słupki dla stopni $3$ i wyższych się nakładają: walidacja nie odróżnia
+tych kandydatów, a minimum przy $d=9$ to przypadek. Reguła wybiera
+najprostszy z nich. Szara linia -- ryzyko wielomianów dopasowanych do
+całej próby -- pokazuje, że tu reguła zyskuje: $d=3$ ma ryzyko ok. $0{,}10$,
+$d=9$ -- ok. $0{,}12$.
+:::
 
 # Wyciek informacji
 
@@ -919,49 +832,49 @@ na nich 1-NN, oceniany pięciokrotną walidacją krzyżową. Jaki błąd wyjdzie
 #| fig-height: 2.7
 
 rng = np.random.default_rng(7)
-n_w, p_w, q_w, powt_w = 50, 5000, 100, 100
+n_leak, p_leak, q_leak, reps_leak = 50, 5000, 100, 100
 
 
-def najblizszy_sasiad(X_ucz, y_ucz, X_ocen):
+def nearest_neighbor(X_tr, y_tr, X_te):
     """Klasyfikator 1-NN w metryce euklidesowej."""
-    odl = ((X_ocen[:, None, :] - X_ucz[None, :, :]) ** 2).sum(axis=2)
-    return y_ucz[odl.argmin(axis=1)]
+    dist = ((X_te[:, None, :] - X_tr[None, :, :]) ** 2).sum(axis=2)
+    return y_tr[dist.argmin(axis=1)]
 
 
-def najsilniej_skorelowane(X, y, q):
+def top_correlated(X, y, q):
     """Indeksy q cech o największej bezwzględnej korelacji z y."""
     Xc, yc = X - X.mean(axis=0), y - y.mean()
-    kor = np.abs(Xc.T @ yc) / np.sqrt((Xc ** 2).sum(axis=0) * (yc ** 2).sum())
-    return np.argsort(kor)[-q:]
+    corr_abs = np.abs(Xc.T @ yc) / np.sqrt((Xc ** 2).sum(axis=0) * (yc ** 2).sum())
+    return np.argsort(corr_abs)[-q:]
 
 
-zle, dobre = [], []
-for _ in range(powt_w):
-    X = rng.normal(size=(n_w, p_w))
-    y = np.repeat([0, 1], n_w // 2)
-    cechy_calosc = najsilniej_skorelowane(X, y, q_w)    # wyciek
-    bledy_zle = bledy_dobre = 0
-    for czesc in np.array_split(rng.permutation(n_w), 5):
-        ucz = np.ones(n_w, dtype=bool)
-        ucz[czesc] = False
-        c = cechy_calosc
-        bledy_zle += np.sum(najblizszy_sasiad(X[ucz][:, c], y[ucz],
-                                              X[czesc][:, c]) != y[czesc])
-        c = najsilniej_skorelowane(X[ucz], y[ucz], q_w)  # tylko dane uczące
-        bledy_dobre += np.sum(najblizszy_sasiad(X[ucz][:, c], y[ucz],
-                                                X[czesc][:, c]) != y[czesc])
-    zle.append(bledy_zle / n_w)
-    dobre.append(bledy_dobre / n_w)
+bad, good = [], []
+for _ in range(reps_leak):
+    X = rng.normal(size=(n_leak, p_leak))
+    y = np.repeat([0, 1], n_leak // 2)
+    feats_all = top_correlated(X, y, q_leak)    # wyciek
+    errors_bad = errors_good = 0
+    for fold in np.array_split(rng.permutation(n_leak), 5):
+        is_tr = np.ones(n_leak, dtype=bool)
+        is_tr[fold] = False
+        feats = feats_all
+        errors_bad += np.sum(nearest_neighbor(X[is_tr][:, feats], y[is_tr],
+                                              X[fold][:, feats]) != y[fold])
+        feats = top_correlated(X[is_tr], y[is_tr], q_leak)  # tylko dane uczące
+        errors_good += np.sum(nearest_neighbor(X[is_tr][:, feats], y[is_tr],
+                                               X[fold][:, feats]) != y[fold])
+    bad.append(errors_bad / n_leak)
+    good.append(errors_good / n_leak)
 
-fig, osie = plt.subplots(1, 2, figsize=(10, 2.7), sharey=True)
-przedzialy = np.linspace(0, 0.9, 46)
-for ax, wyniki, tytul in [(osie[0], zle, "wybór cech przed walidacją"),
-                          (osie[1], dobre, "wybór cech wewnątrz walidacji")]:
-    ax.hist(wyniki, bins=przedzialy, color="#1B6CA8", alpha=0.8)
+fig, axes = plt.subplots(1, 2, figsize=(10, 2.7), sharey=True)
+bins = np.linspace(0, 0.9, 46)
+for ax, results, title in [(axes[0], bad, "wybór cech przed walidacją"),
+                           (axes[1], good, "wybór cech wewnątrz walidacji")]:
+    ax.hist(results, bins=bins, color="#1B6CA8", alpha=0.8)
     ax.axvline(0.5, color="#D7263D", ls="--", lw=1.5)
-    ax.set_title(f"{tytul}: średnio {np.mean(wyniki):.2f}", fontsize=10)
+    ax.set_title(f"{title}: średnio {np.mean(results):.2f}", fontsize=10)
     ax.set_xlabel("oszacowanie błędu walidacją krzyżową")
-osie[0].set_ylabel("liczba prób")
+axes[0].set_ylabel("liczba prób")
 plt.tight_layout()
 plt.show()
 ```
@@ -1015,13 +928,19 @@ $$
 
 . . .
 
-Dowód: $\min_j\widehat\Risk_j\le\widehat\Risk_l$ dla każdego $l$, więc po
-uśrednieniu $\le\Risk_l$, w szczególności dla najlepszego $l$. Wybrany
-model nie jest lepszy od najlepszego.
+Wynik zwycięzcy zaniża przeciętnie nawet najmniejsze z ryzyk, a ryzyko
+faktycznie wybranego modelu jest jeszcze większe.
 
 ::: {.wniosek}
 Klątwa zwycięzcy: wybieramy tego, któremu szum najbardziej pomógł. Rośnie
 z liczbą kandydatów i wariancją oszacowań.
+:::
+
+::: notes
+Dowód: $\min_j\widehat\Risk_j\le\widehat\Risk_l$ dla każdego $l$, więc po
+uśrednieniu $\le\Risk_l$, w szczególności dla najlepszego $l$. Druga
+nierówność: $\Risk_{\widehat\jmath}$ jest jednym z ryzyk, więc nie jest
+mniejsze od najmniejszego.
 :::
 
 ## Zagnieżdżona walidacja krzyżowa
@@ -1037,57 +956,58 @@ metodę: na danych, których nie widziała. Dla każdej części zewnętrznej $F
 #| fig-height: 2.9
 
 rng = np.random.default_rng(11)
-n_kl, p_kl, powt_kl = 100, 10, 100
-wartosci_k_kl = [1, 3, 5, 7, 9, 11, 15, 21, 31, 41]
-liczby_M = [1, 2, 5, 10, 20, 50, 100]
-M_max = max(liczby_M)
+n_sel, p_sel, reps_sel = 100, 10, 100
+k_values_sel = [1, 3, 5, 7, 9, 11, 15, 21, 31, 41]
+M_values = [1, 2, 5, 10, 20, 50, 100]
+M_max = max(M_values)
 
 
-def bledy_knn(odl, y, ucz, ocen):
-    """Liczba błędów k-NN dla wszystkich k z wartosci_k_kl (nieparzyste: bez remisów)."""
-    kolejnosc = np.argsort(odl[np.ix_(ocen, ucz)], axis=1)
-    jedynki = np.cumsum(y[ucz][kolejnosc], axis=1)
-    return np.array([np.sum((jedynki[:, k - 1] > k / 2) != y[ocen])
-                     for k in wartosci_k_kl])
+def knn_errors(dist, y, idx_tr, idx_te):
+    """Liczba błędów k-NN dla wszystkich k z k_values_sel (nieparzyste: bez remisów)."""
+    order = np.argsort(dist[np.ix_(idx_te, idx_tr)], axis=1)
+    ones = np.cumsum(y[idx_tr][order], axis=1)
+    return np.array([np.sum((ones[:, k - 1] > k / 2) != y[idx_te])
+                     for k in k_values_sel])
 
 
-def walidacja_kandydatow(odleglosci, y, indeksy, rng, K=5):
+def cv_candidates(dists, y, idx, rng, K=5):
     """Liczba błędów K-krotnej walidacji krzyżowej każdego kandydata (trójka cech, k)."""
-    bledy = np.zeros(len(odleglosci) * len(wartosci_k_kl))
-    for czesc in np.array_split(rng.permutation(indeksy), K):
-        ucz = np.setdiff1d(indeksy, czesc)
-        bledy += np.concatenate([bledy_knn(o, y, ucz, czesc) for o in odleglosci])
-    return bledy
+    errors = np.zeros(len(dists) * len(k_values_sel))
+    for fold in np.array_split(rng.permutation(idx), K):
+        idx_tr = np.setdiff1d(idx, fold)
+        errors += np.concatenate([knn_errors(dist, y, idx_tr, fold) for dist in dists])
+    return errors
 
 
-min_cv = np.zeros((powt_kl, len(liczby_M)))
-zagniezdzona = np.zeros((powt_kl, len(liczby_M)))
-wszystkie = np.arange(n_kl)
-for r in range(powt_kl):
-    X = rng.normal(size=(n_kl, p_kl))
-    y = rng.integers(0, 2, n_kl)
-    trojki = [rng.choice(p_kl, 3, replace=False)
-              for _ in range(M_max // len(wartosci_k_kl))]
-    odleglosci = [((X[:, t][:, None] - X[:, t][None]) ** 2).sum(axis=2)
-                  for t in trojki]
-    kolej = rng.permutation(M_max)
-    cv_kand = walidacja_kandydatow(odleglosci, y, wszystkie, rng)[kolej] / n_kl
-    min_cv[r] = [cv_kand[:M].min() for M in liczby_M]
-    for czesc in np.array_split(rng.permutation(n_kl), 5):
-        reszta = np.setdiff1d(wszystkie, czesc)
-        cv_wew = walidacja_kandydatow(odleglosci, y, reszta, rng)[kolej]
-        bledy_zew = np.concatenate([bledy_knn(o, y, reszta, czesc)
-                                    for o in odleglosci])[kolej]
-        for j, M in enumerate(liczby_M):
-            zagniezdzona[r, j] += bledy_zew[np.argmin(cv_wew[:M])] / n_kl
+min_cv = np.zeros((reps_sel, len(M_values)))
+nested = np.zeros((reps_sel, len(M_values)))
+all_idx = np.arange(n_sel)
+for r in range(reps_sel):
+    X = rng.normal(size=(n_sel, p_sel))
+    y = rng.integers(0, 2, n_sel)
+    triples = [rng.choice(p_sel, 3, replace=False)
+               for _ in range(M_max // len(k_values_sel))]
+    dists = [((X[:, t][:, None] - X[:, t][None]) ** 2).sum(axis=2)
+             for t in triples]
+    order = rng.permutation(M_max)
+    cv_cand = cv_candidates(dists, y, all_idx, rng)[order] / n_sel
+    min_cv[r] = [cv_cand[:M].min() for M in M_values]
+    for fold in np.array_split(rng.permutation(n_sel), 5):
+        rest = np.setdiff1d(all_idx, fold)
+        cv_inner = cv_candidates(dists, y, rest, rng)[order]
+        outer_errors = np.concatenate([knn_errors(dist, y, rest, fold)
+                                       for dist in dists])[order]
+        for j, M in enumerate(M_values):
+            nested[r, j] += outer_errors[np.argmin(cv_inner[:M])] / n_sel
 
 fig, ax = plt.subplots(figsize=(6.5, 2.9))
-for wyniki, kolor, opis in [(min_cv, "#1B6CA8", "najmniejszy wynik CV"),
-                            (zagniezdzona, "#3A9D5D", "zagnieżdżona CV")]:
-    sr = wyniki.mean(axis=0)
-    bs = wyniki.std(axis=0) / np.sqrt(powt_kl)
-    ax.plot(liczby_M, sr, "o-", color=kolor, label=opis)
-    ax.fill_between(liczby_M, sr - 2 * bs, sr + 2 * bs, color=kolor, alpha=0.2)
+for results, color, label in [(min_cv, "#1B6CA8", "najmniejszy wynik CV"),
+                              (nested, "#3A9D5D", "zagnieżdżona CV")]:
+    mean_res = results.mean(axis=0)
+    se_res = results.std(axis=0) / np.sqrt(reps_sel)
+    ax.plot(M_values, mean_res, "o-", color=color, label=label)
+    ax.fill_between(M_values, mean_res - 2 * se_res, mean_res + 2 * se_res,
+                    color=color, alpha=0.2)
 ax.axhline(0.5, color="#D7263D", ls="--", lw=1.5, label="ryzyko kandydatów")
 ax.set_xscale("log")
 ax.set_xlabel("liczba kandydatów $M$")
@@ -1134,207 +1054,93 @@ Bergstra i Bengio (2012): ryzyko zależy zwykle silnie od jednego-dwóch
 hiperparametrów. Optuna i przerywanie słabych prób -- na laboratorium.
 :::
 
-# Bootstrap
-
-## Pomysł
-
-Niepewność dowolnej wielkości z próby: współczynnika, predykcji w punkcie,
-oszacowania ryzyka. Znając $P$, wylosowalibyśmy wiele prób i obejrzeli
-rozrzut -- jak na wachlarzu wielomianów.
-
-::: {.definicja}
-**Bootstrap** zastępuje nieznane $P$ **rozkładem empirycznym** $\widehat P_n$
-(każda obserwacja z prawdopodobieństwem $1/n$): $n$ obserwacji losowanych
-z próby **ze zwracaniem**.
-
-1. Dla $b=1,\dots,B$: wylosuj próbę bootstrapową $\mathcal D^*_b$ i oblicz
-   $\widehat\theta^*_b=s(\mathcal D^*_b)$.
-2. Błąd standardowy $\widehat\theta$: odchylenie standardowe
-   $\widehat\theta^*_1,\dots,\widehat\theta^*_B$.
-3. Przedział $95\%$: między kwantylami $0{,}025$ i $0{,}975$ (przedział
-   percentylowy).
-:::
-
-. . .
-
-Obserwacja nie trafia do próby bootstrapowej z prawdopodobieństwem
-$(1-1/n)^n\to e^{-1}\approx0{,}368$: próba zawiera ok. $63{,}2\%$ różnych
-obserwacji.
-
-## Bootstrap w działaniu
-
-```{python}
-#| fig-width: 11
-#| fig-height: 3.2
-
-rng = np.random.default_rng(6)
-n_b, d_b, x0 = 50, 3, 0.95
-
-prawdziwy = np.array([Polynomial.fit(*probka(n_b, rng), d_b)(x0)
-                      for _ in range(5000)])
-
-
-def bootstrap_predykcji(x, y, B, rng):
-    """Replikacje bootstrapowe predykcji wielomianu stopnia d_b w punkcie x0."""
-    indeksy = rng.integers(0, len(x), size=(B, len(x)))
-    return np.array([Polynomial.fit(x[i], y[i], d_b)(x0) for i in indeksy])
-
-
-x, y = probka(n_b, rng)
-f_hat_x0 = Polynomial.fit(x, y, d_b)(x0)
-replikacje = bootstrap_predykcji(x, y, 2000, rng)
-oszacowania_se = np.array([bootstrap_predykcji(*probka(n_b, rng), 200, rng).std()
-                           for _ in range(200)])
-
-fig, osie = plt.subplots(1, 2, figsize=(11, 3.2))
-przedzialy = np.linspace(-0.8, 1.4, 56)
-osie[0].hist(prawdziwy, bins=przedzialy, density=True, histtype="step",
-             color="0.4", lw=1.5, label=r"rozkład $\widehat f_{\mathcal{D}}(x_0)$")
-osie[0].hist(replikacje, bins=przedzialy, density=True, color="#1B6CA8",
-             alpha=0.5, label="replikacje bootstrapowe")
-osie[0].axvline(f_hat_x0, color="#1B6CA8", lw=1.8)
-osie[0].axvline(f_prawdziwa(x0), color="black", ls="--", lw=1.4)
-osie[0].set_xlabel("predykcja w $x_0$")
-osie[0].set_title("jedna próba", fontsize=10)
-osie[0].legend(frameon=False, fontsize=8)
-osie[1].hist(oszacowania_se, bins=30, color="#1B6CA8", alpha=0.8)
-osie[1].axvline(prawdziwy.std(), color="#D7263D", ls="--", lw=1.5,
-                label="prawdziwy błąd standardowy")
-osie[1].set_xlabel("bootstrapowe oszacowanie błędu standardowego")
-osie[1].set_ylabel("liczba prób")
-osie[1].set_title("200 różnych prób", fontsize=10)
-osie[1].legend(frameon=False, fontsize=8)
-plt.tight_layout()
-plt.show()
-```
-
-Predykcja wielomianu $d=3$ w $x_0=0{,}95$, $n=50$. Replikacje rozkładają
-się wokół $\widehat f(x_0)$ z **naszej** próby (niebieska), nie wokół
-$\fopt(x_0)$ (przerywana): bootstrap odtwarza **rozrzut**, nie położenie.
-
-. . .
-
-Tu odtwarza go źle (replikacje dwa razy szersze), ale to próba nietypowa:
-w 200 próbach oszacowania skupiają się przy prawdziwej wartości. Bootstrap
-zawodzi tam, gdzie estymator jest niestabilny.
-
-::: notes
-Dwa przybliżenia: statystyczne ($P\to\widehat P_n$) i numeryczne
-(skończone $B$; kilkaset do se, kilka tysięcy do kwantyli).
-Bootstrap do ryzyka: „pozostaw jeden” (pesymistyczny jak CV), .632 i .632+
--- w książce; w praktyce dominuje CV, bo prostsza i bez poprawek
-zależnych od metody.
-:::
-
-# Krzywe uczenia z danych i praktyka
-
-## Krzywe uczenia z danych
-
-```{python}
-#| fig-width: 11
-#| fig-height: 3.6
-
-rng = np.random.default_rng(9)
-N_lc, K_lc, podproby = 1000, 5, 20
-licznosci_cv = np.array([40, 60, 100, 200, 400, 800])
-x_lc, y_lc = probka(N_lc, rng)
-czesci = np.array_split(rng.permutation(N_lc), K_lc)
-
-fig, osie = plt.subplots(1, 2, figsize=(11, 3.6), sharey=True)
-for ax, d in zip(osie, [1, 9]):
-    uczacy_cv = np.zeros(len(licznosci_cv))
-    walid_cv = np.zeros(len(licznosci_cv))
-    for czesc in czesci:
-        reszta = np.setdiff1d(np.arange(N_lc), czesc)
-        for _ in range(podproby):
-            for i, m in enumerate(licznosci_cv):
-                podproba = rng.choice(reszta, m, replace=False)
-                wielomian = Polynomial.fit(x_lc[podproba], y_lc[podproba], d)
-                uczacy_cv[i] += np.mean((wielomian(x_lc[podproba]) - y_lc[podproba]) ** 2)
-                walid_cv[i] += np.mean((wielomian(x_lc[czesc]) - y_lc[czesc]) ** 2)
-    uczacy_cv /= K_lc * podproby
-    walid_cv /= K_lc * podproby
-
-    ryzyko_prawdziwe = np.zeros(len(licznosci_cv))
-    uczacy_prawdziwy = np.zeros(len(licznosci_cv))
-    for i, m in enumerate(licznosci_cv):
-        for _ in range(300):
-            xs, ys = probka(m, rng)
-            wielomian = Polynomial.fit(xs, ys, d)
-            ryzyko_prawdziwe[i] += ryzyko(wielomian) / 300
-            uczacy_prawdziwy[i] += np.mean((wielomian(xs) - ys) ** 2) / 300
-
-    ax.plot(licznosci_cv, ryzyko_prawdziwe, "-", color="#1B6CA8", lw=1.5,
-            label="ryzyko")
-    ax.plot(licznosci_cv, walid_cv, "o", color="#1B6CA8",
-            label="ryzyko: walidacja krzyżowa")
-    ax.plot(licznosci_cv, uczacy_prawdziwy, "-", color="0.45", lw=1.5,
-            label="błąd uczący")
-    ax.plot(licznosci_cv, uczacy_cv, "o", color="0.45",
-            label="błąd uczący: z podprób")
-    ax.axhline(sigma ** 2, color="#D7263D", ls=":", lw=1.5)
-    ax.set_xscale("log")
-    ax.set_yscale("log")
-    ax.set_xticks(licznosci_cv, [str(m) for m in licznosci_cv])
-    ax.xaxis.set_minor_locator(plt.NullLocator())
-    ax.set_title(f"$d = {d}$")
-    ax.set_xlabel("liczność próby uczącej $m$")
-osie[0].set_ylabel("średni kwadrat błędu")
-osie[1].legend(frameon=False, fontsize=8)
-plt.tight_layout()
-plt.show()
-```
-
-Jedna próba $N=1000$: dla każdej części i liczności $m$ losujemy podpróbę
-z reszty, dopasowujemy, oceniamy na części (punkty). Linie -- prawdziwe
-krzywe. Diagnostyka „szeroka szczelina = wariancja” działa bez
-znajomości ryzyka.
-
-::: notes
-scikit-learn: `learning_curve`. Krzywa z danych kończy się na $N(K-1)/K$;
-czy więcej danych pomoże, to ekstrapolacja. Rozbieżność dla $d=9$ przy
-$m=40$: ryzyko oczekiwane zdominowane przez rzadkie „ucieczki” wielomianu
-przy krańcu, których sto podprób łapie nieregularnie.
-:::
+# Praktyka
 
 ## Ocena modeli w praktyce
 
-$k$-NN dla danych o nowotworach piersi (w książce $k=10$ przyjęte
-arbitralnie). Wybór $k$ i ocena procedury wyboru:
+```{python}
+#| fig-width: 10
+#| fig-height: 3.3
 
-```{.python}
-potok = make_pipeline(StandardScaler(), KNeighborsClassifier())
-siatka_k = {"kneighborsclassifier__n_neighbors": [1, 3, 5, 7, 9, 11, 15, 21, 31, 51]}
-strojenie = GridSearchCV(potok, siatka_k, scoring="accuracy",
-                         cv=StratifiedKFold(5, shuffle=True, random_state=0))
-strojenie.fit(X, y)                       # wybór k; model do użytku
-zagn = cross_validate(strojenie, X, y, scoring="accuracy",
-                      cv=StratifiedKFold(5, shuffle=True, random_state=1))
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import GridSearchCV, StratifiedKFold, cross_validate
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+
+X_bc, y_bc = load_breast_cancer(return_X_y=True)
+pipe = make_pipeline(StandardScaler(), KNeighborsClassifier())
+k_grid = [1, 3, 5, 7, 9, 11, 15, 21, 31, 51]
+param_grid = {"kneighborsclassifier__n_neighbors": k_grid}
+
+# Wybór k: pięciokrotna warstwowa walidacja krzyżowa na całych danych.
+tuning = GridSearchCV(pipe, param_grid, scoring="accuracy",
+                      cv=StratifiedKFold(n_splits=5, shuffle=True, random_state=0))
+tuning.fit(X_bc, y_bc)
+cv_err_bc = 1 - tuning.cv_results_["mean_test_score"]
+se_bc = tuning.cv_results_["std_test_score"] / np.sqrt(5)
+i_min_bc = np.argmin(cv_err_bc)
+threshold_bc = cv_err_bc[i_min_bc] + se_bc[i_min_bc]
+# Najprostszy model to największe k, czyli najsilniejsze wygładzanie.
+k_1se_bc = max(k for k, e in zip(k_grid, cv_err_bc) if e <= threshold_bc)
+k_min_bc = k_grid[i_min_bc]
+
+# Ocena procedury wyboru: zagnieżdżona walidacja krzyżowa.
+nested_bc = cross_validate(tuning, X_bc, y_bc, scoring="accuracy",
+                           cv=StratifiedKFold(n_splits=5, shuffle=True, random_state=1),
+                           return_estimator=True)
+nested_err_bc = 1 - nested_bc["test_score"].mean()
+k_outer_bc = [e.best_params_["kneighborsclassifier__n_neighbors"]
+              for e in nested_bc["estimator"]]
+
+fig, ax = plt.subplots(figsize=(10, 3.3))
+ax.errorbar(k_grid, cv_err_bc, yerr=se_bc, fmt="o-", color="#1B6CA8", capsize=4,
+            label=r"$\mathrm{CV}_5\pm$ błąd std.")
+ax.axhline(threshold_bc, color="#E07B39", ls=":", lw=1.5,
+           label="minimum + jeden błąd std.")
+ax.axhline(nested_err_bc, color="#3A9D5D", ls="--", lw=1.5,
+           label="zagnieżdżona CV procedury wyboru")
+ax.plot(k_min_bc, cv_err_bc[i_min_bc], "o", ms=13, mfc="none", mec="#D7263D",
+        mew=2, label=f"minimum: $k = {k_min_bc}$")
+ax.plot(k_1se_bc, cv_err_bc[k_grid.index(k_1se_bc)], "s", ms=13, mfc="none",
+        mec="#3A9D5D", mew=2, label=f"reguła 1 SE: $k = {k_1se_bc}$")
+ax.set_xscale("log")
+ax.set_xticks(k_grid, [str(k) for k in k_grid])
+ax.xaxis.set_minor_locator(plt.NullLocator())
+ax.set_xlabel("liczba sąsiadów $k$")
+ax.set_ylabel("odsetek błędów")
+ax.legend(frameon=False, fontsize=8, loc="upper left")
+plt.tight_layout()
+plt.show()
 ```
 
-- Standaryzacja w potoku: w każdej części liczona tylko z danych uczących.
-- Błąd CV płaski dla $k$ od $3$ do $15$ (różnice rzędu błędu
-  standardowego); reguła jednego błędu standardowego wskazuje większe $k$.
-- Zagnieżdżona walidacja: błąd bliski minimum CV, ale $k$ wybrane
-  w częściach zewnętrznych się różnią -- wybór jest niestabilny.
+$k$-NN dla danych o nowotworach piersi ($n=569$, $p=30$), standaryzacja
+w potoku. Zagnieżdżona walidacja: błąd `{python} f"{nested_err_bc:.3f}".replace(".", ",")`,
+w częściach zewnętrznych wybrano $k$ = `{python} ", ".join(map(str, k_outer_bc))`
+-- wybór konkretnego $k$ jest niestabilny, a zagnieżdżona walidacja
+ocenia procedurę, która tę niestabilność obejmuje.
 
 ::: notes
+`GridSearchCV(make_pipeline(StandardScaler(), KNeighborsClassifier()), ...)`
+wybiera $k$ i daje model do użytku; `cross_validate(strojenie, ...)` --
+zagnieżdżona walidacja. Kod w książce, sekcja „Ocena modeli w praktyce”.
+Błąd standardowy liczony tu z wyników pięciu części, jak w książce.
 Przy 10 kandydatach i stabilnej metodzie optymizm wyboru okazał się mały
 wobec niepewności oszacowania -- ale bez zagnieżdżonej walidacji nie
-mogliśmy tego wiedzieć. Liczby w książce (sekcja „Ocena modeli w praktyce”).
+mogliśmy tego wiedzieć.
 :::
 
 ## Podsumowanie
 
 - Ryzyko metody $=\sigma^2+$ obciążenie$^2+$ wariancja. Elastyczność
-  przesuwa błąd między składnikami; litera U to ich suma. Najlepsza
+  przesuwa błąd między składnikami; krzywa U to ich suma. Najlepsza
   elastyczność zależy od $n$.
 - Ryzyko szacujemy na obserwacjach, których model nie widział. Zbiór
   testowy ocenia **ten** model, z błędem standardowym $\sim1/\sqrt m$.
 - Walidacja krzyżowa ($K=5$, $10$) szacuje ryzyko **metody**, lekko
   pesymistycznie; do selekcji wystarcza, konkretnego modelu nie ocenia.
+  Wśród nieodróżnialnych kandydatów -- **reguła jednego błędu
+  standardowego**: najprostszy.
 - Dwa błędy systematyczne: **wyciek** (cała procedura wewnątrz części --
   potok) i **optymizm wyboru** (zagnieżdżona walidacja albo nietknięty
   zbiór testowy).
-- **Bootstrap**: niepewność dowolnej wielkości z próby -- odtwarza rozrzut,
-  nie położenie.
