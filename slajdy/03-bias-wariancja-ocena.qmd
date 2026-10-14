@@ -185,17 +185,17 @@ niewielki. Ryzyko z poprzedniego slajdu łączy oba rodzaje błędu.
 ## Obciążenie i wariancja predyktora
 
 Obserwacje są niezależnymi losowaniami z $P$, więc zbiór uczący
-$\mathcal D$ jest losowy, a z nim predyktor $\widehat f_{\!\mathcal D}$.
+$\mathcal D$ jest losowy, a z nim predyktor $\fD$.
 
 ::: {.definicja}
 **Predyktor przeciętny** -- średnia predykcji w $\x$ po zbiorach uczących
 liczności $n$:
-$\;\bar f(\x)=\E_{\mathcal D}\big[\widehat f_{\!\mathcal D}(\x)\big]$.
+$\;\bar f(\x)=\E_{\mathcal D}\big[\fD(\x)\big]$.
 
 W ustalonym punkcie $\x_0$:
 
 - **obciążenie** $\;b(\x_0)=\bar f(\x_0)-\fopt(\x_0)$,
-- **wariancja** $\;v(\x_0)=\Var_{\mathcal D}\,\widehat f_{\!\mathcal D}(\x_0)$.
+- **wariancja** $\;v(\x_0)=\Var_{\mathcal D}\,\fD(\x_0)$.
 :::
 
 . . .
@@ -208,7 +208,7 @@ krańcach i małą w środku.
 ::: notes
 Konstrukcja myślowa: w praktyce mamy jeden zbiór uczący i jeden
 predyktor. W symulacji, gdzie $P$ znamy, $\bar f$ to gruba linia.
-To obciążenie i wariancja estymatora $\widehat f_{\!\mathcal D}(\x_0)$
+To obciążenie i wariancja estymatora $\fD(\x_0)$
 liczby $\theta=\fopt(\x_0)$; ogólnie
 $\operatorname{MSE}=b^2+\Var$ i estymator obciążony bywa lepszy --
 przykład ze ściąganiem $c\bar Y$ na wykładzie 6 (regularyzacja).
@@ -220,15 +220,15 @@ przykład ze ściąganiem $c\bar Y$ na wykładzie 6 (regularyzacja).
 **Twierdzenie.** Niech $Y_0$ ma rozkład $Y\mid\X=\x_0$ i będzie
 niezależne od $\mathcal D$. Wtedy
 $$
-\E\big[(Y_0-\widehat f_{\!\mathcal D}(\x_0))^2\big]
+\E\big[(Y_0-\fD(\x_0))^2\big]
 =\underbrace{\Var(Y\mid\X=\x_0)}_{\text{błąd nieredukowalny}}
 +\underbrace{b(\x_0)^2}_{\text{obciążenie}^2}
 +\underbrace{v(\x_0)}_{\text{wariancja}} .
 $$
 :::
 
-Dowód na tablicy: $Y_0-\widehat f_{\!\mathcal D}(\x_0)
-=(Y_0-\fopt)+(\fopt-\bar f)+(\bar f-\widehat f_{\!\mathcal D})$,
+Dowód na tablicy: $Y_0-\fD(\x_0)
+=(Y_0-\fopt)+(\fopt-\bar f)+(\bar f-\fD)$,
 iloczyny mieszane znikają.
 
 . . .
@@ -256,7 +256,7 @@ końcu).
 ::: {.column .karta width="50%"}
 **Ryzyko modelu**
 $$
-\Risk(\widehat f_{\!\mathcal D})
+\Risk(\fD)
 $$
 liczba zależna od tego, jaki zbiór uczący wylosowaliśmy
 :::
@@ -264,13 +264,14 @@ liczba zależna od tego, jaki zbiór uczący wylosowaliśmy
 ::: {.column .karta width="50%"}
 **Ryzyko metody**
 $$
-\overline{\Risk}_n=\E_{\mathcal D}\big[\Risk(\widehat f_{\!\mathcal D})\big]
+\overline{\Risk}_n=\E_{\mathcal D}\big[\Risk(\fD)\big]
 $$
 własność procedury uczenia na próbach liczności $n$
 :::
 ::::
 
-Twierdzenie uśrednione po $\X_0\sim P$ opisuje **metodę**, nie model:
+Uśredniając po punkcie $\x_0$ -- losowanym jak cechy nowej obserwacji,
+niezależnie od $\mathcal D$ -- dostajemy rozkład ryzyka **metody**, nie modelu:
 $$
 \overline{\Risk}_n=\E\big[\Var(Y\mid\X)\big]+\E\big[b(\X)^2\big]+\E\big[v(\X)\big].
 $$
@@ -446,7 +447,7 @@ za to płacimy.
   jednakowe dla wszystkich.
 - **Ocena** -- ile wynosi ryzyko wybranego modelu? Potrzebna **wartość**;
   obciążenie jest błędem.
-- **Model czy metoda** -- $\Risk(\widehat f_{\!\mathcal D})$ tego modelu,
+- **Model czy metoda** -- $\Risk(\fD)$ tego modelu,
   czy $\overline{\Risk}_n$ procedury?
 
 . . .
