@@ -658,20 +658,13 @@ wybrał $10$ wymiarów ciała (wzrost, obwód klatki, długość rękawa, ...).
 „Przeciętny” w jednym wymiarze to środkowe ok. $27\%$ pilotów.
 
 Ilu pilotów jest przeciętnych we wszystkich $10$ wymiarach?
-
-::: {.fragment fragment-index=1}
-**Ani jeden.** Już w $3$ wymiarach tylko $3{,}5\%$.
-
-To rachunek z poprzedniego slajdu odwrócony: w każdym wymiarze
-„szeroko”, razem prawie nic.
-:::
 :::
 
 ::: {.column width="58%"}
 ::: {.fragment fragment-index=1}
 ```{python}
 #| fig-width: 6
-#| fig-height: 3.8
+#| fig-height: 3.4
 
 # Daniels (1952), The "Average Man"?, WADC TN WCRD 53-7: eliminacja krok
 # po kroku i liczba przeciętnych w każdym wymiarze osobno (tabela I).
@@ -683,7 +676,7 @@ kroki = np.arange(1, 11)
 niezalezne = n_pilotow * np.cumprod(przecietni_osobno / n_pilotow)
 podloga = 0.003  # zero nie mieści się na osi logarytmicznej
 
-fig, ax = plt.subplots(figsize=(6, 3.8))
+fig, ax = plt.subplots(figsize=(6, 3.4))
 ax.plot(kroki, niezalezne, "--", color="0.5",
         label="gdyby wymiary były niezależne")
 ax.plot(kroki[:-1], pozostali[:-1], "o-", color="#1B6CA8",
@@ -706,6 +699,9 @@ ax.legend(frameon=False)
 plt.tight_layout()
 plt.show()
 ```
+
+**Ani jeden.** Już w $3$ wymiarach tylko $3{,}5\%$. W każdym wymiarze
+„szeroko”, razem prawie nic.
 :::
 :::
 ::::
