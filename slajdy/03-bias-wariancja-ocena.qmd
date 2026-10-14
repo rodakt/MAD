@@ -389,13 +389,14 @@ plt.show()
 
 :::: {.columns}
 ::: {.column .karta width="50%"}
-**Szeroka szczelina** ($d=9$, małe $n$): dominuje wariancja. Pomoże
-więcej danych albo prostszy model.
+**Ryzyko spada z $n$, szczelina się zamyka** ($d=9$): dominuje
+wariancja. Pomoże więcej danych albo prostszy model.
 :::
 
 ::: {.column .karta width="50%"}
-**Wąska szczelina, obie krzywe wysoko** ($d=1$): dominuje obciążenie.
-Więcej danych nie pomoże -- trzeba bogatszej klasy albo innych cech.
+**Obie krzywe płaskie i zbieżne** ($d=1$): dominuje obciążenie. Więcej
+danych nie pomoże; czy poziom jest wysoki, pokaże bogatsza klasa albo
+inne cechy.
 :::
 ::::
 
@@ -408,7 +409,10 @@ razy większe.
 :::
 
 ::: notes
-Ustalona metoda, rosnące $n$. Ryzyko maleje do granicy $\sigma^2+$ błąd
+Szerokość szczeliny na wykresie zależy od skali osi: w skali
+logarytmicznej widać iloraz ryzyka i błędu uczącego, nie różnicę.
+Dlatego diagnozujemy po przebiegu w funkcji $n$, a różnicę (optymizm)
+podajemy w jednostkach straty. Ustalona metoda, rosnące $n$. Ryzyko maleje do granicy $\sigma^2+$ błąd
 aproksymacji (najlepszy wielomian klasy wciąż mija się z $\fopt$), błąd
 uczący rośnie do niej od dołu. Pokrętło elastyczności tylko przesuwa błąd
 między składnikami; oba naraz zmniejsza tylko więcej danych albo trafne
