@@ -129,6 +129,11 @@ plt.show()
 - Z lewej **niedopasowanie**: oba błędy duże i bliskie sobie.
 - Z prawej **nadmierne dopasowanie**: błąd uczący pod $\sigma^2$, ryzyko rośnie.
 
+::: aside
+Dane jak na wykładzie 2: $X\sim U[0,1]$, $Y=\sin(2\pi X)+X/2+\varepsilon$,
+$\sigma=0{,}3$.
+:::
+
 ::: notes
 Na wykładzie 2 była krzywa U dla $k$-NN; teraz ten sam obraz dla
 drugiej metody. Regresja wielomianowa:
