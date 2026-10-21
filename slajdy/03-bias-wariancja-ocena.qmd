@@ -480,30 +480,29 @@ wielkości z próby -- na wykładzie 4.
 
 ## Zbiór testowy
 
-Predyktor $\widehat f$ dopasowany do $\mathcal D$ i **już niezmieniany**.
-Zbiór testowy: $m$ nowych obserwacji $(\X'_j,Y'_j)$ z $P$, niezależnych od
-$\mathcal D$.
+Predyktor $\widehat f$ dopasowany do $\mathcal D$ i **już niezmieniany**;
+$m$ nowych obserwacji $(\X'_j,Y'_j)$ z $P$, niezależnych od $\mathcal D$:
 $$
 \widehat\Risk_{\mathrm{test}}=\frac1m\sum_{j=1}^m\Loss\big(Y'_j,\widehat f(\X'_j)\big)
 $$
 
 ::: {.definicja}
-**Twierdzenie.** Przy ustalonym $\mathcal D$:
-$\;\E[\widehat\Risk_{\mathrm{test}}\mid\mathcal D]=\Risk(\widehat f)$,
+**Twierdzenie.** $\E[\widehat\Risk_{\mathrm{test}}\mid\mathcal D]=\Risk(\widehat f)$,
 $\;\Var(\widehat\Risk_{\mathrm{test}}\mid\mathcal D)=\tau^2/m$,
-gdzie $\tau^2$ to wariancja straty na nowej obserwacji. Przy stracie 0--1
-liczba błędów ma rozkład dwumianowy i $\tau^2=\Risk(1-\Risk)$.
+gdzie $\tau^2$ -- wariancja straty na nowej obserwacji
+(przy stracie 0--1: $\tau^2=\Risk(1-\Risk)$).
 :::
 
 . . .
 
 - Szacuje ryzyko **tego** predyktora, nie ryzyko metody.
-- Niezależność od $\mathcal D$ jest wszystkim: jedna obserwacja testowa
-  w zbiorze uczącym i wraca optymizm błędu uczącego.
-- Dokładność rośnie jak $\sqrt m$: przy błędzie $10\%$ i $m=100$ przedział
-  $95\%$ to $4\%$--$16\%$; dwa razy węższy kosztuje cztery razy więcej danych.
+- Jedna obserwacja testowa w zbiorze uczącym -- i wraca optymizm.
+- Błąd $10\%$, $m=100$: przedział $95\%$ to $4\%$--$16\%$.
+  Dwa razy węższy -- cztery razy więcej danych.
 
 ::: notes
+Przy stracie 0--1 liczba błędów ma rozkład dwumianowy. Dokładność rośnie
+jak $\sqrt m$.
 $\widehat{\mathrm{se}}=\sqrt{\widehat\Risk(1-\widehat\Risk)/m}$; dla
 połowy szerokości $h$ potrzeba $m\approx1{,}96^2\Risk(1-\Risk)/h^2$
 ($h=0{,}01$: ok. 3500, $h=0{,}005$: ok. 14 000). Obserwacje odłożone do
