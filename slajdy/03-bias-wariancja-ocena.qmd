@@ -495,7 +495,7 @@ gdzie $\tau^2$ -- wariancja straty na nowej obserwacji.
 . . .
 
 - Szacuje ryzyko **tego** predyktora, nie ryzyko metody.
-- Jedna obserwacja testowa w zbiorze uczącym -- i wraca optymizm.
+- Zbiór testowy choć częściowo w uczącym -- wraca optymizm błędu uczącego.
 - Błąd $10\%$, $m=100$: przedział $95\%$ to $4\%$--$16\%$.
   Dwa razy węższy -- cztery razy więcej danych.
 
