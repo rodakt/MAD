@@ -222,8 +222,8 @@ przykład ze ściąganiem $c\bar Y$ na wykładzie 6 (regularyzacja).
 ## Rozkład na obciążenie i wariancję
 
 ::: {.definicja}
-**Twierdzenie.** Niech $Y_0$ ma rozkład $Y\mid\X=\x_0$ i będzie
-niezależne od $\mathcal D$. Wtedy
+**Twierdzenie.** Jeśli $Y_0\sim Y\mid\X=\x_0$ jest niezależne
+od $\mathcal D$, to
 $$
 \E\big[(Y_0-\fD(\x_0))^2\big]
 =\underbrace{\Var(Y\mid\X=\x_0)}_{\text{błąd nieredukowalny}}
@@ -232,18 +232,16 @@ $$
 $$
 :::
 
-Szkic dowodu: wstawiamy $\fopt$ i $\bar f$,
-$Y_0-\fD(\x_0)=(Y_0-\fopt)+(\fopt-\bar f)+(\bar f-\fD)$.
-Pierwszy składnik zależy tylko od $Y_0$, trzeci tylko od $\mathcal D$;
-oba mają średnią zero, środkowy jest stałą. Po podniesieniu do kwadratu
-iloczyny mieszane mają średnią zero i zostają trzy kwadraty.
+Szkic dowodu:
+$Y_0-\fD(\x_0)=(Y_0-\fopt)+(\fopt-\bar f)+(\bar f-\fD)$;
+pierwszy składnik zależy tylko od $Y_0$, trzeci tylko od $\mathcal D$,
+oba mają średnią zero, środkowy jest stały -- iloczyny mieszane znikają.
 
 . . .
 
 ::: {.wniosek}
-„Wariancja” w nazwie kompromisu to wariancja **predyktora** po zbiorach
-uczących, nie wariancja szumu. Predyktor stały $\widehat f\equiv0$ ma
-wariancję zero przy dowolnie zaszumionych danych.
+„Wariancja” to wariancja **predyktora** po zbiorach uczących, nie szumu:
+predyktor $\widehat f\equiv0$ ma wariancję zero przy dowolnym szumie.
 :::
 
 ::: notes
