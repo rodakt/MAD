@@ -447,8 +447,8 @@ za to płacimy.
 „Jak dobry jest model?” to trzy różne pytania.
 
 - **Selekcja** -- który z kandydatów ($k$, $d$, metoda) ma najmniejsze
-  ryzyko? Wystarczy **uporządkować**; obciążenie nie szkodzi, jeśli
-  jednakowe dla wszystkich.
+  ryzyko? Wystarczy **uporządkować**: wspólne zawyżenie ryzyka nie
+  zmienia kolejności, liczy się dokładność **różnic**.
 - **Ocena** -- ile wynosi ryzyko wybranego modelu? Potrzebna **wartość**;
   obciążenie jest błędem.
 - **Model czy metoda** -- $\Risk(\fD)$ tego modelu,
@@ -464,9 +464,9 @@ drugie, choć wszystkie nazywa się „błędem modelu”.
 
 | Pytanie | Narzędzie |
 |---|---|
-| ryzyko ustalonego modelu | zbiór testowy |
+| ryzyko dopasowanego predyktora, gdy nic już nie wybieramy | zbiór testowy |
 | wybór spośród kandydatów | zbiór walidacyjny, walidacja krzyżowa |
-| ryzyko modelu wybranego z danych | zagnieżdżona walidacja krzyżowa albo nietknięty zbiór testowy |
+| ryzyko predyktora wybranego spośród kandydatów na tych samych danych | nietknięty zbiór testowy (ryzyko wybranego modelu) albo zagnieżdżona walidacja krzyżowa (ryzyko oczekiwane procedury wyboru) |
 
 Wspólna zasada wszystkich narzędzi: oceniamy na obserwacjach, które nie
 miały wpływu na predyktor.
