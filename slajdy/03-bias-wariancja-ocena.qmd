@@ -393,13 +393,13 @@ plt.show()
 
 :::: {.columns}
 ::: {.column .karta width="50%"}
-**Ryzyko spada, szczelina się zamyka** ($d=9$): wariancja. Pomoże
-więcej danych albo prostszy model.
+**Krzywe płaskie i zbieżne** ($d=1$): obciążenie. Więcej danych nie
+pomoże; trzeba bogatszej klasy albo innych cech.
 :::
 
 ::: {.column .karta width="50%"}
-**Krzywe płaskie i zbieżne** ($d=1$): obciążenie. Więcej danych nie
-pomoże; trzeba bogatszej klasy albo innych cech.
+**Ryzyko spada, szczelina się zamyka** ($d=9$): wariancja. Pomoże
+więcej danych albo prostszy model.
 :::
 ::::
 
