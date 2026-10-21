@@ -489,8 +489,7 @@ $$
 ::: {.definicja}
 **Twierdzenie.** $\E[\widehat\Risk_{\mathrm{test}}\mid\mathcal D]=\Risk(\widehat f)$,
 $\;\Var(\widehat\Risk_{\mathrm{test}}\mid\mathcal D)=\tau^2/m$,
-gdzie $\tau^2$ -- wariancja straty na nowej obserwacji
-(przy stracie 0--1: $\tau^2=\Risk(1-\Risk)$).
+gdzie $\tau^2$ -- wariancja straty na nowej obserwacji.
 :::
 
 . . .
@@ -501,7 +500,8 @@ gdzie $\tau^2$ -- wariancja straty na nowej obserwacji
   Dwa razy węższy -- cztery razy więcej danych.
 
 ::: notes
-Przy stracie 0--1 liczba błędów ma rozkład dwumianowy. Dokładność rośnie
+Przy stracie 0--1 liczba błędów ma rozkład dwumianowy
+i $\tau^2=\Risk(1-\Risk)$. Dokładność rośnie
 jak $\sqrt m$.
 $\widehat{\mathrm{se}}=\sqrt{\widehat\Risk(1-\widehat\Risk)/m}$; dla
 połowy szerokości $h$ potrzeba $m\approx1{,}96^2\Risk(1-\Risk)/h^2$
