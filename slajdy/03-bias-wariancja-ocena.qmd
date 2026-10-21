@@ -753,9 +753,10 @@ podzielone przez $\sqrt n$. Zaniżony, bo straty nie są niezależne, ale jako
 . . .
 
 ::: {.definicja}
-**Reguła jednego błędu standardowego.** Spośród kandydatów uporządkowanych
-od najprostszego do najbardziej elastycznego wybierz najprostszego, którego
-$\mathrm{CV}_K$ nie przekracza minimum o więcej niż jeden błąd standardowy.
+**Reguła jednego błędu standardowego.** Niech $j^*$ minimalizuje
+$\mathrm{CV}_K$, a $\mathrm{se}_{j^*}$ będzie jego błędem standardowym.
+Spośród kandydatów z $\mathrm{CV}_K(j)\le\mathrm{CV}_K(j^*)+\mathrm{se}_{j^*}$
+wybierz najprostszego.
 :::
 
 Różnice mniejsze niż błąd standardowy mogą być przypadkowe; w razie
