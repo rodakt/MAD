@@ -450,7 +450,7 @@ za to płacimy.
   ryzyko? Wystarczy **uporządkować**: wspólne zawyżenie ryzyka nie
   zmienia kolejności, liczy się dokładność **różnic**.
 - **Ocena** -- ile wynosi ryzyko wybranego modelu? Potrzebna **wartość**;
-  obciążenie jest błędem.
+  obciążenie oszacowania jest błędem.
 - **Model czy metoda** -- $\Risk(\fD)$ tego modelu,
   czy $\overline{\Risk}_n$ procedury?
 
