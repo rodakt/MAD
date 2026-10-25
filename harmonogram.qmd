@@ -12,7 +12,7 @@ semestru. Daty i laboratoria zostaną uzupełnione.
 |---|---|---|---|
 | 1 | | Czym jest model? Predyktory optymalne i błąd nieredukowalny | 5 X: [Prawdopodobieństwo warunkowe i ryzyko](laby/01-ryzyko-symulacja.qmd) |
 | 2 | | Metoda $k$ najbliższych sąsiadów | 12 X: [Reguła Bayesa i metoda $k$ najbliższych sąsiadów](laby/02-knn.qmd) |
-| 3 | | Kompromis obciążenie--wariancja i ocena modeli | |
+| 3 | | Kompromis obciążenie--wariancja i ocena modeli | [Wybór modelu walidacją krzyżową i wyciek informacji](laby/03-walidacja-krzyzowa.qmd) |
 | 4 | | Regresja liniowa I: model, estymacja, wnioskowanie | |
 | 5 | | Regresja liniowa II: zmienne jakościowe, interakcje, diagnostyka | |
 | 6 | | Selekcja i regularyzacja | |

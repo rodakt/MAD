@@ -1,0 +1,106 @@
+---
+title: "Wybór modelu walidacją krzyżową i wyciek informacji"
+subtitle: "komputerowe i tablicowe"
+---
+
+## Przed zajęciami
+
+Spróbuj odpowiedzieć na podane niżej pytania. Jeżeli sprawiają Ci
+trudność, przeczytaj fragmenty wskazane pod pytaniami.
+
+1. Co zwraca `cross_val_score(KNeighborsClassifier(n_neighbors=5), X, y, cv=10)`?
+   Jak z tego wyniku otrzymać oszacowanie błędu klasyfikacji?
+2. Czym różni się `StratifiedKFold` od `KFold`? Po co w klasyfikacji
+   losuje się części warstwowo?
+3. Co robi `make_pipeline(StandardScaler(), KNeighborsClassifier())`
+   przy wywołaniu `fit`, a co przy `predict`?
+4. Walidacja krzyżowa dała dla $k = 1, 5, 15, 51$ oszacowania błędu
+   $0{,}12$, $0{,}10$, $0{,}11$, $0{,}14$, każde z błędem standardowym
+   $0{,}02$. Które $k$ wybiera minimum, a które reguła jednego błędu
+   standardowego?
+
+::: {.callout-note collapse="true" title="Odpowiedzi"}
+1. Tablicę 10 wartości trafności (odsetka poprawnych klasyfikacji), po
+   jednej dla każdej części. Błąd to jeden minus średnia tych wartości.
+2. `StratifiedKFold` dzieli tak, by proporcje klas w każdej części były
+   takie jak w całej próbie. Przy rzadkiej klasie podział niewarstwowy
+   może dać część bez żadnej jej obserwacji. Liczba całkowita `cv=10`
+   przy klasyfikatorze oznacza `StratifiedKFold` bez tasowania.
+3. `fit` wyznacza średnie i odchylenia cech z danych, które dostaje,
+   standaryzuje je i dopasowuje klasyfikator do wyniku. `predict`
+   standaryzuje nowe punkty średnimi i odchyleniami zapamiętanymi przy
+   `fit`, a potem klasyfikuje.
+4. Minimum: $k = 5$. Próg to $0{,}10 + 0{,}02 = 0{,}12$; spełniają go
+   $k = 1, 5, 15$, a najprostszy z nich, czyli o największym $k$, to
+   $k = 15$.
+:::
+
+Do każdego pytania wystarczą jeden albo dwa krótkie fragmenty, po kilka
+akapitów:
+
+1. [Obliczanie wyników walidacji krzyżowej](https://scikit-learn.org/stable/modules/cross_validation.html#computing-cross-validated-metrics)
+   (do pierwszego przykładu z `scoring`).
+2. [`StratifiedKFold`](https://scikit-learn.org/stable/modules/cross_validation.html#stratified-k-fold)
+   i akapit o walidacji krzyżowej w klasyfikacji w
+   [sekcji o walidacji krzyżowej](https://rodakt.github.io/MAD_book/1-fundamenty/05-ocena-modeli.html#walidacja-krzyżowa-w-klasyfikacji).
+3. [Wyciek informacji](https://scikit-learn.org/stable/common_pitfalls.html#data-leakage)
+   w dokumentacji scikit-learn (przykład z wyborem cech).
+4. Ostatni akapit
+   [sekcji o błędzie standardowym walidacji krzyżowej](https://rodakt.github.io/MAD_book/1-fundamenty/05-ocena-modeli.html#błąd-standardowy-walidacji-krzyżowej).
+
+## Zadania z książki
+
+Treść zadań jest w książce; tutaj jej nie powtarzamy.
+
+1. **Wybór $k$ walidacją krzyżową** (Colab) --
+   [Zadanie 5.8](https://rodakt.github.io/MAD_book/1-fundamenty/05-ocena-modeli.html#exr-wybor-k-cv):
+   wynik dziesięciokrotnej walidacji krzyżowej i ryzyko $k$-NN na danych
+   `make_moons`, $k$ wybrane minimum i regułą jednego błędu
+   standardowego, a potem 100 prób: rozkład wybranych $k$, strata
+   z wyboru i optymizm wyboru. Część 1 notebooka.
+2. **Wyciek przy wyborze cech** (Colab) --
+   [Zadanie 5.7](https://rodakt.github.io/MAD_book/1-fundamenty/05-ocena-modeli.html#exr-wyciek-selekcja):
+   wybór cech przed walidacją i w potoku na danych bez żadnej informacji
+   o klasie, zależność wycieku od liczby cech, standaryzacja na całej
+   próbie. Część 2 notebooka.
+3. **Błędy metodologiczne** (tablica) --
+   [Zadanie 5.2](https://rodakt.github.io/MAD_book/1-fundamenty/05-ocena-modeli.html#exr-bledy-procedury):
+   pięć procedur oceny z błędem; kierunek zniekształcenia i poprawka.
+   Punkty a) i b) to sytuacje z części 2 i 1 notebooka.
+
+[Otwórz notebook w Colabie](https://colab.research.google.com/github/rodakt/MAD/blob/2026-27/laby/notebooki/03-walidacja-krzyzowa.ipynb){.btn .btn-primary target="_blank"}
+[Podgląd notebooka](notebooki/03-walidacja-krzyzowa.html){.btn .btn-outline-primary target="_blank"}
+[Pobierz notebook](https://rodakt.github.io/MAD/laby/notebooki/03-walidacja-krzyzowa.ipynb){.btn .btn-outline-primary download="03-walidacja-krzyzowa.ipynb"}
+
+Notebook otwarty z tego linku nie jest zapisany na Twoim Dysku: po ponownym
+kliknięciu linku zobaczysz wersję wyjściową. Na początku zajęć zapisz kopię
+(*Plik → Zapisz kopię na Dysku*) i pracuj na niej.
+
+## Python
+
+Notebook zawiera szkielet kodu; miejsca do uzupełnienia są oznaczone `...`.
+Potrzebne są `numpy`, `matplotlib` i `scikit-learn`, dostępne w Colabie
+bez instalacji.
+
+- Podział na części: `cv = StratifiedKFold(n_splits=10, shuffle=True, random_state=s)`.
+  Pętla `for tr, te in cv.split(X, Y)` daje indeksy obserwacji uczących
+  i oceniających w kolejnych częściach. Przy stałym `random_state` każde
+  wywołanie daje ten sam podział, więc ten sam obiekt `cv` można podać
+  do różnych funkcji i porównywać wyniki.
+- `cross_val_predict(model, X, Y, cv=cv)` zwraca dla każdej obserwacji
+  predykcję modelu, który jej nie widział; `cross_val_score` -- wynik
+  (domyślnie trafność) w każdej części.
+- Funkcja `knn_predict_all` z notebooka liczy predykcje $k$-NN dla
+  wszystkich $k$ naraz: sąsiadów szuka raz, a głosy sumuje `np.cumsum`.
+  Dzięki temu 100 prób po 50 kandydatów liczy się kilkadziesiąt sekund
+  zamiast kilku minut.
+- Reguła jednego błędu standardowego: `np.nonzero(warunek)[0]` zwraca
+  indeksy, w których warunek jest spełniony; największy z nich to
+  najprostszy kandydat, bo $k$ rośnie wzdłuż listy.
+- Wybór cech: `SelectKBest(f_classif, k=q)` zostawia $q$ cech
+  o największej statystyce $F$, przy dwóch klasach -- o największej
+  bezwzględnej korelacji z klasą. `fit_transform(X, Y)` wybiera
+  i od razu zwraca macierz z wybranymi kolumnami.
+- Potok `make_pipeline(step_1, step_2, model)` zachowuje się jak jeden
+  model; funkcje walidacji krzyżowej wywołują jego `fit` osobno
+  w każdej części.
