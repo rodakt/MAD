@@ -1,0 +1,1010 @@
+---
+title: "Regresja liniowa I: model, estymacja, wnioskowanie"
+subtitle: "Rozdział 6"
+format:
+  revealjs:
+    slide-number: true
+    chalkboard: true
+    footer: "[Strona kursu](../index.html) · [Slajdy](index.html)"
+    theme: [default, _slajdy.scss]
+execute:
+  echo: false
+---
+
+## Materiał
+
+- Rozdział [Regresja liniowa](https://rodakt.github.io/MAD_book/2-modele-liniowe/06-regresja-liniowa.html),
+  sekcje od „Model liniowy” do „Jakość dopasowania”
+- Sekcje [Dwa cele modelowania](https://rodakt.github.io/MAD_book/1-fundamenty/01-czym-jest-model.html#sec-predykcja-wnioskowanie)
+  i „Kompromis między interpretowalnością a dokładnością” z rozdziału 1
+- Sekcja [Bootstrap](https://rodakt.github.io/MAD_book/1-fundamenty/05-ocena-modeli.html#sec-bootstrap)
+  z rozdziału 5
+
+Cechy jakościowe, interakcje i diagnostyka modelu -- na wykładzie 5.
+
+```{python}
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import statsmodels.api as sm
+from scipy import stats
+
+# Dane z repozytorium książki (katalog obok repozytorium kursu).
+ads = pd.read_csv("../../MAD_book/dane/Advertising.csv", index_col=0)
+media = ["TV", "radio", "newspaper"]
+media_pl = {"TV": "telewizja", "radio": "radio", "newspaper": "prasa"}
+
+
+def fit_ols(features, data=ads):
+    """Model MNK sprzedaży względem podanych cech (statsmodels)."""
+    return sm.OLS(data["sales"], sm.add_constant(data[features])).fit()
+```
+
+# Predykcja i wnioskowanie
+
+## Dwa pytania o te same dane
+
+Dane o mieszkaniach: cena, metraż, lokalizacja, liczba pokoi.
+
+:::: {.columns}
+::: {.column .karta width="50%"}
+**Predykcja**
+
+„Jaką cenę przewidujemy dla mieszkania 60 m² w tej lokalizacji?”
+
+Wynik: liczba dla konkretnego obiektu. Kryterium: **generalizacja**,
+czyli błąd na nowych danych (wykład 3).
+:::
+
+::: {.column .karta width="50%"}
+**Wnioskowanie**
+
+„O ile różni się przeciętna cena mieszkań 60 m² i 50 m² w tej samej
+lokalizacji?”
+
+Wynik: charakterystyka populacji **wraz z oceną niepewności**
+oszacowania.
+:::
+::::
+
+. . .
+
+Ten sam model może służyć obu celom, ale każdy cel ma własne kryteria
+oceny.
+
+## Dobra predykcja to za mało
+
+Metraż i liczba pokoi prawie zawsze idą w parze.
+
+- Predykcja ceny typowych mieszkań może być bardzo dobra.
+- „Jak cena zależy od metrażu **przy ustalonej liczbie pokoi**?” -- mało
+  mieszkań pozwala na takie porównanie. Różne modele dają podobne
+  predykcje, a różne odpowiedzi na to pytanie.
+
+. . .
+
+**Precyzja** -- rozrzut oszacowań przy powtarzaniu badania tą samą
+metodą. **Dokładność** -- bliskość prawdziwej wartości.
+
+Duża próba wyłącznie z rynku pierwotnego daje precyzyjną średnią cenę,
+ale jako średnia dla całego rynku jest systematycznie błędna.
+
+::: {.wniosek}
+Wąski przedział ufności nie gwarantuje wiarygodnego wniosku.
+:::
+
+## Zależność a przyczynowość
+
+Mieszkania po remoncie są przeciętnie droższe. Czy różnica to skutek
+remontu?
+
+. . .
+
+- Obie grupy różnią się też lokalizacją, metrażem, standardem budynku.
+- Skutek remontu to porównanie ceny **tego samego** mieszkania
+  z remontem i bez niego. Obserwujemy tylko jedną z tych sytuacji.
+- Zwykle szacujemy **przeciętny** skutek w populacji. Potrzebny jest
+  odpowiedni plan badania albo dodatkowe założenia.
+
+::: {.wniosek}
+Samo dopasowanie modelu nie uzasadnia interpretacji przyczynowej.
+:::
+
+## Dane *Advertising*
+
+$200$ rynków: budżety reklamy w telewizji, radiu i prasie (tys. USD)
+i sprzedaż produktu (tys. sztuk).
+
+```{python}
+#| fig-width: 11
+#| fig-height: 3.2
+
+fig, axes = plt.subplots(1, 3, figsize=(11, 3.2), sharey=True)
+for ax, medium in zip(axes, media):
+    x, y = ads[medium].to_numpy(), ads["sales"].to_numpy()
+    slope, intercept = np.polyfit(x, y, 1)
+    line_x = np.array([0, x.max()])
+    ax.scatter(x, y, s=12, color="#1B6CA8", alpha=0.6)
+    ax.plot(line_x, intercept + slope * line_x, color="#D7263D", lw=2)
+    ax.set_xlabel(f"budżet: {media_pl[medium]} (tys. USD)")
+axes[0].set_ylabel("sprzedaż (tys. sztuk)")
+plt.tight_layout()
+plt.show()
+```
+
+1. Czy wydatki na reklamę w ogóle wiążą się ze sprzedażą?
+2. Które media się do tego przyczyniają?
+3. Jak dokładnie przewidzimy sprzedaż przy zadanym budżecie?
+
+::: notes
+Każde pytanie wymaga nie tylko dopasowania, ale też oceny, ile
+w dopasowaniu jest przypadku. Zwrócić uwagę: rozrzut wokół prostej dla
+telewizji rośnie z budżetem -- wróci przy bootstrapie.
+:::
+
+# Model liniowy i MNK
+
+## Model regresji liniowej
+
+::: {.definicja}
+$$
+Y=\beta_0+\beta_1X_1+\dots+\beta_pX_p+\varepsilon,\qquad
+\E[\varepsilon\mid\X]=0,
+$$
+czyli funkcja regresji $\fopt(\x)=\E[Y\mid\X=\x]$ jest liniowa (afiniczna)
+w cechach. $\beta_0$ -- **wyraz wolny**, $\beta_j$ -- **współczynnik
+regresji** przy $X_j$.
+:::
+
+:::: {.columns}
+::: {.column .karta width="50%"}
+**Twierdzenie o świecie**
+
+$\fopt\in\mathcal F_{\mathrm{lin}}$: błąd aproksymacji jest zerowy,
+cały błąd redukowalny pochodzi ze skończoności próby.
+:::
+
+::: {.column .karta width="50%"}
+**Najlepsze przybliżenie**
+
+Celem jest $f_{\mathcal F}$ -- element $\mathcal F_{\mathrm{lin}}$
+najbliższy $\fopt$ w sensie średniego kwadratu. Dla jednej cechy
+nachylenie $\Cov(X,Y)/\Var X$.
+:::
+::::
+
+. . .
+
+Liniowość dotyczy **parametrów**, nie cech: wielomian
+$\beta_0+\beta_1x+\dots+\beta_dx^d$ z wykładu 3 to model liniowy z cechami
+$x,x^2,\dots,x^d$.
+
+::: notes
+Rachunki MNK mają sens przy obu odczytaniach. Własności estymatora
+i wnioskowanie (druga część wykładu) opierają się na pierwszym.
+:::
+
+## Co mówi $\beta_j$
+
+O ile zmienia się **średni** wynik, gdy $X_j$ rośnie o jednostkę,
+**a pozostałe cechy się nie zmieniają**.
+
+- Porównujemy dwie grupy obiektów, które różnią się tylko wartością $X_j$.
+- To opis zależności w populacji, a nie skutek interwencji.
+
+. . .
+
+Rynki z budżetem telewizyjnym wyższym o tysiąc dolarów **przy tych
+samych** budżetach radiowym i prasowym sprzedają przeciętnie
+o $1000\,\beta_1$ sztuk więcej.
+
+Czy podniesienie budżetu na danym rynku dałoby taki wzrost -- zależy od
+tego, co jeszcze różni te rynki. Tego model nie widzi.
+
+## Metoda najmniejszych kwadratów
+
+**Macierz projektowa** $\X$ ($n\times(p+1)$): $i$-ty wiersz
+$(1,x_{i1},\dots,x_{ip})$. Wyniki $\y$, współczynniki $\bbeta$.
+$$
+\mathrm{RSS}(\bbeta)=\sum_{i=1}^n\big(y_i-\beta_0-\beta_1x_{i1}-\dots-\beta_px_{ip}\big)^2
+=\|\y-\X\bbeta\|^2
+$$
+MNK minimalizuje $\mathrm{RSS}$ -- to **minimalizacja ryzyka
+empirycznego** przy stracie kwadratowej w klasie
+$\mathcal F_{\mathrm{lin}}$.
+
+. . .
+
+Gradient równy zeru daje **równania normalne**
+$\;\X^\top\X\,\bbeta=\X^\top\y$.
+
+::: {.definicja}
+**Twierdzenie.** Jeśli kolumny $\X$ są liniowo niezależne, to $\X^\top\X$
+jest odwracalna, a $\mathrm{RSS}$ ma dokładnie jedno minimum
+$$
+\widehat\bbeta=(\X^\top\X)^{-1}\X^\top\y .
+$$
+:::
+
+::: notes
+Na tablicy: $\mathrm{RSS}(\bbeta)=\mathrm{RSS}(\widehat\bbeta)
++\|\X(\widehat\bbeta-\bbeta)\|^2$ -- iloczyn mieszany znika z równań
+normalnych.
+:::
+
+## Kiedy rozwiązanie jest jedno
+
+- Liniowa niezależność kolumn wymaga $n\ge p+1$. Gdy cech jest więcej niż
+  obserwacji, rozwiązań jest nieskończenie wiele, wiele z nich ma
+  $\mathrm{RSS}=0$ -- jak wielomian przechodzący przez wszystkie punkty
+  na wykładzie 3.
+
+. . .
+
+- Dla jednej cechy:
+$$
+\widehat\beta_1=\frac{\sum_{i}(x_i-\bar x)(y_i-\bar y)}{\sum_{i}(x_i-\bar x)^2},
+\qquad
+\widehat\beta_0=\bar y-\widehat\beta_1\bar x .
+$$
+  Nachylenie to kowariancja z próby przez wariancję z próby -- próbkowy
+  odpowiednik $\Cov(X,Y)/\Var X$. Prosta przechodzi przez $(\bar x,\bar y)$.
+
+## Geometria: rzut ortogonalny
+
+:::: {.columns}
+::: {.column width="45%"}
+```{python}
+#| fig-width: 5
+#| fig-height: 4.2
+
+fig = plt.figure(figsize=(5, 4.2))
+ax = fig.add_subplot(projection="3d")
+plane_x, plane_y = np.meshgrid([-0.3, 1.6], [-0.4, 1.3])
+ax.plot_surface(plane_x, plane_y, np.zeros_like(plane_x), color="#1B6CA8", alpha=0.15)
+y_vec = np.array([1.2, 0.9, 1.0])
+y_hat = np.array([1.2, 0.9, 0.0])
+ax.quiver(0, 0, 0, *y_vec, color="black", lw=2, arrow_length_ratio=0.08)
+ax.quiver(0, 0, 0, *y_hat, color="#1B6CA8", lw=2, arrow_length_ratio=0.08)
+ax.quiver(*y_hat, *(y_vec - y_hat), color="#D7263D", lw=2, arrow_length_ratio=0.1)
+# Znak kąta prostego między resztą a płaszczyzną.
+s = 0.12
+ax.plot([1.2 - s, 1.2 - s, 1.2], [0.9, 0.9, 0.9], [0, s, s], color="0.3", lw=1)
+ax.text(*(y_vec + [0.02, 0, 0.05]), r"$\mathbf{y}$", fontsize=14)
+ax.text(*(y_hat + [0.05, 0.05, -0.12]), r"$\widehat{\mathbf{y}}=\mathbf{H}\mathbf{y}$",
+        fontsize=13, color="#1B6CA8")
+ax.text(1.27, 0.9, 0.45, r"$\mathbf{e}$", fontsize=14, color="#D7263D")
+ax.text(1.3, -0.3, 0, r"$\mathcal{C}(\mathbf{X})$", fontsize=13, color="#1B6CA8")
+ax.set_xlim(-0.3, 1.6)
+ax.set_ylim(-0.4, 1.3)
+ax.set_zlim(0, 1.2)
+ax.view_init(elev=18, azim=-60)
+ax.set_axis_off()
+plt.tight_layout()
+plt.show()
+```
+:::
+
+::: {.column width="55%"}
+Gdy $\bbeta$ przebiega $\R^{p+1}$, wektor $\X\bbeta$ przebiega przestrzeń
+kolumn $\mathcal C(\X)$ -- podprzestrzeń $\R^n$ wymiaru $p+1$.
+
+MNK szuka punktu $\mathcal C(\X)$ najbliższego $\y$: **rzutu
+ortogonalnego**.
+
+Równania normalne: $\X^\top(\y-\X\widehat\bbeta)=\mathbf 0$ -- wektor reszt
+$\mathbf e=\y-\widehat\y$ jest prostopadły do każdej kolumny $\X$:
+
+- reszty sumują się do zera (kolumna jedynek),
+- w próbie są nieskorelowane z każdą cechą.
+:::
+::::
+
+## Macierz daszkowa
+
+$$
+\widehat\y=\mathbf H\y,\qquad \mathbf H=\X(\X^\top\X)^{-1}\X^\top
+$$
+$\mathbf H$ jest macierzą rzutu: symetryczna i idempotentna
+($\mathbf H^2=\mathbf H$). Jej ślad to wymiar podprzestrzeni:
+$\operatorname{tr}\mathbf H=p+1$.
+
+. . .
+
+:::: {.columns}
+::: {.column .karta width="50%"}
+**MNK**
+
+$\widehat\y=\mathbf H\y$, $\;\operatorname{tr}\mathbf H=p+1$ -- liczba
+współczynników.
+:::
+
+::: {.column .karta width="50%"}
+**Regresja $k$-NN**
+
+$\widehat\y=\mathbf S\y$, na przekątnej $1/k$, $\;\operatorname{tr}\mathbf S=n/k$ --
+efektywna liczba parametrów z wykładów 2--3.
+:::
+::::
+
+::: {.wniosek}
+Ślad macierzy, która zamienia $\y$ na $\widehat\y$, to wspólna miara
+elastyczności metod liniowych względem $\y$.
+:::
+
+::: notes
+Element $h_{ii}$ -- waga, jaką predykcja w $\x_i$ przypisuje własnemu
+wynikowi $y_i$: dźwignia obserwacji. Wróci przy diagnostyce na wykładzie 5.
+Z Pitagorasa: $\|\y\|^2=\|\widehat\y\|^2+\|\mathbf e\|^2$.
+:::
+
+## Wzór to nie algorytm
+
+Wielomian stopnia $10$ na $50$ punktach z $[0,1]$:
+
+```{python}
+#| echo: true
+x = np.linspace(0, 1, 50)
+V = np.vander(x, 11, increasing=True)   # kolumny 1, x, ..., x^10
+print(f"uwarunkowanie X:     {np.linalg.cond(V):.1e}")
+print(f"uwarunkowanie X^T X: {np.linalg.cond(V.T @ V):.1e}")
+```
+
+- Utworzenie $\X^\top\X$ podnosi wskaźnik uwarunkowania do kwadratu.
+  Przy około $16$ cyfrach znaczących $10^{14}$ zostawia dwie wiarygodne.
+- Biblioteki rozkładają $\X$, a nie $\X^\top\X$: rozkład QR albo według
+  wartości osobliwych (`np.linalg.lstsq`).
+
+::: notes
+Dlatego na wykładzie 3 wielomiany dopasowywała funkcja `Polynomial.fit`,
+która przeskalowuje $x$ do $[-1,1]$.
+:::
+
+## Prosta dla telewizji
+
+```{python}
+#| fig-width: 7
+#| fig-height: 3.4
+
+model_tv = fit_ols(["TV"])
+b0, b1 = model_tv.params
+x, y = ads["TV"].to_numpy(), ads["sales"].to_numpy()
+
+fig, ax = plt.subplots(figsize=(7, 3.4))
+ax.vlines(x, y, b0 + b1 * x, color="0.55", lw=0.8)
+ax.scatter(x, y, s=12, color="#1B6CA8", zorder=3)
+line_x = np.array([0, 300])
+ax.plot(line_x, b0 + b1 * line_x, color="#D7263D", lw=2)
+ax.set_xlabel("budżet: telewizja (tys. USD)")
+ax.set_ylabel("sprzedaż (tys. sztuk)")
+plt.tight_layout()
+plt.show()
+```
+
+$\widehat\beta_0\approx7{,}03$, $\;\widehat\beta_1\approx0{,}0475$: każdy
+dodatkowy tysiąc dolarów w telewizji wiąże się przeciętnie z $47{,}5$
+sztukami więcej. Pionowe odcinki to reszty -- MNK minimalizuje sumę ich
+kwadratów.
+
+## Pytanie {.pytanie}
+
+Współczynniki przy budżetach:
+
+```{python}
+model_full = fit_ols(media)
+pd.DataFrame(
+    {"regresja z jedną cechą": [fit_ols([m]).params[m] for m in media],
+     "regresja z trzema cechami": model_full.params[media].to_numpy()},
+    index=[media_pl[m] for m in media],
+).style.format(precision=4, decimal=",")
+```
+
+Przy prasie: $0{,}055$ czy praktycznie zero? Która liczba jest prawdziwa?
+
+. . .
+
+Obie -- odpowiadają na **różne pytania**. Pierwsza porównuje rynki
+o różnym budżecie prasowym bez względu na resztę, druga -- przy **tych
+samych** budżetach telewizyjnym i radiowym. Korelacja budżetów prasowego
+i radiowego w próbie to $0{,}35$: w regresji z jedną cechą prasa
+przejmuje część zasługi radia.
+
+# Interpretowalność
+
+## Czytelność modelu liniowego
+
+Model jest **interpretowalny**, jeśli z jego struktury widać, jak
+predykcja zależy od cech -- bez liczenia jej dla wielu obiektów.
+W regresji liniowej całą zależność opisuje $p+1$ liczb:
+
+- **addytywność** -- predykcja to suma wkładów cech,
+- **prosta postać wkładów** -- liniowa,
+- **rzadkość** -- trzy współczynniki ogarniamy wzrokiem, trzysta już nie.
+
+. . .
+
+Od najbardziej do najmniej interpretowalnych, z grubsza:
+
+1. regresja liniowa z niewieloma niezerowymi współczynnikami (lasso),
+2. regresja liniowa ze wszystkimi cechami,
+3. modele addytywne $\beta_0+g_1(x_1)+\dots+g_p(x_p)$,
+4. drzewa decyzyjne,
+5. zespoły drzew, sieci neuronowe.
+
+W tej samej kolejności zwykle rośnie elastyczność.
+
+## Tendencja, nie prawo
+
+- Dokładność to jakość predykcji **na nowych danych**. Gdy $\fopt$ jest
+  liniowa, prosta jest i czytelniejsza, i dokładniejsza -- $k$-NN płaci
+  za swobodę wariancją.
+- Na danych tabelarycznych z sensownymi cechami różnice między dobrze
+  dopasowanymi modelami prostymi i złożonymi bywają niewielkie
+  (Rudin, 2019). Elastyczne modele wygrywają, gdy pojedyncza cecha mało
+  znaczy: obrazy, dźwięk, tekst.
+- Część elastyczności można przenieść do cech: logarytm ceny, kwadrat
+  metrażu.
+
+. . .
+
+**Czytelny nie znaczy trafny.** $\beta_j$ zależy od tego, jakie inne
+cechy są w modelu -- jak przy prasie. Przy silnie skorelowanych cechach
+oszacowania są niestabilne, choć predykcje prawie się nie zmieniają.
+
+# Własności estymatora MNK
+
+## Model losowości
+
+**Ustalony układ** (jak dla $k$-NN na wykładzie 3): punkty $\x_i$
+traktujemy jako ustalone, losowe są tylko wyniki.
+
+::: {.definicja}
+**Założenia modelu liniowego.** $\y=\X\bbeta+\boldsymbol\varepsilon$,
+$\X$ ustalona o liniowo niezależnych kolumnach, oraz
+
+- (Z1) $\E\boldsymbol\varepsilon=\mathbf 0$,
+- (Z2) $\Cov\boldsymbol\varepsilon=\sigma^2\mathbf I$ -- błędy
+  nieskorelowane, o jednakowej wariancji.
+:::
+
+(Z1): funkcja regresji jest liniowa. (Z2) wyklucza na przykład rozrzut
+rosnący z budżetem, jak dla telewizji w *Advertising*.
+
+## Średnia i wariancja $\widehat\bbeta$
+
+::: {.definicja}
+**Twierdzenie.** Przy (Z1)--(Z2)
+$$
+\E\widehat\bbeta=\bbeta,\qquad \Cov\widehat\bbeta=\sigma^2(\X^\top\X)^{-1}.
+$$
+:::
+
+Estymator jest nieobciążony. Rozrzut zależy od szumu $\sigma^2$ i od
+układu punktów, zapisanego w $\X^\top\X$.
+
+. . .
+
+Dla jednej cechy
+$$
+\Var\widehat\beta_1=\frac{\sigma^2}{\sum_{i}(x_i-\bar x)^2}
+=\frac{\sigma^2}{n\,s_x^2}.
+$$
+
+- Im szerzej rozrzucone $x_i$, tym stabilniejsza prosta.
+- Odchylenie standardowe maleje jak $1/\sqrt n$.
+
+::: notes
+Na tablicy: $\widehat\bbeta=\bbeta+\mathbf A\boldsymbol\varepsilon$,
+$\mathbf A=(\X^\top\X)^{-1}\X^\top$, więc
+$\Cov\widehat\bbeta=\sigma^2\mathbf A\mathbf A^\top$.
+:::
+
+## Symulacja
+
+```{python}
+#| fig-width: 11
+#| fig-height: 3.5
+
+# Ustalone x_i (n = 30), 10 000 prób nowych wyników z y = 1 + 0,5 x + szum.
+rng = np.random.default_rng(3)
+n_sim, beta0, beta1, sigma = 30, 1.0, 0.5, 1.5
+x_sim = np.sort(rng.uniform(0, 10, n_sim))
+X_sim = np.column_stack([np.ones(n_sim), x_sim])
+XtX_inv = np.linalg.inv(X_sim.T @ X_sim)
+
+reps = 10_000
+Y_sim = beta0 + beta1 * x_sim + rng.normal(0, sigma, (reps, n_sim))
+# Jedno wywołanie lstsq dopasowuje wszystkie próby naraz (kolumny Y_sim.T).
+B_sim = np.linalg.lstsq(X_sim, Y_sim.T, rcond=None)[0].T
+sd_beta1 = sigma * np.sqrt(XtX_inv[1, 1])
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 3.5))
+line_x = np.array([0, 10])
+for b in B_sim[:20]:
+    ax1.plot(line_x, b[0] + b[1] * line_x, color="0.55", lw=0.7)
+ax1.plot(line_x, beta0 + beta1 * line_x, color="black", ls="--", lw=1.4)
+ax1.scatter(x_sim, Y_sim[0], s=12, color="#1B6CA8", zorder=3)
+ax1.set_xlabel("$x$")
+ax1.set_ylabel("$y$")
+ax1.set_title("proste dopasowane do 20 prób", fontsize=10)
+
+ax2.hist(B_sim[:, 1], bins=60, density=True, color="#1B6CA8", alpha=0.6)
+t_grid = np.linspace(beta1 - 4 * sd_beta1, beta1 + 4 * sd_beta1, 200)
+ax2.plot(t_grid, stats.norm.pdf(t_grid, beta1, sd_beta1), color="#D7263D", lw=2)
+ax2.axvline(beta1, color="black", ls="--", lw=1.4)
+ax2.set_xlabel(r"$\widehat\beta_1$")
+ax2.set_title(r"$10\,000$ prób; czerwona: wariancja ze wzoru", fontsize=10)
+plt.tight_layout()
+plt.show()
+```
+
+$y_i=1+0{,}5\,x_i+\varepsilon_i$, $\;\sigma=1{,}5$, $n=30$, punkty $x_i$
+ustalone. Średnia $\widehat\beta_1$ to $\beta_1$, rozrzut zgadza się ze
+wzorem. Kształt jest normalny, bo błędy są normalne -- twierdzenie mówi
+tylko o średniej i wariancji.
+
+## Wariancja predykcji
+
+Predykcja w $\x_0$: $\widehat f(\x_0)=\tilde\x_0^\top\widehat\bbeta$,
+$\tilde\x_0=(1,\x_0)$.
+$$
+\Var\widehat f(\x_0)=\sigma^2\,\tilde\x_0^\top(\X^\top\X)^{-1}\tilde\x_0,
+\qquad
+\frac1n\sum_{i=1}^n\Var\widehat f(\x_i)=\frac{\sigma^2}{n}\operatorname{tr}\mathbf H
+=\sigma^2\,\frac{p+1}{n}.
+$$
+
+. . .
+
+:::: {.columns}
+::: {.column .karta width="50%"}
+**MNK**
+
+wariancja $\sigma^2\,(p+1)/n$; obciążenie zerowe, jeśli model liniowy
+jest trafny
+:::
+
+::: {.column .karta width="50%"}
+**Regresja $k$-NN**
+
+wariancja $\sigma^2/k=\sigma^2\,(n/k)/n$; małe obciążenie dopiero przy
+małych otoczeniach, czyli wielu parametrach
+:::
+::::
+
+::: {.wniosek}
+Obie metody płacą wariancją $\sigma^2/n$ za każdy efektywny parametr.
+Różnią się obciążeniem.
+:::
+
+## Estymacja $\sigma^2$
+
+Reszty są systematycznie mniejsze od błędów: dopasowanie dostosowało się
+do tych samych danych.
+
+::: {.definicja}
+**Twierdzenie.** Przy (Z1)--(Z2) $\;\E\,\mathrm{RSS}(\widehat\bbeta)=\sigma^2(n-p-1)$,
+więc
+$$
+\widehat\sigma^2=\frac{\mathrm{RSS}(\widehat\bbeta)}{n-p-1}
+$$
+jest nieobciążonym estymatorem $\sigma^2$.
+:::
+
+. . .
+
+- Rzut na $\mathcal C(\X)$ „pochłania” składową szumu w $p+1$ kierunkach.
+  W resztach zostaje $n-p-1$ **resztowych stopni swobody**. Przy $p=0$:
+  wariancja z próby z mianownikiem $n-1$.
+- Błąd uczący $\mathrm{RSS}/n$ ma średnią $\sigma^2\big(1-\tfrac{p+1}{n}\big)$ --
+  jest mniejszy nawet od błędu nieredukowalnego. To optymizm błędu
+  uczącego z wykładu 3, tu policzony dokładnie.
+
+::: notes
+Na tablicy: $\mathbf e=(\mathbf I-\mathbf H)\boldsymbol\varepsilon$,
+$\E[\boldsymbol\varepsilon^\top\mathbf M\boldsymbol\varepsilon]
+=\sigma^2\operatorname{tr}\mathbf M$,
+$\operatorname{tr}(\mathbf I-\mathbf H)=n-p-1$.
+:::
+
+## Twierdzenie Gaussa--Markowa
+
+Estymator $\tilde\bbeta$ jest **liniowy**, jeśli $\tilde\bbeta=\mathbf C\y$
+dla macierzy $\mathbf C$ zależnej tylko od $\X$. MNK:
+$\mathbf C=(\X^\top\X)^{-1}\X^\top$.
+
+::: {.definicja}
+**Twierdzenie.** Przy (Z1)--(Z2) dla każdego liniowego estymatora
+$\tilde\bbeta$, nieobciążonego dla każdego $\bbeta$, i każdego wektora
+$\mathbf c$
+$$
+\Var(\mathbf c^\top\tilde\bbeta)\ge\Var(\mathbf c^\top\widehat\bbeta).
+$$
+MNK jest **najlepszym liniowym estymatorem nieobciążonym** (BLUE).
+:::
+
+. . .
+
+Czego twierdzenie **nie** mówi:
+
+- Porównuje tylko z estymatorami nieobciążonymi. Estymator obciążony może
+  mieć mniejszy błąd średniokwadratowy -- na tym oprze się regularyzacja
+  na wykładzie 6.
+- Wymaga (Z2): przy różnych wariancjach błędów lepiej ważyć obserwacje,
+  a MNK traktuje wszystkie jednakowo.
+
+::: notes
+$\mathbf c$ dowolne, więc dotyczy też predykcji
+$\tilde\x_0^\top\widehat\bbeta$ w każdym punkcie. Model z samym wyrazem
+wolnym: średnia z próby jest najlepszą nieobciążoną średnią ważoną.
+:::
+
+# Wnioskowanie o parametrach
+
+## Rozkłady przy normalnych błędach
+
+Do przedziału ufności potrzebny jest cały rozkład, nie tylko średnia
+i wariancja. Trzecie założenie:
+(Z3) $\boldsymbol\varepsilon\sim\Nrozk(\mathbf 0,\sigma^2\mathbf I)$.
+
+::: {.definicja}
+**Twierdzenie.** Przy (Z1)--(Z3):
+$\widehat\bbeta\sim\Nrozk\big(\bbeta,\sigma^2(\X^\top\X)^{-1}\big)$,
+$\;\mathrm{RSS}/\sigma^2\sim\chi^2_{n-p-1}$, a $\widehat\bbeta$
+i $\mathrm{RSS}$ są niezależne.
+:::
+
+. . .
+
+**Błąd standardowy** $\mathrm{SE}(\widehat\beta_j)=\widehat\sigma\sqrt{v_{jj}}$,
+$v_{jj}$ -- element przekątnej $(\X^\top\X)^{-1}$. Wtedy
+$$
+\frac{\widehat\beta_j-\beta_j}{\mathrm{SE}(\widehat\beta_j)}\sim t_{n-p-1}
+\quad\Longrightarrow\quad
+\widehat\beta_j\pm t_{n-p-1}\,\mathrm{SE}(\widehat\beta_j)
+$$
+to **przedział ufności** na poziomie $1-\alpha$ ($t_{n-p-1}$ -- kwantyl
+rzędu $1-\alpha/2$).
+
+Cena za nieznane $\sigma$: kwantyl $t$ jest większy od $1{,}96$ -- przy
+$28$ stopniach swobody wynosi $2{,}05$.
+
+## Pytanie {.pytanie}
+
+Dla regresji sprzedaży względem budżetu telewizyjnego przedział ufności
+$95\%$ dla $\beta_1$ to około $[0{,}042;\,0{,}053]$.
+
+Czy $\beta_1$ leży w tym przedziale z prawdopodobieństwem $95\%$?
+
+. . .
+
+```{python}
+#| fig-width: 9
+#| fig-height: 2.6
+
+# Przedziały ufności z 50 pierwszych prób symulacji.
+residuals = Y_sim - B_sim @ X_sim.T
+sigma2_hat = (residuals ** 2).sum(axis=1) / (n_sim - 2)
+se_beta1 = np.sqrt(sigma2_hat * XtX_inv[1, 1])
+t_crit = stats.t.ppf(0.975, n_sim - 2)
+covers = np.abs(B_sim[:, 1] - beta1) <= t_crit * se_beta1
+
+fig, ax = plt.subplots(figsize=(9, 2.6))
+for i in range(50):
+    color = "0.45" if covers[i] else "#D7263D"
+    ax.plot([i, i], [B_sim[i, 1] - t_crit * se_beta1[i],
+                     B_sim[i, 1] + t_crit * se_beta1[i]], color=color, lw=1.5)
+    ax.plot(i, B_sim[i, 1], "o", color=color, ms=3)
+ax.axhline(beta1, color="black", ls="--", lw=1.2)
+ax.set_xlabel("numer próby symulacji")
+ax.set_ylabel(r"przedział dla $\beta_1$")
+ax.set_title(f"odsetek przedziałów zawierających $\\beta_1$ w {reps} próbach: "
+             f"{covers.mean():.3f}".replace(".", ","), fontsize=10)
+plt.tight_layout()
+plt.show()
+```
+
+Nie. Losowy jest **przedział**, a nie $\beta_1$: w $95\%$ prób procedura
+daje przedział zawierający $\beta_1$. Jeden obliczony przedział albo go
+zawiera, albo nie.
+
+## Średnia czy pojedynczy rynek?
+
+:::: {.columns}
+::: {.column .karta width="50%"}
+**Przedział ufności dla średniej**
+
+Przeciętna sprzedaż na rynkach o budżecie $\x_0$:
+$\fopt(\x_0)=\tilde\x_0^\top\bbeta$.
+$$
+\mathrm{SE}^2=\widehat\sigma^2\,\tilde\x_0^\top(\X^\top\X)^{-1}\tilde\x_0
+$$
+:::
+
+::: {.column .karta width="50%"}
+**Przedział predykcji**
+
+Sprzedaż na **jednym** nowym rynku:
+$Y_0=\tilde\x_0^\top\bbeta+\varepsilon_0$.
+$$
+\Var(Y_0-\widehat f(\x_0))=\sigma^2+\sigma^2\,\tilde\x_0^\top(\X^\top\X)^{-1}\tilde\x_0
+$$
+:::
+::::
+
+Błąd nieredukowalny plus redukowalny z wykładu 1 -- tu sama wariancja,
+bo estymator jest nieobciążony.
+
+. . .
+
+```{python}
+model_tv_radio = fit_ols(["TV", "radio"])
+pred = model_tv_radio.get_prediction(np.array([[1, 100, 20]])).summary_frame(alpha=0.05)
+pred = pred.iloc[0]
+
+
+def fmt(v):
+    """Liczba z przecinkiem dziesiętnym."""
+    return f"{v:.2f}".replace(".", ",")
+
+
+print(f"TV = 100, radio = 20 tys. USD; predykcja: {fmt(pred['mean'])} tys. sztuk")
+print(f"przedział dla średniej:   [{fmt(pred['mean_ci_lower'])}; {fmt(pred['mean_ci_upper'])}]")
+print(f"przedział predykcji:      [{fmt(pred['obs_ci_lower'])}; {fmt(pred['obs_ci_upper'])}]")
+```
+
+::: {.wniosek}
+Przy rosnącym $n$ przedział dla średniej kurczy się do punktu, a przedział
+predykcji nie zejdzie poniżej $\pm1{,}96\,\sigma$.
+:::
+
+## Test $t$
+
+$H_0\colon\beta_j=0$ -- cecha $X_j$ nie wiąże się ze średnim wynikiem,
+**gdy pozostałe cechy są ustalone**. Przy $H_0$
+$\;t=\widehat\beta_j/\mathrm{SE}(\widehat\beta_j)\sim t_{n-p-1}$.
+
+::: {.definicja}
+**$p$-wartość** $\;p=\Prob_{H_0}\big(|T|\ge|t_{\mathrm{obs}}|\big)$ --
+prawdopodobieństwo, że przy prawdziwej $H_0$ statystyka wypadłaby co
+najmniej tak daleko od zera jak w naszej próbie.
+:::
+
+- Mała $p$-wartość: dane byłyby przy $H_0$ zaskakujące.
+- $p$-wartość **nie jest** prawdopodobieństwem, że $H_0$ jest prawdziwa.
+- Odrzucamy $H_0$ na poziomie $\alpha$ $\iff$ przedział ufności nie
+  zawiera zera.
+
+## Które media?
+
+```{python}
+pd.DataFrame(
+    {"współczynnik": model_full.params, "SE": model_full.bse,
+     "t": model_full.tvalues, "p-wartość": model_full.pvalues},
+).rename(index={"const": "wyraz wolny", **media_pl}).style.format(precision=4, decimal=",")
+```
+
+. . .
+
+- Telewizja i radio: $t$ rzędu $30$ i $20$.
+- Prasa: $t\approx-0{,}18$, $p\approx0{,}86$. W regresji z samą prasą:
+  $t\approx3{,}3$, $p\approx0{,}001$.
+
+Nie ma sprzeczności, bo hipotezy są różne: „prasa nie wnosi nic, gdy znamy
+budżety TV i radia” a „sprzedaż nie zależy od budżetu prasowego w ogóle”.
+
+## Pytanie {.pytanie}
+
+$n=200$ obserwacji, $100$ cech **niezależnych od wyniku**. Dla każdej
+cechy test $t$ na poziomie $5\%$.
+
+Ile cech wyjdzie „istotnych”?
+
+. . .
+
+```{python}
+rng = np.random.default_rng(4)
+n_noise, p_noise, reps_noise = 200, 100, 500
+n_signif, f_rejects = [], []
+for _ in range(reps_noise):
+    X = sm.add_constant(rng.normal(size=(n_noise, p_noise)))
+    result = sm.OLS(rng.normal(size=n_noise), X).fit()
+    n_signif.append(np.sum(result.pvalues[1:] < 0.05))
+    f_rejects.append(result.f_pvalue < 0.05)
+n_signif = np.array(n_signif)
+
+print(f"średnia liczba istotnych testów t:      {n_signif.mean():.1f} na {p_noise}")
+print(f"odsetek prób z co najmniej jednym:      {np.mean(n_signif > 0):.3f}")
+print(f"odsetek prób, w których test F odrzuca: {np.mean(f_rejects):.3f}")
+```
+
+Każdy test myli się przy prawdziwej $H_0$ z prawdopodobieństwem $0{,}05$:
+średnio $5$ „istotnych” cech, prawie zawsze co najmniej jedna. Pytanie
+„czy **którakolwiek** cecha się liczy?” wymaga jednego testu.
+
+## Test $F$
+
+Model $M_0$ powstaje z $M$ przez usunięcie $q$ cech
+($H_0$: ich współczynniki są zerowe). Zawsze $\mathrm{RSS}_0\ge\mathrm{RSS}$ --
+czy spadek jest większy, niż dałby sam szum?
+$$
+F=\frac{(\mathrm{RSS}_0-\mathrm{RSS})/q}{\mathrm{RSS}/(n-p-1)}
+\;\sim\;F_{q,\,n-p-1}\quad\text{przy }H_0 .
+$$
+
+- Mianownik to $\widehat\sigma^2$.
+- Licznik przy $H_0$ też ma średnią $\sigma^2$: każdy z $q$ usuniętych
+  kierunków wnosi przeciętnie $\sigma^2$ szumu. Gdy $H_0$ jest fałszywa,
+  dochodzi sygnał.
+- Przy $H_0$ więc $F\approx1$; duże wartości świadczą przeciw $H_0$.
+
+. . .
+
+*Advertising*, $H_0\colon\beta_1=\beta_2=\beta_3=0$ ($M_0$ -- sama średnia,
+$\mathrm{RSS}_0=\mathrm{TSS}$): $F\approx570$, $p$-wartość rzędu
+$10^{-96}$. Wydatki na reklamę wiążą się ze sprzedażą. Dla $q=1$ test $F$
+i test $t$ są równoważne: $F=t^2$.
+
+::: notes
+Pitagoras: $\mathrm{RSS}_0=\mathrm{RSS}+\|\widehat\y-\widehat\y_0\|^2$;
+przy $H_0$ drugi składnik to rzut samego szumu na $q$-wymiarową
+podprzestrzeń, więc $\|\widehat\y-\widehat\y_0\|^2/\sigma^2\sim\chi^2_q$,
+niezależnie od RSS.
+:::
+
+# Bootstrap
+
+## Niepewność bez wzoru
+
+Wzory na błędy standardowe wymagały (Z2), a przedziały -- (Z3). Gdybyśmy
+znali rozkład $P$, wylosowalibyśmy z niego wiele prób i obejrzeli rozrzut,
+jak wachlarz dopasowań na wykładzie 3. Mamy jedną próbę.
+
+. . .
+
+**Bootstrap** (Efron, 1979): zastępujemy $P$ **rozkładem empirycznym**
+$\widehat P_n$ -- masa $1/n$ na każdej obserwacji. Losowanie z
+$\widehat P_n$ to losowanie $n$ obserwacji z próby **ze zwracaniem**.
+
+::: {.definicja}
+$\widehat\theta=s(\mathcal D)$ -- wielkość obliczona z próby.
+
+1. Dla $b=1,\dots,B$: wylosuj z próby ze zwracaniem $n$ obserwacji
+   ($\mathcal D^*_b$), oblicz $\widehat\theta^*_b=s(\mathcal D^*_b)$.
+2. Błąd standardowy $\widehat\theta$: odchylenie standardowe
+   $\widehat\theta^*_1,\dots,\widehat\theta^*_B$.
+3. Przedział $95\%$: między kwantylami rzędu $0{,}025$ i $0{,}975$
+   (**przedział percentylowy**).
+:::
+
+::: notes
+Próba bootstrapowa zawiera przeciętnie ok. $63{,}2\%$ różnych obserwacji:
+$(1-1/n)^n\to e^{-1}\approx0{,}368$. $B$: kilkaset do błędu
+standardowego, kilka tysięcy do kwantyli.
+:::
+
+## Bootstrap dla *Advertising*
+
+Losujemy ze zwracaniem całe **pary** $(\x_i,y_i)$ -- rynki -- i za każdym
+razem dopasowujemy model z trzema mediami ($B=2000$).
+
+```{python}
+#| fig-width: 11
+#| fig-height: 2.8
+
+rng = np.random.default_rng(0)
+X_ads = sm.add_constant(ads[media]).to_numpy()
+y_ads = ads["sales"].to_numpy()
+n_ads, B = len(y_ads), 2000
+boot = np.empty((B, X_ads.shape[1]))
+for b in range(B):
+    idx = rng.integers(0, n_ads, n_ads)
+    boot[b] = np.linalg.lstsq(X_ads[idx], y_ads[idx], rcond=None)[0]
+se_boot = boot.std(axis=0)
+
+fig, axes = plt.subplots(1, 3, figsize=(11, 2.8))
+for j, (ax, medium) in enumerate(zip(axes, media), start=1):
+    est, se = model_full.params[medium], model_full.bse[medium]
+    ax.hist(boot[:, j], bins=50, density=True, color="#1B6CA8", alpha=0.6)
+    t_grid = np.linspace(est - 4.5 * se, est + 4.5 * se, 200)
+    ax.plot(t_grid, stats.norm.pdf(t_grid, est, se), color="#D7263D", lw=2)
+    ax.set_title(media_pl[medium], fontsize=10)
+    ax.set_yticks([])
+plt.tight_layout()
+plt.show()
+
+pd.DataFrame(
+    {"SE ze wzoru": model_full.bse[media].to_numpy(),
+     "SE z bootstrapu": se_boot[1:]},
+    index=[media_pl[m] for m in media],
+).style.format(precision=4, decimal=",")
+```
+
+Histogram -- replikacje bootstrapowe, krzywa -- rozkład normalny z błędem
+standardowym ze wzoru. Przy telewizji bootstrap daje błąd standardowy
+o około jedną trzecią większy. Wzór zakłada (Z2), a rozrzut sprzedaży
+rośnie z budżetem; bootstrap par tego założenia nie potrzebuje.
+
+## Czego bootstrap nie umie
+
+- Replikacje rozkładają się wokół $\widehat\theta$ z **naszej** próby, nie
+  wokół prawdziwej wartości: próba bootstrapowa nie wie o populacji
+  więcej niż próba, z której ją wylosowano. Bootstrap odtwarza
+  **rozrzut** estymatora, nie jego położenie.
+- Jest zawodny tam, gdzie estymator jest niestabilny -- mało danych,
+  predykcja przy krańcu zakresu cech.
+- Dwa przybliżenia: $P\to\widehat P_n$ (zależy od $n$) i skończone $B$
+  (poprawiamy, zwiększając $B$).
+
+# Jakość dopasowania
+
+## RSE i $R^2$
+
+**Resztowy błąd standardowy** (RSE) $\widehat\sigma=\sqrt{\mathrm{RSS}/(n-p-1)}$ --
+typowa odległość wyniku od dopasowania, w jednostkach $Y$.
+
+Z wyrazem wolnym, z twierdzenia Pitagorasa:
+$$
+\underbrace{\textstyle\sum_i(y_i-\bar y)^2}_{\mathrm{TSS}}
+=\underbrace{\textstyle\sum_i(\widehat y_i-\bar y)^2}_{\mathrm{ESS}}
++\underbrace{\textstyle\sum_i(y_i-\widehat y_i)^2}_{\mathrm{RSS}},
+\qquad
+R^2=1-\frac{\mathrm{RSS}}{\mathrm{TSS}} .
+$$
+**Współczynnik determinacji** $R^2$ -- odsetek zmienności $y$ w próbie
+odtworzony przez model.
+
+```{python}
+models = {"TV": ["TV"], "TV + radio": ["TV", "radio"], "TV + radio + prasa": media}
+rows = {}
+for name, features in models.items():
+    result = fit_ols(features)
+    rows[name] = {"R²": result.rsquared, "skorygowany R²": result.rsquared_adj,
+                  "RSE": np.sqrt(result.mse_resid)}
+pd.DataFrame(rows).T.style.format(precision=4, decimal=",")
+```
+
+::: notes
+Średnia sprzedaż $14{,}0$ tys. sztuk, RSE dla samej TV $3{,}26$ -- predykcja
+myli się typowo o jedną czwartą. Dodanie prasy: RSE nawet rośnie, bo
+spadek RSS nie równoważy utraty stopnia swobody.
+:::
+
+## $R^2$ nie służy do wyboru modelu
+
+- $R^2$ **nigdy nie maleje** po dodaniu cechy: klasy modeli są
+  zagnieżdżone. $\;1-R^2=(\mathrm{RSS}/n)/(\mathrm{TSS}/n)$ to błąd uczący
+  podzielony przez wariancję $y$ -- ma wszystkie wady błędu uczącego.
+- **Skorygowany $R^2$** $\;1-\dfrac{\mathrm{RSS}/(n-p-1)}{\mathrm{TSS}/(n-1)}$
+  może zmaleć (prasa), ale usuwa tylko obciążenie $\widehat\sigma^2$ dla
+  jednego, ustalonego z góry modelu. Optymizmu wyboru z wykładu 3 nie
+  usuwa.
+- $R^2$ zależy od rozrzutu cech w próbie: ten sam model z tym samym
+  szumem da wysokie $R^2$ przy szerokim zakresie $x$ i niskie przy
+  wąskim. Do porównań między próbami lepsze jest RSE.
+
+::: {.wniosek}
+Wybór cech i modeli -- wykład 6.
+:::
+
+## Podsumowanie
+
+*Advertising*:
+
+1. Czy reklama wiąże się ze sprzedażą? Tak: test $F$, $F\approx570$.
+2. Które media? Telewizja i radio; prasa nic nie wnosi, gdy znamy dwa
+   pozostałe budżety.
+3. Jak dokładnie przewidujemy? Średnią sprzedaż przy TV $=100$,
+   radio $=20$ -- z dokładnością ok. $\pm0{,}3$ tys. sztuk; sprzedaż na
+   jednym rynku -- tylko ok. $\pm3{,}3$ tys.
+
+. . .
+
+- MNK to rzut ortogonalny; $\operatorname{tr}\mathbf H=p+1$ mierzy
+  elastyczność tak jak $n/k$ dla $k$-NN.
+- $\Cov\widehat\bbeta=\sigma^2(\X^\top\X)^{-1}$, $\;\widehat\sigma^2$
+  z mianownikiem $n-p-1$. Wzory na SE, przedziały i testy stoją na
+  założeniach (Z1)--(Z3).
+- Losowy jest przedział, nie parametr. Wiele testów $t$ -- fałszywe
+  odkrycia; hipoteza łączna -- test $F$.
+- Gdy założenia są wątpliwe, niepewność szacuje bootstrap.
