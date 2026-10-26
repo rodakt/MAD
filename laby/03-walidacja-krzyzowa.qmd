@@ -53,7 +53,8 @@ akapitów:
 Treść zadań jest w książce; tutaj jej nie powtarzamy.
 
 1. **Wybór $k$ walidacją krzyżową** (Colab) --
-   [Zadanie 5.8](https://rodakt.github.io/MAD_book/1-fundamenty/05-ocena-modeli.html#exr-wybor-k-cv):
+   [Zadanie 5.8](https://rodakt.github.io/MAD_book/1-fundamenty/05-ocena-modeli.html#exr-wybor-k-cv),
+   poprzedzone walidacją krzyżową jednego modelu i czterech kandydatów:
    wynik dziesięciokrotnej walidacji krzyżowej i ryzyko $k$-NN na danych
    `make_moons`, $k$ wybrane minimum i regułą jednego błędu
    standardowego, a potem 100 prób: rozkład wybranych $k$, strata
@@ -87,13 +88,17 @@ bez instalacji.
   i oceniających w kolejnych częściach. Przy stałym `random_state` każde
   wywołanie daje ten sam podział, więc ten sam obiekt `cv` można podać
   do różnych funkcji i porównywać wyniki.
-- `cross_val_predict(model, X, Y, cv=cv)` zwraca dla każdej obserwacji
-  predykcję modelu, który jej nie widział; `cross_val_score` -- wynik
-  (domyślnie trafność) w każdej części.
+- `cross_val_score(model, X, Y, cv=cv)` zwraca wynik (domyślnie trafność)
+  w każdej części; `cross_val_predict(model, X, Y, cv=cv)` -- dla każdej
+  obserwacji predykcję modelu, który jej nie widział, z której liczymy
+  stratę każdej obserwacji i błąd standardowy.
+- `GridSearchCV(model, {"n_neighbors": k_values}, cv=cv)` to standardowe
+  narzędzie do wyboru parametru walidacją krzyżową; w notebooku służy do
+  sprawdzenia własnych wyników.
 - Funkcja `knn_predict_all` z notebooka liczy predykcje $k$-NN dla
   wszystkich $k$ naraz: sąsiadów szuka raz, a głosy sumuje `np.cumsum`.
-  Dzięki temu 100 prób po 50 kandydatów liczy się kilkadziesiąt sekund
-  zamiast kilku minut.
+  Jest potrzebna dopiero przy 100 próbach: liczą się wtedy kilkadziesiąt
+  sekund zamiast kilku minut.
 - Reguła jednego błędu standardowego: `np.nonzero(warunek)[0]` zwraca
   indeksy, w których warunek jest spełniony; największy z nich to
   najprostszy kandydat, bo $k$ rośnie wzdłuż listy.
