@@ -110,7 +110,7 @@ $$
 **Najlepsze przybliżenie**
 
 $$
-f_{\mathcal F}=\operatorname*{arg\,min}_{f\in\mathcal F_{\mathrm{lin}}}
+f_{\mathcal F}=\argmin_{f\in\mathcal F_{\mathrm{lin}}}
 \E\big[(\fopt(\X)-f(\X))^2\big]
 $$
 
@@ -129,11 +129,29 @@ Drugie odczytanie nie wymaga wiary w model.
 
 ## Co mówi $\beta_j$
 
-O ile zmienia się **średni** wynik, gdy $X_j$ rośnie o jednostkę,
-**a pozostałe cechy się nie zmieniają**.
+Niech $\x'$ różni się od $\x$ tylko $j$-tą cechą: $x'_j=x_j+1$.
+$$
+\begin{aligned}
+\fopt(\x')-\fopt(\x)
+&=\big(\beta_0+\dots+\beta_j(x_j+1)+\dots+\beta_px_p\big)\\
+&\quad-\big(\beta_0+\dots+\beta_jx_j+\dots+\beta_px_p\big)=\beta_j.
+\end{aligned}
+$$
 
+- Różnica nie zależy od $\x$: ta sama w każdym punkcie.
 - Porównujemy dwie grupy obiektów, które różnią się tylko wartością $X_j$.
-- To opis zależności w populacji, a nie skutek interwencji.
+  To opis zależności w populacji, a nie skutek interwencji.
+
+. . .
+
+W wielomianie $\beta_0+\beta_1x+\beta_2x^2$ nie da się zmienić $x$,
+zostawiając $x^2$:
+$\fopt(x+1)-\fopt(x)=\beta_1+\beta_2(2x+1)$.
+
+::: {.wniosek}
+$\beta_j$ -- zmiana **średniego** wyniku, gdy $X_j$ rośnie o jednostkę,
+**a pozostałe cechy się nie zmieniają**.
+:::
 
 ## $\beta_j$ w danych *Advertising*
 
