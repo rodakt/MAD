@@ -78,28 +78,38 @@ Wynik: oszacowanie $\widehat\Delta(\ell)$ charakterystyki populacji
 Ten sam model może służyć obu celom, ale każdy cel ma własne kryteria
 oceny.
 
-## Co znaczy współczynnik
+## W tej samej lokalizacji czy ogółem?
 
-Załóżmy, że w każdej lokalizacji średnia cena rośnie liniowo z metrażem:
-$$
-\fopt(s,\ell)=a(\ell)+\beta s .
-$$
-Wtedy $\Delta(\ell)=10\beta$ niezależnie od lokalizacji: $\beta$ to
-różnica średnich cen na dodatkowy metr kwadratowy **w obrębie tej samej
-lokalizacji**.
+$\Delta(\ell)$ porównuje mieszkania **w tej samej lokalizacji**.
+Porównanie mieszkań o różnym metrażu ogółem to inne porównanie: większe
+mieszkania mogą częściej leżeć w innych miejscach.
 
 . . .
 
-Bez lokalizacji dopasowujemy prostą $a+\beta' s$. Teraz $\beta'$
-porównuje mieszkania o różnym metrażu **ogółem** -- a większe mogą
-częściej leżeć w innych miejscach.
+Przykład: $\ell$ to odległość od centrum, średnia cena zależy liniowo
+od obu cech:
+$$
+\fopt(s,\ell)=\alpha+\beta s+\gamma\ell .
+$$
+Wtedy $\Delta(\ell)=10\beta$ niezależnie od lokalizacji: $\beta$ to
+różnica średnich cen na dodatkowy metr kwadratowy **przy ustalonej
+odległości od centrum**.
+
+. . .
+
+Bez lokalizacji: prosta $\alpha'+\beta' s$. Jeśli większe mieszkania
+leżą dalej od centrum, a ceny spadają z odległością ($\gamma<0$), to
+$\beta'$ obejmuje też różnicę lokalizacji i jest **mniejsze** od $\beta$,
+a może być nawet ujemne.
 
 ::: {.wniosek}
-Ten sam „współczynnik przy metrażu” oznacza w obu modelach różne
-wielkości.
+Wynik zależy od tego, które cechy trzymamy stałe. Ten sam „współczynnik
+przy metrażu” oznacza w obu modelach różne wielkości.
 :::
 
 ## Dobra predykcja to za mało
+
+Małe ryzyko $\Risk(\widehat f)$ nie gwarantuje dokładnego $\widehat\Delta$.
 
 Metraż i liczba pokoi prawie zawsze idą w parze.
 
