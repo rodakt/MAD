@@ -36,7 +36,7 @@ media_pl = {"TV": "telewizja", "radio": "radio", "newspaper": "prasa"}
 
 
 def fit_ols(features, data=ads):
-    """Model MNK sprzedaży względem podanych cech (statsmodels)."""
+    """Model OLS sprzedaży względem podanych cech (statsmodels)."""
     return sm.OLS(data["sales"], sm.add_constant(data[features])).fit()
 ```
 
@@ -50,10 +50,13 @@ Dane o mieszkaniach: cena, metraż, lokalizacja, liczba pokoi.
 ::: {.column .karta width="50%"}
 **Predykcja**
 
-„Jaką cenę przewidujemy dla mieszkania 60 m² w tej lokalizacji?”
+„Jaką cenę przewidujemy dla mieszkania 60 m² w lokalizacji $\ell$?”
+$$
+\widehat y=\widehat f(60,\ell)
+$$
 
 Wynik: liczba dla konkretnego obiektu. Kryterium: **generalizacja**,
-czyli błąd na nowych danych (wykład 3).
+czyli ryzyko $\Risk(\widehat f)$ na nowych danych (wykład 3).
 :::
 
 ::: {.column .karta width="50%"}
@@ -61,9 +64,12 @@ czyli błąd na nowych danych (wykład 3).
 
 „O ile różni się przeciętna cena mieszkań 60 m² i 50 m² w tej samej
 lokalizacji?”
+$$
+\Delta(\ell)=\fopt(60,\ell)-\fopt(50,\ell)
+$$
 
-Wynik: charakterystyka populacji **wraz z oceną niepewności**
-oszacowania.
+Wynik: oszacowanie $\widehat\Delta(\ell)$ charakterystyki populacji
+**wraz z oceną niepewności**.
 :::
 ::::
 
@@ -71,6 +77,27 @@ oszacowania.
 
 Ten sam model może służyć obu celom, ale każdy cel ma własne kryteria
 oceny.
+
+## Co znaczy współczynnik
+
+Załóżmy, że w każdej lokalizacji średnia cena rośnie liniowo z metrażem:
+$$
+\fopt(s,\ell)=a(\ell)+\beta s .
+$$
+Wtedy $\Delta(\ell)=10\beta$ niezależnie od lokalizacji: $\beta$ to
+różnica średnich cen na dodatkowy metr kwadratowy **w obrębie tej samej
+lokalizacji**.
+
+. . .
+
+Bez lokalizacji dopasowujemy prostą $a+\beta' s$. Teraz $\beta'$
+porównuje mieszkania o różnym metrażu **ogółem** -- a większe mogą
+częściej leżeć w innych miejscach.
+
+::: {.wniosek}
+Ten sam „współczynnik przy metrażu” oznacza w obu modelach różne
+wielkości.
+:::
 
 ## Dobra predykcja to za mało
 
@@ -108,7 +135,61 @@ remontu?
 
 ::: {.wniosek}
 Samo dopasowanie modelu nie uzasadnia interpretacji przyczynowej.
+Także $\Delta(\ell)$ to różnica między grupami mieszkań, a nie zmiana
+ceny po powiększeniu mieszkania.
 :::
+
+## Czego dotyczy niepewność
+
+Wnioskowanie: ustalonej, choć nieznanej charakterystyki populacji.
+Predykcja: losowej wartości nowej obserwacji.
+
+```{python}
+#| fig-width: 11
+#| fig-height: 3.6
+
+rng = np.random.default_rng(7)
+grid = np.linspace(30, 90, 200)
+fig, axes = plt.subplots(1, 2, figsize=(11, 3.6), sharex=True, sharey=True)
+for ax, n in zip(axes, [30, 300]):
+    area = rng.uniform(30, 90, n)
+    price = 150 + 9 * area + rng.normal(0, 60, n)
+    model = sm.OLS(price, sm.add_constant(area)).fit()
+    bands = model.get_prediction(sm.add_constant(grid)).summary_frame(alpha=0.05)
+    ax.fill_between(grid, bands["obs_ci_lower"], bands["obs_ci_upper"],
+                    color="#0072B2", alpha=0.15, label="przedział predykcji")
+    ax.fill_between(grid, bands["mean_ci_lower"], bands["mean_ci_upper"],
+                    color="#0072B2", alpha=0.45, label="przedział ufności dla średniej")
+    ax.scatter(area, price, s=10, color="0.45", alpha=0.6, label="dane")
+    ax.plot(grid, 150 + 9 * grid, "--", color="0.15", lw=1.5,
+            label="średnia warunkowa")
+    ax.set(title=f"$n = {n}$", xlabel="metraż [m²]")
+    ax.grid(alpha=0.2)
+axes[0].set_ylabel("cena [tys. zł]")
+axes[0].legend(fontsize=8, loc="upper left")
+plt.tight_layout()
+plt.show()
+```
+
+Więcej danych zwęża przedział dla średniej, ale nie usuwa rozrzutu cen
+wokół niej -- błędu nieredukowalnego.
+
+::: notes
+Symulacja z książki (rys. fig-ufnosc-predykcja): cena = 150 + 9·metraż +
+szum o odchyleniu 60, przedziały 95%. Wzory na oba przedziały -- w bloku
+o wnioskowaniu („Średnia czy pojedynczy rynek?”).
+:::
+
+## Predykcja a wnioskowanie {.smaller}
+
+| | Predykcja | Wnioskowanie |
+|:--|:--|:--|
+| Pytanie | Jaka będzie cena tego mieszkania? | O ile różnią się średnie ceny dwóch grup mieszkań? |
+| Wynik | przewidywanie $\widehat y=\widehat f(\x)$ | oszacowanie $\widehat\Delta$ charakterystyki populacji $\Delta$ |
+| Kryterium jakości | ryzyko $\Risk(\widehat f)$ na nowych danych | dokładność $\widehat\Delta$ i wiarygodność oceny jej niepewności |
+| Niepewność dotyczy | losowej wartości nowej obserwacji | ustalonej, choć nieznanej wielkości $\Delta$ |
+| Typowe narzędzie | zbiór walidacyjny, przedział predykcji | przedział ufności |
+| Co może zawieść | generalizacja na nowe przypadki | założenia metody, dobór próby, rozdzielenie powiązanych cech |
 
 ## Dane *Advertising*
 
@@ -142,7 +223,7 @@ w dopasowaniu jest przypadku. Zwrócić uwagę: rozrzut wokół prostej dla
 telewizji rośnie z budżetem -- wróci przy bootstrapie.
 :::
 
-# Model liniowy i MNK
+# Model liniowy i OLS
 
 ## Model regresji liniowej
 
@@ -180,7 +261,7 @@ $\beta_0+\beta_1x+\dots+\beta_dx^d$ z wykładu 3 to model liniowy z cechami
 $x,x^2,\dots,x^d$.
 
 ::: notes
-Rachunki MNK mają sens przy obu odczytaniach. Własności estymatora
+Rachunki OLS mają sens przy obu odczytaniach. Własności estymatora
 i wnioskowanie (druga część wykładu) opierają się na pierwszym.
 :::
 
@@ -209,7 +290,8 @@ $$
 \mathrm{RSS}(\bbeta)=\sum_{i=1}^n\big(y_i-\beta_0-\beta_1x_{i1}-\dots-\beta_px_{ip}\big)^2
 =\|\y-\X\bbeta\|^2
 $$
-MNK minimalizuje $\mathrm{RSS}$ -- to **minimalizacja ryzyka
+**OLS** (ang. *ordinary least squares*)
+minimalizuje $\mathrm{RSS}$ -- to **minimalizacja ryzyka
 empirycznego** przy stracie kwadratowej w klasie
 $\mathcal F_{\mathrm{lin}}$.
 
@@ -289,7 +371,7 @@ plt.show()
 Gdy $\bbeta$ przebiega $\R^{p+1}$, wektor $\X\bbeta$ przebiega przestrzeń
 kolumn $\mathcal C(\X)$ -- podprzestrzeń $\R^n$ wymiaru $p+1$.
 
-MNK szuka punktu $\mathcal C(\X)$ najbliższego $\y$: **rzutu
+OLS szuka punktu $\mathcal C(\X)$ najbliższego $\y$: **rzutu
 ortogonalnego**.
 
 Równania normalne: $\X^\top(\y-\X\widehat\bbeta)=\mathbf 0$ -- wektor reszt
@@ -313,7 +395,7 @@ $\operatorname{tr}\mathbf H=p+1$.
 
 :::: {.columns}
 ::: {.column .karta width="50%"}
-**MNK**
+**OLS**
 
 $\widehat\y=\mathbf H\y$, $\;\operatorname{tr}\mathbf H=p+1$ -- liczba
 współczynników.
@@ -383,7 +465,7 @@ plt.show()
 
 $\widehat\beta_0\approx7{,}03$, $\;\widehat\beta_1\approx0{,}0475$: każdy
 dodatkowy tysiąc dolarów w telewizji wiąże się przeciętnie z $47{,}5$
-sztukami więcej. Pionowe odcinki to reszty -- MNK minimalizuje sumę ich
+sztukami więcej. Pionowe odcinki to reszty -- OLS minimalizuje sumę ich
 kwadratów.
 
 ## Pytanie {.pytanie}
@@ -451,7 +533,7 @@ W tej samej kolejności zwykle rośnie elastyczność.
 cechy są w modelu -- jak przy prasie. Przy silnie skorelowanych cechach
 oszacowania są niestabilne, choć predykcje prawie się nie zmieniają.
 
-# Własności estymatora MNK
+# Własności estymatora OLS
 
 ## Model losowości
 
@@ -490,7 +572,7 @@ $$
 =\frac{\sigma^2}{n\,s_x^2}.
 $$
 
-- Im szerzej rozrzucone $x_i$, tym stabilniejsza prosta.
+- Przy ustalonym $\sigma$: im szerzej rozrzucone $x_i$, tym stabilniejsza prosta.
 - Odchylenie standardowe maleje jak $1/\sqrt n$.
 
 ::: notes
@@ -558,7 +640,7 @@ $$
 
 :::: {.columns}
 ::: {.column .karta width="50%"}
-**MNK**
+**OLS**
 
 wariancja $\sigma^2\,(p+1)/n$; obciążenie zerowe, jeśli model liniowy
 jest trafny
@@ -610,7 +692,7 @@ $\operatorname{tr}(\mathbf I-\mathbf H)=n-p-1$.
 ## Twierdzenie Gaussa--Markowa
 
 Estymator $\tilde\bbeta$ jest **liniowy**, jeśli $\tilde\bbeta=\mathbf C\y$
-dla macierzy $\mathbf C$ zależnej tylko od $\X$. MNK:
+dla macierzy $\mathbf C$ zależnej tylko od $\X$. OLS:
 $\mathbf C=(\X^\top\X)^{-1}\X^\top$.
 
 ::: {.definicja}
@@ -620,7 +702,7 @@ $\mathbf c$
 $$
 \Var(\mathbf c^\top\tilde\bbeta)\ge\Var(\mathbf c^\top\widehat\bbeta).
 $$
-MNK jest **najlepszym liniowym estymatorem nieobciążonym** (BLUE).
+OLS jest **najlepszym liniowym estymatorem nieobciążonym** (BLUE).
 :::
 
 . . .
@@ -631,7 +713,7 @@ Czego twierdzenie **nie** mówi:
   mieć mniejszy błąd średniokwadratowy -- na tym oprze się regularyzacja
   na wykładzie 6.
 - Wymaga (Z2): przy różnych wariancjach błędów lepiej ważyć obserwacje,
-  a MNK traktuje wszystkie jednakowo.
+  a OLS traktuje wszystkie jednakowo.
 
 ::: notes
 $\mathbf c$ dowolne, więc dotyczy też predykcji
@@ -1000,7 +1082,7 @@ Wybór cech i modeli -- wykład 6.
 
 . . .
 
-- MNK to rzut ortogonalny; $\operatorname{tr}\mathbf H=p+1$ mierzy
+- OLS to rzut ortogonalny; $\operatorname{tr}\mathbf H=p+1$ mierzy
   elastyczność tak jak $n/k$ dla $k$-NN.
 - $\Cov\widehat\bbeta=\sigma^2(\X^\top\X)^{-1}$, $\;\widehat\sigma^2$
   z mianownikiem $n-p-1$. Wzory na SE, przedziały i testy stoją na
