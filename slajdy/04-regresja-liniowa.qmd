@@ -442,7 +442,7 @@ W regresji liniowej całą zależność opisuje $p+1$ liczb:
 - **prosta postać wkładów** -- liniowa,
 - **rzadkość** -- trzy współczynniki ogarniamy wzrokiem, trzysta już nie.
 
-. . .
+## Interpretowalność a elastyczność
 
 Od najbardziej do najmniej interpretowalnych, z grubsza:
 
@@ -452,4 +452,6 @@ Od najbardziej do najmniej interpretowalnych, z grubsza:
 4. drzewa decyzyjne,
 5. zespoły drzew, sieci neuronowe.
 
+::: {.wniosek}
 W tej samej kolejności zwykle rośnie elastyczność.
+:::
