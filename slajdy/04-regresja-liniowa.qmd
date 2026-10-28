@@ -407,6 +407,37 @@ Dlatego na wykładzie 3 wielomiany dopasowywała funkcja `Polynomial.fit`,
 która przeskalowuje $x$ do $[-1,1]$.
 :::
 
+## Współczynnik determinacji $R^2$
+
+::: {.definicja}
+$$
+R^2=1-\frac{\mathrm{RSS}}{\mathrm{TSS}},\qquad
+\mathrm{TSS}=\sum_{i}(y_i-\bar y)^2 .
+$$
+:::
+
+- $\mathrm{TSS}$ to RSS najprostszego modelu -- stałej $\bar y$.
+  $R^2$ to część tego błędu, którą usuwają cechy; przy wyrazie wolnym
+  $R^2\in[0,1]$.
+- $1-R^2=(\mathrm{RSS}/n)/(\mathrm{TSS}/n)$ -- błąd uczący przez wariancję
+  $y$ z próby. Dla jednej cechy $R^2=r^2$.
+
+```{python}
+pd.DataFrame(
+    {nazwa: [fit_ols(cechy).rsquared] for nazwa, cechy in
+     {"TV": ["TV"], "TV + radio": ["TV", "radio"],
+      "TV + radio + prasa": media}.items()},
+    index=["$R^2$"],
+).style.format(precision=3, decimal=",")
+```
+
+. . .
+
+::: {.wniosek}
+$R^2$ nigdy nie maleje po dodaniu cechy -- to błąd uczący, więc nie
+nadaje się do wyboru modelu.
+:::
+
 # Interpretacja
 
 ## Pytanie {.pytanie}
