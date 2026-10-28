@@ -416,11 +416,11 @@ R^2=1-\frac{\mathrm{RSS}}{\mathrm{TSS}},\qquad
 $$
 :::
 
-- $\mathrm{TSS}$ to RSS najprostszego modelu -- stałej $\bar y$.
-  $R^2$ to część tego błędu, którą usuwają cechy; przy wyrazie wolnym
-  $R^2\in[0,1]$.
-- $1-R^2=(\mathrm{RSS}/n)/(\mathrm{TSS}/n)$ -- błąd uczący przez wariancję
-  $y$ z próby. Dla jednej cechy $R^2=r^2$.
+- $\mathrm{TSS}$ to RSS modelu bez cech, który zawsze przewiduje $\bar y$.
+- $R^2$ to ułamek tego błędu, który usuwają cechy: $0$ -- cechy nic nie
+  dają, $1$ -- dopasowanie idealne.
+- Dla jednej cechy $R^2=r^2$, gdzie $r$ to współczynnik korelacji z próby
+  między $x$ i $y$.
 
 ```{python}
 pd.DataFrame(
@@ -434,8 +434,14 @@ pd.DataFrame(
 . . .
 
 ::: {.wniosek}
-$R^2$ nigdy nie maleje po dodaniu cechy -- to błąd uczący, więc nie
-nadaje się do wyboru modelu.
+$R^2$ nigdy nie maleje po dodaniu cechy, bo RSS na zbiorze uczącym nie
+rośnie -- nie nadaje się do wyboru modelu.
+:::
+
+::: aside
+Bez wyrazu wolnego $\mathrm{RSS}$ może przekroczyć $\mathrm{TSS}$, a $R^2$
+wyjść ujemne; pakiety liczą wtedy $R^2$ inaczej, z $\sum_i y_i^2$
+w mianowniku.
 :::
 
 # Interpretacja
