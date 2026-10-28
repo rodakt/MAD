@@ -329,6 +329,41 @@ $$
   $f_{\mathcal F}$.
 - Prosta przechodzi przez punkt $(\bar x,\bar y)$.
 
+## RSS dla telewizji
+
+```{python}
+#| fig-width: 7
+#| fig-height: 3.6
+
+B0, B1 = np.meshgrid(np.linspace(b0 - 3, b0 + 3, 300),
+                     np.linspace(b1 - 0.02, b1 + 0.02, 300))
+rss = ((y[:, None, None] - B0 - B1 * x[:, None, None]) ** 2).sum(axis=0)
+rss_min = ((y - b0 - b1 * x) ** 2).sum()
+
+fig, ax = plt.subplots(figsize=(7, 3.6))
+cs = ax.contour(B0, B1, rss, levels=rss_min * np.array([1.1, 1.3, 1.7, 2.5, 4, 6]),
+                colors="#1B6CA8", linewidths=1)
+ax.clabel(cs, fmt=lambda v: f"{v:.0f}", fontsize=8)
+ax.plot([b0], [b1], "o", color="#D7263D", ms=7, zorder=3)
+ax.annotate(f"minimum: RSS = {rss_min:.0f}", (b0, b1), xytext=(0, 10),
+            textcoords="offset points", ha="center", va="bottom", color="#D7263D",
+            bbox=dict(facecolor="white", edgecolor="none", pad=1))
+ax.set_xlabel(r"$\beta_0$")
+ax.set_ylabel(r"$\beta_1$")
+plt.tight_layout()
+plt.show()
+```
+
+Poziomice $\mathrm{RSS}(\beta_0,\beta_1)$ to elipsy -- funkcja kwadratowa
+ma jedno minimum $(\widehat\beta_0,\widehat\beta_1)\approx(7{,}03;\ 0{,}0475)$.
+
+::: notes
+Elipsy są wydłużone i pochylone: TV nie jest scentrowana, więc większe
+$\beta_1$ można częściowo zrównoważyć mniejszym $\beta_0$. Przy
+współliniowych kolumnach elipsa przechodzi w dolinę bez jednego
+minimum -- następny slajd.
+:::
+
 ## Kiedy rozwiązanie jest jedno
 
 Kolumny $\X$ muszą być liniowo niezależne -- żadna cecha nie może być
