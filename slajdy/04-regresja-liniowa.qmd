@@ -255,6 +255,45 @@ $$
 to predykcje w punktach uczących, więc
 $\mathrm{RSS}(\bbeta)=\|\y-\X\bbeta\|^2$.
 
+## Dwie macierze projektowe
+
+:::: {.columns}
+::: {.column .karta width="50%"}
+***Advertising***
+
+Kolumny: $1$, `TV`, `radio`, `newspaper`.
+$$
+\X=
+\begin{pmatrix}
+1 & 230{,}1 & 37{,}8 & 69{,}2\\
+1 & 44{,}5 & 39{,}3 & 45{,}1\\
+\vdots & \vdots & \vdots & \vdots
+\end{pmatrix}
+$$
+$n=200$, $p=3$.
+:::
+
+::: {.column .karta width="50%"}
+**Wielomian stopnia $d$**
+
+Jedna zmienna $x$, cechy $x,x^2,\dots,x^d$.
+$$
+\X=
+\begin{pmatrix}
+1 & x_1 & x_1^2 & \cdots & x_1^d\\
+\vdots & \vdots & \vdots & & \vdots\\
+1 & x_n & x_n^2 & \cdots & x_n^d
+\end{pmatrix}
+$$
+$p=d$.
+:::
+::::
+
+::: {.wniosek}
+Ten sam wzór $\mathrm{RSS}(\bbeta)=\|\y-\X\bbeta\|^2$ -- zmieniają się
+tylko kolumny $\X$.
+:::
+
 ## Równania normalne
 
 $\mathrm{RSS}(\bbeta)$ jest funkcją kwadratową $\bbeta$. Gradient równy
