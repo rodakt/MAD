@@ -247,6 +247,14 @@ w cechach. $\beta_0$ -- **wyraz wolny**, $\beta_j$ -- **współczynnik
 regresji** przy $X_j$.
 :::
 
+Klasa funkcji liniowych:
+$$
+\mathcal F_{\mathrm{lin}}=\big\{\,f(\x)=\beta_0+\beta_1x_1+\dots+\beta_px_p:
+\beta_0,\dots,\beta_p\in\R\,\big\}.
+$$
+
+## Dwa odczytania modelu
+
 :::: {.columns}
 ::: {.column .karta width="50%"}
 **Twierdzenie o świecie**
