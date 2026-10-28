@@ -62,8 +62,8 @@ czyli ryzyko $\Risk(\widehat f)$ na nowych danych (wykład 3).
 ::: {.column .karta width="50%"}
 **Wnioskowanie**
 
-„O ile różni się przeciętna cena mieszkań 60 m² i 50 m² w tej samej
-lokalizacji?”
+„O ile różni się przeciętna cena mieszkań 60 m² i 50 m² **w tej samej
+lokalizacji**?”
 $$
 \Delta(\ell)=\fopt(60,\ell)-\fopt(50,\ell)
 $$
@@ -77,35 +77,6 @@ Wynik: oszacowanie $\widehat\Delta(\ell)$ charakterystyki populacji
 
 Ten sam model może służyć obu celom, ale każdy cel ma własne kryteria
 oceny.
-
-## W tej samej lokalizacji czy ogółem?
-
-$\Delta(\ell)$ porównuje mieszkania **w tej samej lokalizacji**.
-Porównanie mieszkań o różnym metrażu ogółem to inne porównanie: większe
-mieszkania mogą częściej leżeć w innych miejscach.
-
-. . .
-
-Przykład: $\ell$ to odległość od centrum, średnia cena zależy liniowo
-od obu cech:
-$$
-\fopt(s,\ell)=\alpha+\beta s+\gamma\ell .
-$$
-Wtedy $\Delta(\ell)=10\beta$ niezależnie od lokalizacji: $\beta$ to
-różnica średnich cen na dodatkowy metr kwadratowy **przy ustalonej
-odległości od centrum**.
-
-. . .
-
-Bez lokalizacji: prosta $\alpha'+\beta' s$. Jeśli większe mieszkania
-leżą dalej od centrum, a ceny spadają z odległością ($\gamma<0$), to
-$\beta'$ obejmuje też różnicę lokalizacji i jest **mniejsze** od $\beta$,
-a może być nawet ujemne.
-
-::: {.wniosek}
-Wynik zależy od tego, które cechy trzymamy stałe. Ten sam „współczynnik
-przy metrażu” oznacza w obu modelach różne wielkości.
-:::
 
 ## Dobra predykcja to za mało
 
