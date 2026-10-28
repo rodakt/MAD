@@ -98,21 +98,33 @@ $x,x^2,\dots,x^d$.
 ::: {.column .karta width="50%"}
 **Twierdzenie o świecie**
 
-$\fopt\in\mathcal F_{\mathrm{lin}}$: błąd aproksymacji jest zerowy,
-cały błąd redukowalny pochodzi ze skończoności próby.
+$$
+\fopt\in\mathcal F_{\mathrm{lin}}
+$$
+
+- błąd aproksymacji jest zerowy,
+- cały błąd redukowalny pochodzi ze skończoności próby.
 :::
 
 ::: {.column .karta width="50%"}
 **Najlepsze przybliżenie**
 
-Celem jest $f_{\mathcal F}$ -- element $\mathcal F_{\mathrm{lin}}$
-najbliższy $\fopt$ w sensie średniego kwadratu. Dla jednej cechy
-nachylenie $\Cov(X,Y)/\Var X$.
+$$
+f_{\mathcal F}=\operatorname*{arg\,min}_{f\in\mathcal F_{\mathrm{lin}}}
+\E\big[(\fopt(\X)-f(\X))^2\big]
+$$
+
+- $\fopt$ może być dowolna, celem jest $f_{\mathcal F}$,
+- dla jednej cechy nachylenie $\Cov(X,Y)/\Var X$.
 :::
 ::::
 
+::: {.wniosek}
+Metoda najmniejszych kwadratów ma sens przy obu odczytaniach.
+:::
+
 ::: notes
-Rachunki OLS mają sens przy obu odczytaniach.
+Drugie odczytanie nie wymaga wiary w model.
 :::
 
 ## Co mówi $\beta_j$
