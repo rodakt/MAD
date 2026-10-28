@@ -185,8 +185,13 @@ wybiera współczynniki minimalizujące $\mathrm{RSS}$.
 
 . . .
 
-$\mathrm{RSS}/n$ to błąd na zbiorze uczącym, więc OLS to
-**minimalizacja ryzyka empirycznego** przy stracie kwadratowej w klasie
+To nic nowego -- ryzyko empiryczne z wykładu 1 przy stracie kwadratowej
+$\Loss(y,\widehat y)=(y-\widehat y)^2$:
+$$
+\widehat\Risk_n(f)=\frac1n\sum_{i=1}^n\Loss\big(y_i,f(\x_i)\big)
+=\frac{\mathrm{RSS}}{n}.
+$$
+OLS to **minimalizacja ryzyka empirycznego** w klasie
 $\mathcal F_{\mathrm{lin}}$.
 
 ## Macierz projektowa
