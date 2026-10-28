@@ -28,7 +28,7 @@ import matplotlib.pyplot as plt
 import statsmodels.api as sm
 
 # Dane z repozytorium książki (katalog obok repozytorium kursu).
-ads = pd.read_csv("../../MAD_book/dane/Advertising.csv", index_col=0)
+ads = pd.read_csv("../../mad-book/dane/Advertising.csv", index_col=0)
 media = ["TV", "radio", "newspaper"]
 media_pl = {"TV": "telewizja", "radio": "radio", "newspaper": "prasa"}
 
@@ -78,7 +78,7 @@ Y=\beta_0+\beta_1X_1+\dots+\beta_pX_p+\varepsilon,\qquad
 \E[\varepsilon\mid\X]=0,
 $$
 czyli funkcja regresji $\fopt(\x)=\E[Y\mid\X=\x]$ jest liniowa (afiniczna)
-w cechach. $\beta_0$ -- **wyraz wolny**, $\beta_j$ -- **współczynnik
+w $X_1,\dots,X_p$. $\beta_0$ -- **wyraz wolny**, $\beta_j$ -- **współczynnik
 regresji** przy $X_j$.
 :::
 
@@ -87,6 +87,10 @@ $$
 \mathcal F_{\mathrm{lin}}=\big\{\,f(\x)=\beta_0+\beta_1x_1+\dots+\beta_px_p:
 \beta_0,\dots,\beta_p\in\R\,\big\}.
 $$
+
+Liniowość dotyczy **parametrów**, nie cech: wielomian
+$\beta_0+\beta_1x+\dots+\beta_dx^d$ z wykładu 3 to model liniowy z cechami
+$x,x^2,\dots,x^d$.
 
 ## Dwa odczytania modelu
 
@@ -106,12 +110,6 @@ najbliższy $\fopt$ w sensie średniego kwadratu. Dla jednej cechy
 nachylenie $\Cov(X,Y)/\Var X$.
 :::
 ::::
-
-. . .
-
-Liniowość dotyczy **parametrów**, nie cech: wielomian
-$\beta_0+\beta_1x+\dots+\beta_dx^d$ z wykładu 3 to model liniowy z cechami
-$x,x^2,\dots,x^d$.
 
 ::: notes
 Rachunki OLS mają sens przy obu odczytaniach.
