@@ -15,7 +15,8 @@ execute:
 
 - Rozdział [Regresja liniowa](https://rodakt.github.io/MAD_book/2-modele-liniowe/06-regresja-liniowa.html),
   sekcje „Model liniowy” i „Metoda najmniejszych kwadratów” (bez
-  geometrii) z dopasowaniem do danych *Advertising*
+  geometrii) z dopasowaniem do danych *Advertising*; z sekcji
+  „Wnioskowanie o parametrach” test $t$ i test $F$
 - Sekcja „Kompromis między interpretowalnością a dokładnością”
   z [rozdziału 1](https://rodakt.github.io/MAD_book/1-fundamenty/01-czym-jest-model.html)
 
@@ -26,6 +27,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import statsmodels.api as sm
+from scipy import stats
 
 # Dane z repozytorium książki (katalog obok repozytorium kursu).
 ads = pd.read_csv("../../mad-book/dane/Advertising.csv", index_col=0)
@@ -491,4 +493,169 @@ Od najbardziej do najmniej interpretowalnych, z grubsza:
 
 ::: {.wniosek}
 W tej samej kolejności zwykle rośnie elastyczność.
+:::
+
+# Testowanie hipotez
+
+## Model losowości
+
+**Ustalony układ**: punkty $\x_i$ traktujemy jako ustalone, losowe są
+tylko wyniki.
+
+::: {.definicja}
+$\y=\X\bbeta+\boldsymbol\varepsilon$, gdzie
+$\boldsymbol\varepsilon\sim\Nrozk(\mathbf 0,\sigma^2\mathbf I)$: błędy
+niezależne, o średniej zero, jednakowej wariancji i rozkładzie normalnym.
+:::
+
+Wtedy
+$$
+\widehat\bbeta\sim\Nrozk\big(\bbeta,\sigma^2(\X^\top\X)^{-1}\big),
+\qquad
+\mathrm{SE}(\widehat\beta_j)=\widehat\sigma\sqrt{v_{jj}},
+\qquad
+\widehat\sigma^2=\frac{\mathrm{RSS}}{n-p-1},
+$$
+gdzie $v_{jj}$ -- element przekątnej $(\X^\top\X)^{-1}$.
+**Błąd standardowy** szacuje, o ile $\widehat\beta_j$ zmienia się
+typowo między próbami.
+
+::: notes
+Jednakowa wariancja jest dla telewizji wątpliwa -- rozrzut rośnie
+z budżetem (pierwszy slajd z danymi). Diagnostyka na wykładzie 5.
+:::
+
+## Test $t$: czy $\beta_j=0$?
+
+$H_0\colon\beta_j=0$ -- cecha $X_j$ nie wiąże się ze średnim wynikiem,
+**gdy pozostałe cechy są ustalone**.
+
+$$
+t=\frac{\widehat\beta_j}{\mathrm{SE}(\widehat\beta_j)}
+\;\sim\;t_{n-p-1}\quad\text{przy }H_0 .
+$$
+
+- $t$ mówi, o ile błędów standardowych oszacowanie odbiega od zera.
+- Przy $H_0$ sam szum odsuwa $\widehat\beta_j$ od zera typowo o jeden,
+  dwa błędy standardowe.
+- Odległość rzędu $30$ błędów standardowych nie jest więc przypadkiem.
+
+## $p$-wartość
+
+::: {.definicja}
+$p=\Prob_{H_0}\big(|T|\ge|t_{\mathrm{obs}}|\big)$ -- prawdopodobieństwo,
+że przy prawdziwej $H_0$ statystyka wypadłaby co najmniej tak daleko od
+zera jak w naszej próbie.
+:::
+
+```{python}
+#| fig-width: 7
+#| fig-height: 2.6
+
+df_resid = model_full.df_resid
+t_obs = model_full.tvalues["newspaper"]
+siatka = np.linspace(-4, 4, 400)
+
+fig, ax = plt.subplots(figsize=(7, 2.6))
+ax.plot(siatka, stats.t.pdf(siatka, df_resid), color="#1B6CA8", lw=2)
+for ogon in (siatka <= -abs(t_obs), siatka >= abs(t_obs)):
+    ax.fill_between(siatka[ogon], stats.t.pdf(siatka[ogon], df_resid),
+                    color="#D7263D", alpha=0.3)
+ax.axvline(t_obs, color="#D7263D", lw=1.5)
+ax.axvline(-t_obs, color="#D7263D", lw=1, ls="--")
+ax.annotate(f"prasa: $t={t_obs:.2f}$, $p={model_full.pvalues['newspaper']:.2f}$"
+            .replace(".", "{,}"), (t_obs, 0.3), xytext=(-8, 0),
+            textcoords="offset points", ha="right", color="#D7263D",
+            bbox=dict(facecolor="white", edgecolor="none", pad=1))
+ax.annotate(f"telewizja: $t={model_full.tvalues['TV']:.0f}$ →", (4, 0.05),
+            ha="right", color="0.3")
+ax.set_yticks([])
+ax.set_xlabel(f"rozkład $t$ przy $H_0$ ({df_resid:.0f} stopni swobody)")
+plt.tight_layout()
+plt.show()
+```
+
+- Mała $p$-wartość: dane byłyby przy $H_0$ zaskakujące.
+- $p$-wartość **nie jest** prawdopodobieństwem, że $H_0$ jest prawdziwa.
+
+## Które media?
+
+```{python}
+pd.DataFrame(
+    {"współczynnik": model_full.params, "SE": model_full.bse,
+     "t": model_full.tvalues, "p-wartość": model_full.pvalues},
+).rename(index={"const": "wyraz wolny", **media_pl}).style.format(precision=4, decimal=",")
+```
+
+- Telewizja i radio: $t\approx33$ i $22$.
+- Prasa: $p\approx0{,}86$ -- przy tych samych budżetach TV i radia brak
+  śladu zależności.
+
+. . .
+
+To odpowiedź na wcześniejsze pytanie „$0{,}055$ czy zero?”. W regresji
+z samą prasą $p\approx0{,}001$, bo testujemy tam inną hipotezę: czy
+sprzedaż zależy od budżetu prasowego **w ogóle**.
+
+## Pytanie {.pytanie}
+
+$n=200$ obserwacji, $100$ cech **niezależnych od wyniku**. Dla każdej
+cechy test $t$ na poziomie $5\%$.
+
+Ile cech wyjdzie „istotnych”?
+
+. . .
+
+```{python}
+rng = np.random.default_rng(4)
+n_noise, p_noise, reps_noise = 200, 100, 500
+n_signif, f_rejects = [], []
+for _ in range(reps_noise):
+    X = sm.add_constant(rng.normal(size=(n_noise, p_noise)))
+    result = sm.OLS(rng.normal(size=n_noise), X).fit()
+    n_signif.append(np.sum(result.pvalues[1:] < 0.05))
+    f_rejects.append(result.f_pvalue < 0.05)
+n_signif = np.array(n_signif)
+
+print(f"średnia liczba istotnych testów t:      {n_signif.mean():.1f} na {p_noise}")
+print(f"odsetek prób z co najmniej jednym:      {np.mean(n_signif > 0):.3f}")
+print(f"odsetek prób, w których test F odrzuca: {np.mean(f_rejects):.3f}")
+```
+
+Każdy test myli się przy prawdziwej $H_0$ z prawdopodobieństwem $0{,}05$:
+średnio $5$ „istotnych” cech, prawie zawsze co najmniej jedna. Pytanie
+„czy **którakolwiek** cecha się liczy?” wymaga jednego testu.
+
+::: notes
+Druga słabość pojedynczego testu: brak istotności to nie brak związku.
+Przy współliniowych cechach błędy standardowe są duże i każda cecha
+z osobna może wyjść nieistotna, choć razem wyjaśniają dużo.
+:::
+
+## Test $F$: wszystkie cechy naraz
+
+$H_0\colon\beta_1=\dots=\beta_p=0$. Model przy $H_0$ to sama średnia
+$\bar y$, jego RSS to $\mathrm{TSS}$. Czy spadek do $\mathrm{RSS}$ jest
+większy, niż dałby sam szum?
+$$
+F=\frac{(\mathrm{TSS}-\mathrm{RSS})/p}{\mathrm{RSS}/(n-p-1)}
+\;\sim\;F_{p,\,n-p-1}\quad\text{przy }H_0 .
+$$
+
+- Mianownik to $\widehat\sigma^2$.
+- Licznik przy $H_0$ też ma średnią $\sigma^2$, więc wtedy $F\approx1$.
+  Gdy $H_0$ jest fałszywa, do licznika dochodzi sygnał.
+
+. . .
+
+::: {.wniosek}
+*Advertising*: $F\approx570$, $p$-wartość rzędu $10^{-96}$ -- wydatki na
+reklamę wiążą się ze sprzedażą.
+:::
+
+::: notes
+Ogólnie: usunięcie $q$ cech, $F=\frac{(\mathrm{RSS}_0-\mathrm{RSS})/q}
+{\mathrm{RSS}/(n-p-1)}\sim F_{q,n-p-1}$. Dla $q=1$ test $F$ i test $t$
+są równoważne: $F=t^2$. W symulacji ze 100 cechami szumu test $F$
+odrzuca w około $5\%$ prób, tak jak powinien.
 :::
