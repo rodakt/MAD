@@ -250,9 +250,10 @@ $$
 \vdots\\
 \beta_0+\beta_1x_{n1}+\dots+\beta_px_{np}
 \end{pmatrix}
-\quad\text{-- predykcje w punktach uczących, więc}\quad
-\mathrm{RSS}(\bbeta)=\|\y-\X\bbeta\|^2 .
 $$
+
+to predykcje w punktach uczących, więc
+$\mathrm{RSS}(\bbeta)=\|\y-\X\bbeta\|^2$.
 
 ## Równania normalne
 
