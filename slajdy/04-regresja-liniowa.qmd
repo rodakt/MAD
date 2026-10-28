@@ -381,6 +381,12 @@ kombinacją liniową pozostałych.
 
 ## Wzór to nie algorytm
 
+::: {.definicja}
+**Wskaźnik uwarunkowania** $\kappa(\X)=\sigma_{\max}/\sigma_{\min}$ --
+stosunek skrajnych wartości osobliwych $\X$. Czynnik, o jaki błędy
+zaokrągleń mogą się wzmocnić przy rozwiązywaniu układu.
+:::
+
 Wielomian stopnia $10$ na $50$ punktach z $[0,1]$:
 
 ```{python}
@@ -391,8 +397,8 @@ print(f"uwarunkowanie X:     {np.linalg.cond(V):.1e}")
 print(f"uwarunkowanie X^T X: {np.linalg.cond(V.T @ V):.1e}")
 ```
 
-- Utworzenie $\X^\top\X$ podnosi wskaźnik uwarunkowania do kwadratu.
-  Przy około $16$ cyfrach znaczących $10^{14}$ zostawia dwie wiarygodne.
+- Wartości osobliwe $\X^\top\X$ to $\sigma_i^2$, więc
+  $\kappa(\X^\top\X)=\kappa(\X)^2$. Przy około $16$ cyfrach znaczących $10^{14}$ zostawia dwie wiarygodne.
 - Biblioteki rozkładają $\X$, a nie $\X^\top\X$: rozkład QR albo według
   wartości osobliwych (`np.linalg.lstsq`).
 
