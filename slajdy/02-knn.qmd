@@ -104,11 +104,34 @@ plt.show()
 Prosta nie odtworzy zakrzywienia przy żadnej liczbie danych. Średnia
 z sąsiadów podąża za nim, ale także za lokalnymi odchyleniami próby.
 
+## Sklep: popyt a temperatura
+
+Zamiast dwóch rodzajów dni -- cecha ciągła, temperatura. Pięć dni:
+
+| temperatura $x$ (°C) | 12 | 16 | 19 | 23 | 28 |
+|:--|--:|--:|--:|--:|--:|
+| popyt $y$ (sztuki) | 4 | 6 | 10 | 8 | 15 |
+
+Prognoza przy $20$°C: dnia o tej temperaturze nie ma. Bierzemy $k=3$
+najbliższe dni -- $19$, $23$ i $16$°C:
+$$
+\widehat f(20)=\frac{10+8+6}{3}=8.
+$$
+
+. . .
+
+Klasyfikacja „popyt wysoki ($\ge10$)?”: wśród tych samych sąsiadów
+wysoki popyt był raz, więc $\widehat\eta(20)=1/3$ -- przewidujemy niski.
+
+Założenie: dni o podobnej temperaturze mają podobne rozkłady popytu.
+Wybór cech jest częścią modelu.
+
 ## Z „$\X=\x$” do „$\X$ blisko $\x$”
 
-Optimum to $\fopt(\x)=\E[Y\mid\X=\x]$, ale w próbie zwykle nie ma
-obserwacji o cechach dokładnie $\x$. Warunek „$\X=\x$” zastępujemy
-słabszym, „$\X$ blisko $\x$”, i uśredniamy wyniki najbliższych obserwacji.
+Optimum to $\fopt(\x)=\E[Y\mid\X=\x]$, ale przy cechach ciągłych w próbie
+zwykle nie ma obserwacji o cechach dokładnie $\x$. Warunek „$\X=\x$”
+zastępujemy słabszym, „$\X$ blisko $\x$”. Na danych symulowanych widać,
+jak blisko optimum jest taka średnia:
 
 ```{python}
 #| fig-width: 6.5
@@ -188,32 +211,27 @@ $$
 Częstość klasy to średnia zmiennej $\ind(Y=c)$, więc oba wzory są tym
 samym uśrednianiem.
 
-## Reguła podstawienia
+## Minimalizacja punktowa na sąsiadach
 
-:::: {.columns}
-::: {.column .karta width="50%"}
-**Klasyfikator bayesowski**
 $$
 \Bayes(\x)=\argmax_c\,\eta_c(\x)
-$$
-:::
-
-::: {.column .karta width="50%"}
-**Klasyfikator $k$-NN**
-$$
+\qquad\longrightarrow\qquad
 \widehat g(\x)=\argmax_c\,\widehat\eta_c(\x)
 $$
-:::
-::::
 
-Ta sama postać, a nieznane $\eta_c$ zastępuje oszacowanie z danych.
-To jest **reguła podstawienia** (*plug-in rule*).
+Ta sama postać, a nieznane $\eta_c$ zastępuje oszacowanie z danych --
+**reguła podstawienia** (*plug-in rule*).
 
 . . .
 
-$k$-NN **nie** minimalizuje ryzyka empirycznego w żadnej klasie
-$\mathcal F$, tylko naśladuje postać predyktora optymalnego. Ryzyko
-empiryczne pojawi się dopiero przy wyborze $k$.
+Ryzyko warunkowe $r(a\mid\x)$ z wykładu 1 szacujemy średnią stratą
+odpowiedzi $a$ na sąsiadach:
+$$
+\widehat r(a\mid\x)=\frac1k\sum_{i\in N_k(\x)}\Loss(y_i,a).
+$$
+Minimum daje średnia sąsiadów (strata kwadratowa) albo klasa najczęstsza
+(0--1). $k$-NN nie wybiera funkcji z klasy $\mathcal F$: w każdym
+punkcie rozwiązuje osobny mały problem na własnych sąsiadach.
 
 ::: notes
 $\widehat\eta$ można podstawić do reguły kosztowej albo reguły Chowa,
@@ -465,149 +483,49 @@ Przy którym $k$ błąd na zbiorze uczącym jest najmniejszy?
 
 . . .
 
-**Zawsze $k=1$**, czyli wybór najgorszy z możliwych.
+**Zawsze przy $k=1$** -- wynosi wtedy zero. Nie znaczy to, że $k=1$ jest
+zawsze złe, tylko że błąd uczący tego nie rozstrzyga.
 
-Krzywą w kształcie U rozkłada na dwa składniki rozdział
-[Obciążenie i wariancja](https://rodakt.github.io/MAD_book/1-fundamenty/04-bias-wariancja.html).
-Zostaje pytanie: jak wybrać $k$, mając tylko dane?
+$k$ wybieramy na osobnych danych:
+
+- **zbiór uczący** -- skalowanie i zapamiętane obserwacje,
+- **zbiór walidacyjny** -- porównanie kilku wartości $k$,
+- **zbiór testowy** -- tylko końcowa ocena wybranej procedury.
+
+::: notes
+Jeśli wybieramy $k$ według błędu testowego, zbiór testowy staje się
+walidacyjnym i nie daje już niezależnej oceny. Rozkład krzywej U na
+obciążenie i wariancję oraz walidacja krzyżowa -- wykład 3.
+:::
 
 # Zbieżność do optimum
 
-## Twierdzenie Stone'a
+## Gdy danych przybywa
 
-::: {.definicja}
-**Twierdzenie (zgodność uniwersalna $k$-NN).** Jeżeli
-$$
-k_n\to\infty\qquad\text{oraz}\qquad k_n/n\to0\qquad (n\to\infty),
-$$
-to dla **każdego** rozkładu $(\X,Y)$:
-$\E\big[\Risk(\widehat g_n)\big]\to\Risk(\Bayes)$ w klasyfikacji oraz
-$\E\big[\Risk(\widehat f_n)\big]\to\Risk(\fopt)$ w regresji (gdy
-$\E[Y^2]<\infty$).
-:::
+Dwa źródła błędu reagują na wzrost próby inaczej:
+
+- $k$ rośnie -- uśredniamy więcej wyników, szum przestaje mieć znaczenie;
+- $k$ rośnie wolniej niż $n$ -- sąsiedzi to coraz mniejsza część próby,
+  więc otoczenie kurczy się wokół $\x$.
+
+Przy $k=\sqrt n$: dla $n=100$ uśredniamy $10$ obserwacji, czyli $10\%$
+próby, dla $n=10\,000$ -- $100$ obserwacji, czyli $1\%$.
 
 . . .
 
-Warunki odpowiadają dwóm źródłom błędu:
-
-- $k_n\to\infty$ -- uśredniamy coraz więcej obserwacji, więc szum przestaje
-  mieć znaczenie;
-- $k_n/n\to0$ -- otoczenie kurczy się do punktu $\x$.
-
-$k=\sqrt n$ spełnia oba warunki.
-
-::: notes
-$\E$ dotyczy losowości zbioru uczącego. Dowód -- Devroye i in. (1996),
-Györfi i in. (2002). Siła: słowo „każdego” -- bez ciągłości, bez
-gęstości. Odpowiedź na „optimum jest nieosiągalne” z wykładu 1: bez $P$
-nie wyznaczymy go, ale osiągniemy w granicy, mając tylko dane.
-:::
-
-## A jeśli $k$ nie rośnie?
-
 ::: {.definicja}
-**Twierdzenie Covera--Harta.** Dla dwóch klas ryzyko reguły 1-NN dąży do
-granicy $\Risk_{1\text{NN}}$, która spełnia
-$$
-\Risk^*\le\Risk_{1\text{NN}}\le2\Risk^*(1-\Risk^*)\le2\Risk^*.
-$$
+Jeśli $k\to\infty$ i $k/n\to0$, ryzyko $k$-NN dąży do ryzyka predyktora
+optymalnego -- dla **każdego** rozkładu danych (Stone, 1977).
 :::
 
-- 1-NN myli się asymptotycznie **co najwyżej dwa razy** częściej niż
-  reguła optymalna.
-- Ale nie jest **zgodna**: przy $\Risk^*>0$ jej ryzyko nie dąży do
-  $\Risk^*$. Nawet przy nieskończonej próbie etykieta najbliższego sąsiada
-  to jedno losowanie z $Y\mid\X=\x$; reguła ją kopiuje, zamiast wybrać
-  klasę bardziej prawdopodobną.
-
-. . .
-
-Np. $\eta(\x)=0{,}7$: reguła optymalna myli się w $30\%$,
-1-NN w $2\cdot0{,}7\cdot0{,}3=42\%$. Usuwa to dopiero uśrednianie
-rosnącej liczby sąsiadów.
+Optimum, którego bez rozkładu nie umieliśmy wyznaczyć, osiągamy
+w granicy, mając same dane. Twierdzenie nie mówi jednak, **ile** danych
+potrzeba -- to zależy od liczby cech.
 
 ::: notes
-Szkic dowodu: etykieta sąsiada i etykieta punktu to dwa niezależne
-losowania z Bernoulli($\eta(\x)$), różnią się z prawdopodobieństwem
-$2\eta(1-\eta)$; reszta to nierówność Jensena. W książce.
-:::
-
-## Obie reguły na znanym rozkładzie
-
-```{python}
-#| fig-width: 6.5
-#| fig-height: 3.9
-
-rng = np.random.default_rng(17)
-mu = 1.0
-
-
-def probka(n, rng):
-    """Losuje n obserwacji z równoliczną mieszanką N(-mu,1) i N(mu,1)."""
-    y = rng.integers(0, 2, n)
-    x = rng.normal(np.where(y == 1, mu, -mu), 1.0)
-    return x.reshape(-1, 1), y
-
-
-siatka = np.linspace(-7, 7, 4001)
-gestosc_klasy1 = norm.pdf(siatka - mu)
-gestosc_klasy0 = norm.pdf(siatka + mu)
-
-
-def ryzyko_dokladne(klasyfikator):
-    """Prawdopodobieństwo błędu klasyfikatora, liczone całkowaniem."""
-    etykiety = klasyfikator.predict(siatka.reshape(-1, 1))
-    return 0.5 * np.trapezoid(np.where(etykiety == 0, gestosc_klasy1, 0.0), siatka) \
-         + 0.5 * np.trapezoid(np.where(etykiety == 1, gestosc_klasy0, 0.0), siatka)
-
-
-# Granica ryzyka 1-NN: E[2 eta(X) (1 - eta(X))] po rozkładzie brzegowym X.
-eta = gestosc_klasy1 / (gestosc_klasy1 + gestosc_klasy0)
-gestosc_x = 0.5 * (gestosc_klasy1 + gestosc_klasy0)
-ryzyko_1nn_granica = np.trapezoid(2 * eta * (1 - eta) * gestosc_x, siatka)
-blad_bayesa = norm.cdf(-mu)
-
-licznosci = np.array([20, 50, 100, 300, 1000, 3000, 10_000])
-powtorzenia = 25
-ryzyko_1nn = np.empty((len(licznosci), powtorzenia))
-ryzyko_knn = np.empty((len(licznosci), powtorzenia))
-for i, n in enumerate(licznosci):
-    for j in range(powtorzenia):
-        X_tr, y_tr = probka(n, rng)
-        k = max(1, int(round(np.sqrt(n))))
-        ryzyko_1nn[i, j] = ryzyko_dokladne(
-            KNeighborsClassifier(n_neighbors=1).fit(X_tr, y_tr))
-        ryzyko_knn[i, j] = ryzyko_dokladne(
-            KNeighborsClassifier(n_neighbors=k).fit(X_tr, y_tr))
-
-fig, ax = plt.subplots(figsize=(6.5, 3.9))
-ax.plot(licznosci, ryzyko_1nn.mean(axis=1), "o-", color="0.45", label="1-NN")
-ax.plot(licznosci, ryzyko_knn.mean(axis=1), "o-", color="#1B6CA8",
-        label=r"$k$-NN, $k=\sqrt{n}$")
-ax.axhline(2 * blad_bayesa * (1 - blad_bayesa), color="0.3", ls=":", lw=1.3,
-           label=r"$2R^*(1-R^*)$")
-ax.axhline(ryzyko_1nn_granica, color="0.45", ls="--", lw=1.3,
-           label="granica ryzyka 1-NN")
-ax.axhline(blad_bayesa, color="#D7263D", ls="--", lw=1.6,
-           label=r"błąd bayesowski $R^*$")
-ax.set_xscale("log")
-ax.set_xlabel("liczność próby uczącej $n$")
-ax.set_ylabel("ryzyko")
-ax.set_ylim(0.15, 0.31)
-ax.legend(frameon=False, fontsize=8, ncol=2, loc="upper right")
-plt.tight_layout()
-plt.show()
-```
-
-Zbieżność nie znaczy jednak „szybko”: bez założeń o rozkładzie nie ma
-żadnej gwarancji tempa, a dla gładkich $\fopt$ tempo maleje z liczbą
-cech $p$.
-
-::: notes
-Dwie klasy $\Nrozk(\pm1,1)$, jak na wykładzie 1: $\Risk^*\approx0{,}159$,
-granica 1-NN $\approx0{,}225$, ograniczenie $\approx0{,}267$.
-1-NN stabilizuje się na granicy, $\sqrt n$-NN schodzi niżej i powoli
-zbliża się do $\Risk^*$.
+Formalne twierdzenie, regułę 1-NN (Cover--Hart: asymptotycznie co
+najwyżej dwa razy gorsza od optimum, ale niezgodna) i rysunek obu reguł
+-- rozszerzenie w książce, sekcja o zbieżności do optimum.
 :::
 
 # Przekleństwo wymiarowości
@@ -721,38 +639,6 @@ dochodzą wypadki odrzutowców i skutek: regulowane fotele, pedały i pasy,
 projektowanie pod zakres zamiast pod średnią. Tego nie ma w raporcie.
 :::
 
-## Odległości przestają się różnić
-
-```{python}
-#| fig-width: 6.5
-#| fig-height: 3.6
-
-rng = np.random.default_rng(23)
-wymiary = np.array([1, 2, 3, 5, 10, 20, 50, 100, 200, 500, 1000])
-n, zapytania = 1000, 50
-iloraz = np.empty(len(wymiary))
-for i, p in enumerate(wymiary):
-    punkty = rng.random((n, p))
-    q = rng.random((zapytania, p))
-    # Kwadraty odległości euklidesowych między zapytaniami a punktami.
-    d2 = (q ** 2).sum(1)[:, None] + (punkty ** 2).sum(1)[None, :] - 2 * q @ punkty.T
-    d = np.sqrt(np.maximum(d2, 0))
-    iloraz[i] = np.mean(d.min(axis=1) / d.max(axis=1))
-
-fig, ax = plt.subplots(figsize=(6.5, 3.6))
-ax.semilogx(wymiary, iloraz, "o-", color="#1B6CA8")
-ax.axhline(1, color="0.5", lw=0.8, ls=":")
-ax.set_ylim(0, 1.05)
-ax.set_xlabel("wymiar $p$")
-ax.set_ylabel(r"$d_{\min} / d_{\max}$")
-plt.tight_layout()
-plt.show()
-```
-
-$n=1000$ punktów jednostajnych w $[0,1]^p$: iloraz odległości do
-najbliższego i najdalszego punktu dąży do $1$. Gdy wszyscy są niemal
-równo odlegli, „najbliższy sąsiad” przestaje nieść informację o $\x$.
-
 ## Skutek: cechy nieistotne
 
 ```{python}
@@ -804,9 +690,39 @@ Klasy różnią się tylko w dwóch cechach, reszta to szum. Informacja jest
 cały czas w tych samych dwóch kolumnach, ale $k$-NN nie ma sposobu, by
 się o tym dowiedzieć.
 
+## Dlaczego szum szkodzi?
+
+Kwadrat odległości to suma kwadratów różnic w cechach. Średnio:
+
+| | para z tej samej klasy | para z różnych klas |
+|:--|--:|--:|
+| 2 cechy istotne | $4$ | $12$ |
+| $m$ cech szumowych | $+\,2m$ | $+\,2m$ |
+
+Różnica średnich, $8$, **nie zależy** od $m$. Rośnie natomiast rozrzut:
+każda cecha szumowa dodaje losowy składnik, a odchylenie ich sumy to
+$\sqrt{8m}$.
+
+. . .
+
+Przy $m=8$ wahania są rzędu różnicy $8$, przy $m=998$ -- około $11$
+razy większe. O tym, kto jest najbliższym sąsiadem, decyduje wtedy
+przypadek.
+
+::: {.wniosek}
+Standaryzacja nie pomoże -- skale są już równe. Pomaga tylko wybór cech.
+:::
+
+::: notes
+Para z tej samej klasy: w każdej cesze różnica dwóch N(·,1), wariancja 2.
+Z różnych klas w cesze istotnej środki odległe o 2: 2 + 2² = 6.
+Ogólniejsza postać zjawiska (koncentracja odległości, d_min/d_max → 1)
+-- rozszerzenie w książce.
+:::
+
 ## Co z tego wynika
 
-- Twierdzenie Stone'a nadal obowiązuje, ale potrzebna liczba obserwacji
+- Zbieżność do optimum nadal obowiązuje, ale potrzebna liczba obserwacji
   rośnie z wymiarem tak szybko, że w praktyce jest nieosiągalna.
 - Metoda, która nic nie zakłada o postaci zależności, musi każdy jej
   szczegół „odkryć” w danych.
@@ -851,8 +767,11 @@ $k$-d (`algorithm`) -- w książce.
   „$\X=\x$” zastępuje „$\X$ blisko $\x$”.
 - „Blisko” to część modelu: odległość i skala cech decydują o tym, kto
   jest sąsiadem.
-- $k$ steruje wygładzeniem; błąd uczący wskazuje zawsze $k=1$.
-- Przy $k_n\to\infty$, $k_n/n\to0$ ryzyko dąży do optimum dla **każdego**
-  rozkładu, ale tempo maleje z wymiarem.
+- To minimalizacja punktowa, w której rozkład $Y\mid\X=\x$ zastępują
+  wyniki sąsiadów.
+- $k$ steruje wygładzeniem; wybieramy je na zbiorze walidacyjnym, nie
+  uczącym.
+- Gdy $k$ rośnie, a $k/n$ maleje, ryzyko dąży do optimum dla **każdego**
+  rozkładu, ale potrzebna liczba danych rośnie z wymiarem.
 - W wielu wymiarach brakuje danych: potrzebne są założenia o postaci
   zależności.
