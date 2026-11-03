@@ -14,7 +14,7 @@ execute:
 ## Materiał
 
 - Rozdział [Czym jest model?](https://rodakt.github.io/MAD_book/1-fundamenty/01-czym-jest-model.html)
-- Rozdział [Predyktory optymalne i błąd nieredukowalny](https://rodakt.github.io/MAD_book/1-fundamenty/02-predyktory-optymalne.html)
+- Rozdział [Ryzyko i predyktory optymalne](https://rodakt.github.io/MAD_book/1-fundamenty/02-predyktory-optymalne.html)
 
 Przypomnienia z rachunku prawdopodobieństwa i zadania są w książce.
 
@@ -26,29 +26,23 @@ Przypomnienia z rachunku prawdopodobieństwa i zadania są w książce.
   szczegóły.
 - Model doskonale wierny byłby kopią rzeczywistości: równie
   przeładowaną i równie trudną do zrozumienia.
-- Model to kompromis między wiernością a użytecznością.
 
 > „Wszystkie modele są błędne, ale niektóre są użyteczne” -- G. Box
 
 . . .
 
-Doskonała wierność nie jest więc kryterium oceny. Zastępują ją
-**trafność**, **zakres stosowalności** i **użyteczność**.
+Kryterium nie jest więc wierność, lecz:
 
-## Cechy dobrego modelu
-
-- **Celowość** -- miasto ma inny model dla urbanisty, epidemiologa
-  i nawigacji satelitarnej.
-- **Selektywność i jawne granice** -- to, co model pomija, może się
-  później ujawnić jako źródło błędu.
-- **Zachowanie istotnych relacji** -- mapa drogowa musi oddać połączenia,
-  niekoniecznie odległości.
-- **Ograniczony zakres stosowalności** -- nowe dane mogą ujawnić granice
+- **celowość** -- miasto ma inny model dla urbanisty, epidemiologa
+  i nawigacji satelitarnej,
+- **selektywność i jawne granice** -- to, co model pomija, może się
+  później ujawnić jako źródło błędu,
+- **ograniczony zakres stosowalności** -- nowe dane mogą ujawnić granice
   modelu; modelowanie jest procesem iteracyjnym.
 
 ::: notes
-Pełna lista (także użyteczność i redukcja złożoności) -- sekcja
-„Pojęcie modelu”. Ok. 8 min na ten blok.
+Pełna lista cech dobrego modelu (także zachowanie istotnych relacji,
+użyteczność) -- sekcja „Pojęcie modelu”.
 :::
 
 # Model w analizie danych
@@ -76,18 +70,9 @@ o identycznych zarejestrowanych cechach: jeden chory, drugi zdrowy.
 
 . . .
 
-A model jest funkcją -- obu przypisze **tę samą** predykcję.
-
-## Model opisuje grupę, nie przypadek
-
-Jedna predykcja dla chorego i zdrowego pacjenta: czy model musi się
-pomylić przy jednym z nich?
-
-. . .
-
-Nie, jeśli predykcja nie zgaduje wyniku konkretnego pacjenta, lecz opisuje
-**grupę wszystkich pacjentów o tych samych cechach**: jak rozkładają się
-w niej wyniki.
+Model jest funkcją -- obu przypisze **tę samą** predykcję. Nie musi się
+przy tym mylić, jeśli opisuje **grupę wszystkich pacjentów o tych samych
+cechach**: jak rozkładają się w niej wyniki.
 
 „Na 100 takich pacjentów choruje 30” -- to zdanie jest prawdziwe zarówno
 dla chorego, jak i dla zdrowego.
@@ -191,16 +176,6 @@ Ok. 8 min na blok.
 
 # Opis probabilistyczny
 
-## Dwa pytania
-
-Obiekty o tych samych cechach mają różne wyniki, a model daje im jedną
-predykcję. Zanim powiemy, co znaczy „dobry model”, musimy
-odpowiedzieć na dwa pytania:
-
-1. **Z czym porównujemy predykcję**, skoro pojedynczy wynik nie jest
-   właściwym punktem odniesienia?
-2. **Jak wycenić rozbieżność** między predykcją a obserwacją?
-
 ## Dane jako próba z rozkładu
 
 - Cechy i wynik są losowe: para $(\X,Y)$ ma **rozkład łączny** $P$.
@@ -233,8 +208,7 @@ $$
 
 . . .
 
-Odpowiedź na pytanie 1: predykcję porównujemy nie z jedną wartością,
-lecz z **rozkładem** $Y\mid\X=\x$ -- jego część systematyczna plus szum.
+Predykcję porównujemy więc nie z jednym wynikiem, lecz z **rozkładem** $Y\mid\X=\x$ -- jego część systematyczna plus szum.
 
 ## Regresja: część systematyczna i szum
 
@@ -270,26 +244,12 @@ $\eta_k(\x)$ -- dla dwóch klas: klasa $1$, gdy $\eta(\x)>1/2$.
 
 Jeżeli $0<\eta(\x)<1$, obie klasy są możliwe przy tych samych cechach:
 nawet **dokładna** znajomość $\eta$ nie daje bezbłędnej klasyfikacji.
-
-## Jeden rozkład, dwa sposoby opisu
-
-Punkt wyjścia ten sam: rozkład $Y\mid\X=\x$. Różni się tylko to, co
-z niego odczytujemy jako opis zależności.
-
-- **Regresja** -- jedną charakterystykę: „środek” rozkładu $\fopt(\x)$
-  (albo medianę); resztę rozkładu pomijamy.
-- **Klasyfikacja** -- „środka” nie ma, podajemy cały wektor
-  $\big(\eta_1(\x),\ldots,\eta_K(\x)\big)$, czyli **pełny rozkład**
-  $Y\mid\X=\x$. Do jednej klasy sprowadza go dopiero reguła decyzyjna.
-
-. . .
-
-Dla klas kodowanych $0/1$: $\E[Y\mid\X=\x]=\Prob(Y=1\mid\X=\x)$, czyli
-$\fopt=\eta$.
+Regresja opisuje „środek” rozkładu $Y\mid\X=\x$, klasyfikacja -- cały
+rozkład; dla klas $0/1$ zachodzi $\fopt=\eta$.
 
 ::: notes
-Ok. 15 min na blok. Modele dyskryminacyjne vs generatywne (ramka
-„Po co nam ten podział”) -- najwyżej jedno zdanie.
+Modele dyskryminacyjne vs generatywne (ramka „Po co nam ten podział”)
+-- najwyżej jedno zdanie.
 :::
 
 # Strata i ryzyko
@@ -345,351 +305,322 @@ $$
 \Risk(f)=\Prob\big(f(\X)\neq Y\big).
 $$
 
-## Ryzyko a błąd na danych treningowych
+# Ryzyko na przykładzie
 
-Ryzyka nie umiemy obliczyć -- nie znamy $P$. Umiemy obliczyć
-**ryzyko empiryczne**
-$$
-\widehat{\Risk}_n(f)=\frac1n\sum_{i=1}^{n}\Loss\big(y_i,f(\x_i)\big).
-$$
+## Sklep: popyt na produkt
 
-. . .
+Sklep przewiduje dzienny popyt $Y\in\{0,2,4\}$ sztuk. Przed prognozą zna
+rodzaj dnia $X$: $A$ -- zwykły dzień, $B$ -- dzień lokalnego wydarzenia.
 
-Jeśli te same dane posłużyły do dopasowania modelu,
-$\widehat{\Risk}_n$ jest **systematycznie zaniżone**: model był
-dobierany tak, by na nich wypadać dobrze.
+| $x$ | $\Prob(X=x)$ | $\Prob(Y=0\mid X=x)$ | $\Prob(Y=2\mid X=x)$ | $\Prob(Y=4\mid X=x)$ |
+|:---|---:|---:|---:|---:|
+| $A$ | $0{,}75$ | $0{,}6$ | $0{,}3$ | $0{,}1$ |
+| $B$ | $0{,}25$ | $0{,}1$ | $0{,}3$ | $0{,}6$ |
 
-## Błąd redukowalny i nieredukowalny
-
-- **Nieredukowalny** -- najmniejsze ryzyko osiągalne przy danych cechach
-  i stracie. Dodatni nawet przy znanym $P$ i optymalnej regule.
-- **Redukowalny** -- nadwyżka ryzyka naszego predyktora ponad to minimum:
-  ograniczenia klasy modeli, skończona próba.
-
-. . .
-
-::: {.callout-important}
-## Nieredukowalny -- ale względem czego?
-Względem **ustalonego zestawu cech**, nie zjawiska. Nowa, informatywna
-cecha może go zmniejszyć: czego nie da się poprawić modelowaniem, często
-daje się poprawić pomiarem.
-:::
+Tabela to **założony rozkład** populacji dni, a nie wyniki z kilku
+dni. Prawdopodobieństwo pary to iloczyn, np.
+$\Prob(X=A,Y=0)=0{,}75\cdot0{,}6=0{,}45$.
 
 ::: notes
-Ok. 12 min na blok.
+Przez większość wykładu rozkład jest znany: dzięki temu można dokładnie
+wskazać cel uczenia -- regułę, której szukalibyśmy przy pełnej wiedzy.
+Na końcu wracamy do próby.
 :::
+
+## Ryzyko reguły „zawsze 2”
+
+Reguła $f(A)=f(B)=2$, strata kwadratowa: popyt $2$ daje stratę $0$,
+popyt $0$ albo $4$ -- stratę $4$. Ponieważ
+$\Prob(Y=2)=0{,}75\cdot0{,}3+0{,}25\cdot0{,}3=0{,}3$,
+$$
+\Risk(f)=0\cdot0{,}3+4\cdot0{,}7=2{,}8.
+$$
+
+W pojedynczym dniu strata wynosi $0$ albo $4$; ryzyko to jej przeciętna
+w populacji dni.
+
+. . .
+
+$2{,}8$ to nie $2{,}8\%$ pomyłek ani pomyłka o $2{,}8$ sztuki, lecz
+średni **kwadrat** pomyłki. Znaczenie ryzyka zależy od straty:
+prawdopodobieństwem błędu jest dopiero przy stracie 0--1.
+
+## Ryzyko w dwóch krokach
+
+Reguła stała $f\equiv1{,}5$ (średni popyt $\E[Y]$) ma ryzyko $2{,}55$.
+Policzmy je inaczej.
+
+1. Przy ustalonym rodzaju dnia -- **ryzyko warunkowe**:
+   $$
+   \E\big[(Y-1{,}5)^2\mid X=A\big]=0{,}6\cdot2{,}25+0{,}3\cdot0{,}25+0{,}1\cdot6{,}25=2{,}05,
+   $$
+   a dla dni $B$ tak samo: $4{,}05$.
+2. Uśredniamy po rodzajach dni: $0{,}75\cdot2{,}05+0{,}25\cdot4{,}05=2{,}55$.
+
+. . .
+
+Ogólnie, dla ryzyka warunkowego $r(a\mid\x)=\E\big[\Loss(Y,a)\mid\X=\x\big]$,
+$$
+\Risk(f)=\E\big[r(f(\X)\mid\X)\big]
+$$
+-- to wzór na iterowaną wartość oczekiwaną.
 
 # Predyktor optymalny
 
-## Pytanie {.pytanie}
-
-::: {style="font-size: 1.4em; text-align: center; margin-top: 1.5em"}
-Która funkcja $f$ minimalizuje $\Risk(f)$?
-:::
-
-Minimalizujemy po **wszystkich** funkcjach, nie w żadnej klasie modeli.
-Odpowiedź wyznacza granicę, do której metody uczenia mogą się tylko
-zbliżać.
-
 ## Minimalizacja punktowa
 
-Prawo iterowanej wartości oczekiwanej:
+Wybór reguły to wybór dwóch liczb $a_A$ i $a_B$:
 $$
-\Risk(f)=\E\Big[\,\E\big[\Loss(Y,f(\X))\mid\X\big]\Big].
+\Risk=0{,}75\,r(a_A\mid A)+0{,}25\,r(a_B\mid B).
 $$
-
-**Ryzyko warunkowe** predykcji $a$ w punkcie $\x$:
-$$
-r(a\mid\x)=\E\big[\Loss(Y,a)\mid\X=\x\big].
-$$
+Pierwszy składnik zależy tylko od $a_A$, drugi tylko od $a_B$: najlepszą
+odpowiedź wybieramy w każdej grupie osobno.
 
 ::: {.definicja}
-**Twierdzenie.** Jeżeli $\fopt(\x)$ minimalizuje $r(\cdot\mid\x)$ dla
+**Twierdzenie.** Jeżeli $\fopt(\x)$ minimalizuje $r(a\mid\x)$ dla
 każdego $\x$, to $\fopt$ minimalizuje $\Risk$ wśród wszystkich
 predyktorów.
 :::
 
-::: notes
-Dowód: nierówność punktowa zachowuje się przy uśrednianiu po X.
-Na tablicy, jedna linijka.
-:::
-
-## Brak danych w punkcie
-
-Zasada mówi, **co** estymować -- średnią warunkową, medianę, $\eta(\x)$ --
-ale nie **jak**.
-
-- Rozkładu $Y\mid\X=\x$ nie znamy, a przy cechach ciągłych
-  $\Prob(\X=\x)=0$: w próbie prawie na pewno nie ma obserwacji o cechach
-  dokładnie $\x$.
-- Informację trzeba **pożyczać** z innych punktów: z otoczenia $\x$
-  (np. $k$ najbliższych sąsiadów) albo z całej próby naraz (model
-  parametryczny).
-
 . . .
 
-Pożyczanie sprzęga predykcje w różnych punktach -- stąd **kompromisy**:
-
-- prosta dopasowana do zakrzywionej funkcji regresji poprawia się w jednym
-  obszarze kosztem innego,
-- uśrednianie lokalne: małe otoczenie ma mało obserwacji, duże miesza
-  punkty o różnych rozkładach warunkowych.
+Działa to dzięki swobodzie wyboru. Reguła stała ($a_A=a_B$) albo prosta
+wiąże odpowiedzi w różnych punktach -- najlepszy predyktor
+w ograniczonej klasie może mieć większe ryzyko.
 
 ::: notes
-Wyjątek: cechy o niewielu wartościach, każda obserwowana wiele razy --
-wtedy optimum można szacować w każdym punkcie osobno (średnia wyników
-w punkcie).
+Dowód na tablicy: nierówność punktowa zachowuje się po uśrednieniu
+po X. O odpowiedzi w grupie decyduje rozkład wyniku w tej grupie;
+częstość grupy tylko waży jej udział w ryzyku.
 :::
 
-## Co z tego wynika
-
-- Optymalna predykcja w $\x$ zależy tylko od $Y\mid\X=\x$. Rozkład cech
-  $p(\x)$ jedynie waży, ile wnosi błąd w danym obszarze.
-
-. . .
-
-Zostaje pytanie: dla danej straty i danego rozkładu $Y\mid\X=\x$, która
-liczba $a$ minimalizuje $r(a\mid\x)$? Strata wyznacza, jaką
-charakterystykę rozkładu zwraca optimum: średnią, medianę, najbardziej
-prawdopodobną klasę.
-
-## Strata kwadratowa: funkcja regresji
-
-::: {.definicja}
-**Twierdzenie.** Przy stracie kwadratowej i $\E[Y^2]<\infty$ ryzyko
-minimalizuje $\fopt(\x)=\E[Y\mid\X=\x]$.
-:::
-
-Niech $m=\E[Y\mid\X=\x]$. Rozpisujemy $Y-a=(Y-m)+(m-a)$; wyraz
-mieszany znika, bo $\E[Y-m\mid\X=\x]=0$:
-$$
-\begin{aligned}
-r(a\mid\x)&=\E\big[(Y-m)^2\mid\X=\x\big]+(m-a)^2\\
-&=\Var(Y\mid\X=\x)+(m-a)^2 .
-\end{aligned}
-$$
-
-Pierwszy składnik nie zależy od $a$, drugi zeruje się dokładnie dla $a=m$.
-
-. . .
-
-::: {.wniosek}
-Dla $a=m$ ryzyko warunkowe wynosi $\Var(Y\mid\X=\x)$: optymalny predyktor
-ma **dodatnie ryzyko**, o ile $Y$ nie jest wyznaczone przez $\X$.
-:::
-
-## Rozkład ryzyka (strata kwadratowa)
+## Regresja: średnia w każdej grupie
 
 $$
 \begin{aligned}
-\underbrace{\E\big[(Y - f(\X))^2\big]}_{\text{ryzyko } f}
-&=
-\underbrace{\E\Big[\big(\fopt(\X) - f(\X)\big)^2\Big]}_{\text{błąd redukowalny}}\\
-&\quad+
-\underbrace{\E\big[\Var(Y \mid \X)\big]}_{\text{błąd nieredukowalny}}
+r(a\mid A)&=0{,}6a^2+0{,}3(2-a)^2+0{,}1(4-a)^2=1{,}8+(a-1)^2,\\
+r(a\mid B)&=1{,}8+(a-3)^2
 \end{aligned}
 $$
 
-- **Redukowalny** -- średni kwadrat odległości $f$ od $\fopt$; znika
-  dla $f=\fopt$.
-- **Nieredukowalny** -- średnia wariancja szumu $\varepsilon=Y-\fopt(\X)$.
-  Nie ma w nim $f$: żaden model go nie zmniejszy, może to zrobić tylko
-  inny zestaw cech
-  ([książka](https://rodakt.github.io/MAD_book/1-fundamenty/02-predyktory-optymalne.html#sec-blad-nieredukowalny)).
-
-## Inna strata -- inna odpowiedź
-
-Przy stracie absolutnej $|y-a|$ optimum to **mediana warunkowa**
-$\med(Y\mid\X=\x)$. Przykład: $Y\mid\X=\x$ to mieszanina
-$0{,}85\,\Nrozk(2,\,0{,}6^2)+0{,}15\,\Nrozk(9,\,2^2)$.
-
 ```{python}
-#| fig-width: 11
-#| fig-height: 3.4
+#| fig-width: 7
+#| fig-height: 3
 
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.optimize import brentq
-from scipy.stats import norm
 
-# Ten sam rozkład co w rysunku fig-strata-optima w książce;
-# oba ryzyka liczone dokładnie ze wzorów dla rozkładu normalnego.
-w = np.array([0.85, 0.15])
-mu = np.array([2.0, 9.0])
-sd = np.array([0.6, 2.0])
-
-def gestosc(y):
-    return (w * norm.pdf(y[:, None], mu, sd)).sum(axis=1)
-
-def dystrybuanta(y):
-    return (w * norm.cdf(y, mu, sd)).sum()
-
-srednia = (w * mu).sum()
-wariancja = (w * (sd**2 + mu**2)).sum() - srednia**2
-mediana = brentq(lambda a: dystrybuanta(a) - 0.5, mu.min(), mu.max())
-
-siatka = np.linspace(0, 12, 500)
-ryzyko_kw = wariancja + (siatka - srednia) ** 2
-z = (siatka[:, None] - mu) / sd
-ryzyko_abs = (w * sd * (2 * norm.pdf(z) + z * (2 * norm.cdf(z) - 1))).sum(axis=1)
-
-fig, osie = plt.subplots(1, 3, figsize=(11, 3.4), sharex=True)
-
-osie[0].fill_between(siatka, gestosc(siatka), color="#BBBBBB")
-osie[0].axvline(srednia, color="#D7263D", ls="--", lw=1.5,
-                label=f"średnia = {srednia:.2f}")
-osie[0].axvline(mediana, color="#2E8B57", ls=":", lw=1.8,
-                label=f"mediana = {mediana:.2f}")
-osie[0].set_title(r"gęstość $Y \mid X = x$")
-osie[0].set_xlabel("$y$")
-osie[0].legend(loc="upper right", frameon=False)
-
-for ax, ryzyko, opt, kolor, styl, etykieta, tytul in [
-    (osie[1], ryzyko_kw, srednia, "#D7263D", "--", "średnia warunkowa",
-     r"strata kwadratowa $(y-a)^2$"),
-    (osie[2], ryzyko_abs, mediana, "#2E8B57", ":", "mediana warunkowa",
-     r"strata absolutna $|y-a|$"),
-]:
-    ax.plot(siatka, ryzyko, color="#1B6CA8", lw=2)
-    ax.axvline(opt, color=kolor, ls=styl, lw=1.5, label=etykieta)
-    ax.set_xlabel("predykcja $a$")
-    ax.set_title(tytul)
-    ax.legend(loc="upper center", frameon=False)
-
-osie[1].set_ylabel(r"ryzyko warunkowe $r(a \mid x)$")
-plt.tight_layout()
-plt.show()
-```
-
-**Wybór straty jest wyborem merytorycznym**, nie technicznym.
-
-::: notes
-Jeśli brakuje czasu: tylko jedno zdanie o medianie, bez rysunku.
-Dowód dla mediany -- w książce. Strata kwadratowa: 1 błąd 10 = 100 błędów 1;
-absolutna: = 10 błędów 1.
-:::
-
-## Strata 0--1: klasyfikator bayesowski
-
-Ryzyko warunkowe wskazania klasy $a$:
-$$
-r(a\mid\x)=\Prob(Y\neq a\mid\X=\x)=1-\eta_a(\x).
-$$
-
-::: {.definicja}
-**Twierdzenie.** Prawdopodobieństwo błędu minimalizuje
-**klasyfikator bayesowski**
-$$
-\Bayes(\x)=\argmax_k\,\eta_k(\x).
-$$
-:::
-
-Jego ryzyko to **błąd bayesowski**
-$$
-\Risk^{*}=\Prob\big(\Bayes(\X)\neq Y\big)=\E\Big[1-\max_k\eta_k(\X)\Big]
-$$
--- błąd nieredukowalny dla straty 0--1.
-
-## Błąd bayesowski to nie wada modelu
-
-- Przy ustalonych cechach $\Risk^*$ nie zmniejszy **żaden** model, żadna
-  liczba danych ani moc obliczeniowa.
-- $\Risk^*>0$, gdy te same cechy występują u obiektów różnych klas.
-
-. . .
-
-Jeśli $\Risk^*=7\%$, a nasz klasyfikator ma błąd $7{,}2\%$, to dalsze
-strojenie da co najwyżej $0{,}2$ punktu procentowego. Większej poprawy
-trzeba szukać w **cechach**, nie w modelu.
-
-::: notes
-Ok. 20 min na cały blok -- rdzeń wykładu. Rozkład ryzyka dla straty
-0--1 (eq-rozklad-bledu-01) -- tylko słownie: ta sama budowa,
-optimum + nieujemna nadwyżka.
-
-Jeśli padnie pytanie o inny próg (diagnostyka: przeoczenie choroby
-droższe niż fałszywy alarm) -- to inna strata, wrócimy przy regresji
-logistycznej (wykład 7).
-:::
-
-# Od teorii do uczenia
-
-## Optimum jest nieosiągalne
-
-$\E[Y\mid\X=\x]$ i $\eta_k(\x)$ wymagają znajomości $P$. Reguła Bayesa
-nie jest algorytmem -- jest **wzorcem**, do którego algorytmy się
-zbliżają.
-
-```{python}
-#| fig-width: 6.5
-#| fig-height: 3.6
-
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.stats import norm
-from sklearn.neighbors import KNeighborsClassifier
-
-# Ten sam eksperyment co fig-blad-bayesa w książce: dwie klasy N(-1,1), N(1,1),
-# ryzyko k-NN liczone dokładnie (całkowaniem), a nie na zbiorze testowym.
-rng = np.random.default_rng(7)
-mu = 1.0
-blad_bayesa = norm.cdf(-mu)
-
-def probka(n, rng):
-    y = rng.integers(0, 2, n)
-    x = rng.normal(np.where(y == 1, mu, -mu), 1.0)
-    return x.reshape(-1, 1), y
-
-siatka = np.linspace(-7, 7, 4001)
-gestosc_klasy1 = norm.pdf(siatka - mu)
-gestosc_klasy0 = norm.pdf(siatka + mu)
-
-def ryzyko_dokladne(klasyfikator):
-    etykiety = klasyfikator.predict(siatka.reshape(-1, 1))
-    return 0.5 * np.trapezoid(np.where(etykiety == 0, gestosc_klasy1, 0.0), siatka) \
-         + 0.5 * np.trapezoid(np.where(etykiety == 1, gestosc_klasy0, 0.0), siatka)
-
-licznosci = np.array([20, 50, 100, 300, 1000, 3000, 10_000])
-powtorzenia = 25
-bledy = np.empty((len(licznosci), powtorzenia))
-for i, n in enumerate(licznosci):
-    for j in range(powtorzenia):
-        X_tr, y_tr = probka(n, rng)
-        k = max(1, int(round(np.sqrt(n))))
-        klf = KNeighborsClassifier(n_neighbors=k).fit(X_tr, y_tr)
-        bledy[i, j] = ryzyko_dokladne(klf)
-
-srednie = bledy.mean(axis=1)
-kwantyle = np.quantile(bledy, [0.1, 0.9], axis=1)
-wasy = np.abs(kwantyle - srednie)
-
-fig, ax = plt.subplots(figsize=(6.5, 3.6))
-ax.errorbar(licznosci, srednie, yerr=wasy, marker="o", capsize=3,
-            color="#1B6CA8", label=r"$k$-NN, $k=\sqrt{n}$")
-ax.axhline(blad_bayesa, color="#D7263D", ls="--", lw=1.8,
-           label=rf"błąd bayesowski $\Phi(-\mu) = {blad_bayesa:.4f}$")
-ax.set_xscale("log")
-ax.set_xlabel("liczność próby uczącej $n$")
-ax.set_ylabel("ryzyko $R(g)$")
+# Ryzyka warunkowe z przykładu sklepu (rysunek fig-ryzyko-popyt w książce).
+a = np.linspace(-0.5, 4.5, 301)
+fig, ax = plt.subplots(figsize=(7, 3))
+ax.plot(a, 1.8 + (a - 1)**2, label="zwykły dzień A", color="#1B6CA8")
+ax.plot(a, 1.8 + (a - 3)**2, label="dzień wydarzenia B", color="#D7263D")
+ax.scatter([1, 3], [1.8, 1.8], color=["#1B6CA8", "#D7263D"], zorder=3)
+ax.set(xlabel="prognoza a", ylabel="oczekiwana strata", ylim=(0, 15))
 ax.legend(frameon=False)
 plt.tight_layout()
 plt.show()
 ```
 
-::: notes
-Dwie klasy N(-1,1) i N(1,1), reguła Bayesa: x > 0, błąd Phi(-1).
-Krzywa nigdy nie przecina czerwonej linii -- nie może.
-W realnym problemie czerwonej linii nie znamy: wypłaszczenie może znaczyć
-„granica zjawiska” albo „za słaby model”. Jeśli podwojenie danych nic nie
-daje, problemem nie jest liczba danych.
+Minima w $a=1$ i $a=3$ -- średnich popytu w grupach. Oba są dodatnie.
+
+## Dlaczego średnia?
+
+Niech $m=\E[Y\mid\X=\x]$. Rozpisujemy $Y-a=(Y-m)+(m-a)$; wyraz
+mieszany znika, bo $\E[Y-m\mid\X=\x]=0$:
+$$
+r(a\mid\x)=\Var(Y\mid\X=\x)+(m-a)^2 .
+$$
+
+::: {.definicja}
+**Twierdzenie.** Przy stracie kwadratowej (i $\E[Y^2]<\infty$) ryzyko
+minimalizuje **funkcja regresji** $\fopt(\x)=\E[Y\mid\X=\x]$.
 :::
+
+. . .
+
+| Reguła | $(f(A),f(B))$ | Ryzyko |
+|:---|:---|---:|
+| najlepsza stała | $(1{,}5;\ 1{,}5)$ | $2{,}55$ |
+| prognozy skrajne | $(0;\ 4)$ | $2{,}8$ |
+| funkcja regresji | $(1;\ 3)$ | $1{,}8$ |
+
+Samo użycie cechy nie gwarantuje poprawy, ale **najlepsza** reguła
+z cechą nie jest gorsza od najlepszej stałej -- może cechę zignorować.
+
+## Klasyfikacja: czy popyt wyniesie co najmniej 2?
+
+Ten sam rozkład, nowa odpowiedź $Z=\ind(Y\ge2)$, strata 0--1.
+Z tabeli: $\Prob(Z=1\mid A)=0{,}4$, $\Prob(Z=1\mid B)=0{,}9$.
+
+| Rodzaj dnia | Ryzyko odpowiedzi $0$ | Ryzyko odpowiedzi $1$ | Najlepsza |
+|:---|---:|---:|---:|
+| $A$ | $0{,}4$ | $0{,}6$ | $0$ |
+| $B$ | $0{,}9$ | $0{,}1$ | $1$ |
+
+. . .
+
+Te same kroki co w regresji. Reguła $g(A)=0$, $g(B)=1$ ma ryzyko
+$$
+\Risk(g)=0{,}75\cdot0{,}4+0{,}25\cdot0{,}1=0{,}325,
+$$
+tym razem prawdopodobieństwo błędu: myli się w $32{,}5\%$ dni.
+
+## Klasyfikator bayesowski
+
+Przy stracie 0--1 ryzyko warunkowe wskazania klasy $a$ to
+$r(a\mid\x)=\Prob(Y\neq a\mid\X=\x)=1-\eta_a(\x)$.
+
+::: {.definicja}
+**Twierdzenie.** Prawdopodobieństwo błędu minimalizuje
+**klasyfikator bayesowski** $\Bayes(\x)=\argmax_k\,\eta_k(\x)$.
+Jego ryzyko to **błąd bayesowski**
+$$
+\Risk^{*}=\E\Big[1-\max_k\eta_k(\X)\Big].
+$$
+:::
+
+Nazwa nie oznacza rozkładu na parametrach modelu -- to reguła
+„najbardziej prawdopodobna klasa przy danych cechach”.
+
+. . .
+
+W sklepie najlepsza reguła stała (zawsze $1$) myli się w $47{,}5\%$
+dni, reguła Bayesa -- w $32{,}5\%$. Rodzaj dnia obniża najmniejszy
+możliwy błąd o $15$ punktów procentowych.
+
+## Jeden schemat, dwa zastosowania
+
+| Krok | Regresja, strata kwadratowa | Klasyfikacja, strata 0--1 |
+|:---|:---|:---|
+| ustalamy cechy | $\X=\x$ | $\X=\x$ |
+| odpowiedź | liczba $a$ | klasa $a$ |
+| przeciętna strata | $\E[(Y-a)^2\mid\X=\x]$ | $1-\eta_a(\x)$ |
+| minimum | średnia warunkowa | najbardziej prawdopodobna klasa |
+| ryzyko optimum | średnia wariancji warunkowych | średnie najmniejsze p-stwo pomyłki |
+
+W obu zadaniach potrzebny jest rozkład odpowiedzi przy danych cechach.
+Liczb $1{,}8$ i $0{,}325$ nie porównujemy: mają inne jednostki i inne
+znaczenie.
+
+## Dlaczego optimum się myli?
+
+Najlepsza prognoza zwykłego dnia to $1$, a popyt wynosi $0$, $2$ albo
+$4$ -- żadna liczba nie trafi we wszystkie wyniki. Dla straty
+kwadratowej:
+$$
+\underbrace{\E\big[(Y-f(\X))^2\big]}_{\text{ryzyko } f}
+=\underbrace{\E\big[(f(\X)-\fopt(\X))^2\big]}_{\text{błąd redukowalny}}
++\underbrace{\E\big[\Var(Y\mid\X)\big]}_{\text{błąd nieredukowalny}}
+$$
+
+- **nieredukowalny** -- ryzyko $\fopt$, najmniejsze przy tych cechach
+  i tej stracie; w klasyfikacji to błąd bayesowski,
+- **redukowalny** -- nadwyżka naszej reguły ponad to minimum.
+
+. . .
+
+W sklepie: $\Risk(f)=1{,}8+0{,}75(a_A-1)^2+0{,}25(a_B-3)^2$. Reguła stała
+$1{,}5$ ma ryzyko $2{,}55=1{,}8+0{,}75$: tracimy $0{,}75$, bo pomijamy
+rodzaj dnia.
+
+## Nieredukowalny -- ale względem czego?
+
+::: {.callout-important}
+## Względem ustalonego zestawu cech, nie zjawiska
+Nowa cecha, np. liczba wcześniejszych rezerwacji produktu, mogłaby
+rozróżnić dni dotąd traktowane jednakowo i obniżyć optimum. Czego nie
+da się poprawić modelowaniem, często daje się poprawić pomiarem.
+:::
+
+- Więcej dni w próbie pomaga dokładniej oszacować rozkład przy obecnych
+  cechach, ale nie usuwa jego zmienności.
+- W praktyce optimum i jego ryzyko są nieznane: wypłaszczenie wyników
+  nie dowodzi, że osiągnęliśmy granicę -- może to być słabość metody.
+
+([książka](https://rodakt.github.io/MAD_book/1-fundamenty/02-predyktory-optymalne.html#sec-blad-nieredukowalny))
+
+# Wybór straty
+
+## Strata absolutna: mediana
+
+Przy $|y-a|$ pomyłka o $4$ sztuki kosztuje dwa razy więcej niż o $2$
+(przy kwadratowej -- cztery razy).
+
+W zwykłym dniu prognoza $0$ ma przeciętną stratę
+$0{,}3\cdot2+0{,}1\cdot4=1$, a średnia $1$ -- aż $1{,}2$.
+
+::: {.definicja}
+**Twierdzenie.** Przy stracie absolutnej (i $\E|Y|<\infty$) ryzyko
+minimalizuje **mediana warunkowa** $\fopt(\x)=\med(Y\mid\X=\x)$.
+:::
+
+| Reguła | $(f(A),f(B))$ | Ryzyko kwadratowe | Ryzyko absolutne |
+|:---|:---|---:|---:|
+| średnie warunkowe | $(1;\ 3)$ | $1{,}8$ | $1{,}2$ |
+| mediany warunkowe | $(0;\ 4)$ | $2{,}8$ | $1{,}0$ |
+
+Reguły porównujemy **w obrębie kolumny** -- każda to inne kryterium.
+
+::: notes
+Intuicja mediany: przesuwając prognozę w prawo, oddalamy się od wyników
+po lewej i zbliżamy do tych po prawej; liczy się tylko, po której
+stronie jest więcej prawdopodobieństwa. Dowód -- w książce.
+:::
+
+## Którą stratę wybrać?
+
+Niech w zwykłym dniu zamiast popytu $4$ zdarza się (z p-stwem $0{,}1$)
+duże zamówienie na $20$ sztuk:
+
+- średnia warunkowa rośnie z $1$ do $2{,}6$, choć w $90\%$ dni popyt
+  to $0$ albo $2$; mediana zostaje równa $0$,
+- przy stracie kwadratowej pomyłka o $18$ sztuk kosztuje $324$.
+
+Tak samo w próbie: kilka obserwacji odstających mocno przesuwa średnią,
+a medianę niewiele -- mediana jest **odporna**.
+
+. . .
+
+::: {.wniosek}
+Wybór straty to opis kosztów pomyłek, nie kwestia dokładności.
+:::
+
+Każda brakująca i nadmiarowa sztuka kosztuje tyle samo -- strata
+absolutna. Duże pomyłki nieproporcjonalnie dotkliwe -- kwadratowa.
+Niedobór droższy niż nadmiar -- inny kwantyl rozkładu warunkowego.
+
+::: notes
+Pytanie o różne koszty dwóch rodzajów pomyłek w klasyfikacji (próg
+decyzyjny inny niż 1/2) -- wrócimy przy regresji logistycznej
+(wykład 7).
+:::
+
+# Od teorii do uczenia
+
+## Od znanego rozkładu do danych
+
+Optimum wymaga znajomości rozkładu. W praktyce mamy tylko obserwacje
+$(\x_i,y_i)$ -- reguły mówią, **czego w nich szukać**.
+
+- Cechy powtarzają się wielokrotnie: średni popyt w grupie szacujemy
+  średnią, prawdopodobieństwo -- odsetkiem. Daszek w $\widehat f$,
+  $\widehat g$: wynik zależy od próby.
+- Cechy ciągłe (temperatura, powierzchnia, dochód): powtórzeń brak.
+  Informację pożyczamy z **podobnych obiektów** (np. $k$ najbliższych
+  sąsiadów) albo ze **wspólnego wzoru** (model parametryczny).
+
+. . .
+
+Ryzyka też nie znamy. Dla ustalonej reguły szacujemy je średnią strat
+na **nowych** przypadkach. To liczba losowa: nawet reguła Bayesa może
+na próbie mylić się rzadziej niż $\Risk^*$.
 
 ## Trening: minimalizacja ryzyka empirycznego
 
-Zamiast nieznanego $\Risk$ minimalizujemy $\widehat\Risk_n$ w wybranej
-**klasie modeli** $\mathcal F$:
-
 $$
+\widehat{\Risk}_n(f)=\frac1n\sum_{i=1}^{n}\Loss\big(y_i,f(\x_i)\big),
+\qquad
 \widehat f\in\argmin_{f\in\mathcal F}\;\widehat{\Risk}_n(f).
 $$
 
@@ -697,61 +628,27 @@ $$
 - kryterium $\widehat\Risk_n$ -- jak je porównujemy,
 - algorytm -- jak znajdujemy minimum (często w przybliżeniu).
 
-Klasa zbyt wąska może nie zawierać dobrego opisu zależności.
-
-## Strata uczenia a strata oceny
-
-Kryterium dopasowania nie musi być stratą, którą oceniamy predykcje.
-
-Klasyfikacja w dwóch etapach:
-
-- model prawdopodobieństw klas dopasowujemy, minimalizując średnią
-  **straty logarytmicznej** -- ujemnego logarytmu prawdopodobieństwa
-  przypisanego zaobserwowanej klasie,
-- etykiety po regule decyzyjnej oceniamy **stratą 0--1**.
-
 . . .
 
-Strata 0--1 słabo nadaje się do dopasowania: mała zmiana parametrów
-zwykle nie zmienia liczby błędów, więc nie wskazuje, w którą stronę
-poprawiać model. Strata logarytmiczna reaguje na każdą zmianę
-prawdopodobieństw.
+Małe $\widehat\Risk_n$ nie oznacza małego ryzyka. Regresja jednego
+najbliższego sąsiada ma na danych uczących $\widehat\Risk_n=0$:
+dostatecznie bogata klasa **zapamiętuje** próbę razem z przypadkowymi
+odchyleniami. To **nadmierne dopasowanie** -- błąd treningowy jest
+systematycznie zaniżony.
 
 ::: notes
-Dlaczego minimalizacja straty logarytmicznej daje sensowne
-prawdopodobieństwa (straty właściwe, największa wiarygodność) --
-wykład 7, regresja logistyczna.
-:::
-
-## Małe ryzyko empiryczne $\neq$ małe ryzyko
-
-Regresja jednego najbliższego sąsiada: na danych treningowych
-$\widehat\Risk_n=0$ (o ile cechy się nie powtarzają).
-
-. . .
-
-Dostatecznie bogata klasa **zapamiętuje** próbę -- razem z przypadkowymi
-odchyleniami, których nie da się przewidzieć dla nowych obiektów.
-
-To **nadmierne dopasowanie**: mały błąd treningowy, duży błąd na nowych
-danych.
-
-. . .
-
-Jak dobrać elastyczność modelu i jak rzetelnie oszacować jego ryzyko?
-
-::: notes
-Ok. 12 min na blok. Zadanie 1.14 (wielomiany stopni 1--12)
--- dobre na laboratorium.
+Kryterium dopasowania nie musi być stratą oceny (strata logarytmiczna
+przy uczeniu, 0--1 przy ocenie) -- wykład 7. Zadanie 1.14 (wielomiany
+stopni 1--12) -- dobre na laboratorium.
 :::
 
 ## Podsumowanie
 
 - Model opisuje **rozkład** $Y\mid\X=\x$, a nie pojedynczy wynik.
-- Jakość mierzy **ryzyko** -- oczekiwana strata; wybór straty jest
-  merytoryczny.
-- Optimum wyznacza się punktowo: funkcja regresji (strata kwadratowa),
-  mediana (absolutna), klasyfikator bayesowski (0--1).
-- Nawet optimum ma błąd -- **nieredukowalny przy danych cechach**.
-- Optimum wymaga $P$; w praktyce minimalizujemy $\widehat\Risk_n$
+- Jakość mierzy **ryzyko** -- oczekiwana strata. Liczymy je w dwóch
+  krokach: w grupach o tych samych cechach, potem uśredniamy.
+- Optimum wybieramy **punktowo**: średnia (strata kwadratowa), mediana
+  (absolutna), najbardziej prawdopodobna klasa (0--1).
+- Nawet optimum się myli -- błąd **nieredukowalny przy danych cechach**.
+- Optimum wymaga rozkładu; w praktyce minimalizujemy $\widehat\Risk_n$
   w klasie $\mathcal F$.
