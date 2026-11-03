@@ -1,0 +1,694 @@
+---
+title: "Regresja liniowa II: cechy jakościowe, interakcje, diagnostyka"
+subtitle: "Rozdziały 6 i 5"
+format:
+  revealjs:
+    slide-number: true
+    chalkboard: true
+    footer: "[Strona kursu](../index.html) · [Slajdy](index.html)"
+    theme: [default, _slajdy.scss]
+execute:
+  echo: false
+---
+
+## Materiał
+
+- Rozdział [Regresja liniowa](https://rodakt.github.io/MAD_book/2-modele-liniowe/06-regresja-liniowa.html),
+  sekcje „Cechy jakościowe”, „Interakcje i nieliniowość” i „Diagnostyka
+  modelu”
+- Sekcja „Bootstrap” z [rozdziału 5](https://rodakt.github.io/MAD_book/1-fundamenty/05-ocena-modeli.html)
+
+Skorelowane błędy, reszty studentyzowane, odporne błędy standardowe
+i rachunek diagnostyki -- w rozdziale 6.
+
+```{python}
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import statsmodels.api as sm
+from scipy import stats
+from statsmodels.nonparametric.smoothers_lowess import lowess
+from statsmodels.stats.outliers_influence import variance_inflation_factor
+
+# Dane z repozytorium książki (katalog obok repozytorium kursu).
+data_dir = next(p for p in [Path("../../MAD_book/dane"), Path("../../mad-book/dane")]
+                if p.exists())
+ads = pd.read_csv(data_dir / "Advertising.csv", index_col=0)
+credit = pd.read_csv(data_dir / "Credit.csv")
+auto = pd.read_csv(data_dir / "Auto.csv", na_values="?").dropna()
+
+BLUE, RED = "#1B6CA8", "#D7263D"
+
+
+def ols(y, X):
+    """Model OLS z wyrazem wolnym (statsmodels)."""
+    return sm.OLS(y, sm.add_constant(X)).fit()
+
+
+def pl(value, digits):
+    """Liczba z przecinkiem dziesiętnym."""
+    return f"{value:.{digits}f}".replace(".", ",")
+
+
+def coef_table(model, digits=3):
+    """Tabela współczynników: oszacowanie, błąd standardowy, t, p."""
+    return pd.DataFrame(
+        {"współczynnik": model.params, "błąd std.": model.bse,
+         "t": model.tvalues, "p": model.pvalues},
+    ).style.format(precision=digits, decimal=",")
+```
+
+## Model z wykładu 4 -- czego nie umie
+
+$$
+\texttt{sales}=\beta_0+\beta_1\,\texttt{TV}+\beta_2\,\texttt{radio}+\varepsilon
+$$
+
+- cechy muszą być **liczbami** -- a region, płeć, typ umowy?
+- efekt telewizji jest **ten sam** przy każdym budżecie radiowym,
+- zależność od każdej cechy jest **prostą**,
+- wnioski opierają się na założeniach (Z1)--(Z3).
+
+. . .
+
+::: {.wniosek}
+Każde rozszerzenie to nowa kolumna $\X$. Model zostaje liniowy
+w parametrach, więc OLS, błędy standardowe i testy z wykładu 4 działają
+bez zmian.
+:::
+
+# Cechy jakościowe
+
+## Dane *Credit*
+
+$400$ klientów banku. Wynik: średnie saldo zadłużenia na karcie
+kredytowej (`Balance`, USD).
+
+:::: {.columns}
+::: {.column .karta width="50%"}
+**Cechy ilościowe**
+
+- dochód `Income` (tys. USD)
+- limit kredytowy `Limit`
+- ocena kredytowa `Rating`
+- wiek `Age`
+:::
+
+::: {.column .karta width="50%"}
+**Cechy jakościowe**
+
+- `Own`: czy ma dom (tak/nie)
+- `Student`: czy jest studentem
+- `Region`: `East`, `South`, `West`
+:::
+::::
+
+## Cecha o dwóch wartościach
+
+**Zmienna zero-jedynkowa**: $x_i=1$, gdy klient $i$ ma dom, $x_i=0$
+w przeciwnym razie.
+Model $\E[Y\mid x]=\beta_0+\beta_1x$ daje średnie saldo $\beta_0$
+w grupie bez domu i $\beta_0+\beta_1$ w grupie z domem.
+
+```{python}
+own = (credit["Own"] == "Yes").astype(float).rename("Own_Yes")
+model_own = ols(credit["Balance"], own)
+coef_table(model_own, 2)
+```
+
+$\beta_1$ -- **różnica średnich** grup, a $\widehat\beta_1$ -- różnica
+średnich z próby. Tu $p\approx$ `{python} pl(model_own.pvalues["Own_Yes"], 2)`:
+dane nie świadczą o różnicy.
+
+## Cecha o $K$ wartościach
+
+Jeden poziom wybieramy jako **poziom odniesienia**, dla każdego
+z pozostałych $K-1$ -- zmienna zero-jedynkowa.
+
+```{python}
+regions = pd.get_dummies(credit["Region"], drop_first=True, dtype=float)  # odniesienie: East
+model_region = ols(credit["Balance"], regions)
+coef_table(model_region, 2)
+```
+
+- wyraz wolny -- średnie saldo na wschodzie,
+- współczynnik przy `South` -- o ile średnia na południu różni się od wschodu.
+
+## Pytanie {.pytanie}
+
+Dlaczego nie dodać zmiennych dla **wszystkich trzech** regionów?
+
+$$
+x_{\mathrm{East}}+x_{\mathrm{South}}+x_{\mathrm{West}}=?
+$$
+
+. . .
+
+Suma trzech zmiennych to kolumna jedynek. Kolumny $\X$ są liniowo
+zależne, $\X^\top\X$ nie jest odwracalna, rozwiązań jest nieskończenie
+wiele: dowolną stałą można przenieść z wyrazu wolnego do wszystkich trzech
+współczynników naraz. To przypadek „TV wpisane dwa razy” z wykładu 4.
+
+## Kodowanie zmienia współczynniki, nie dopasowanie
+
+Każde poprawne kodowanie pozwala nadać każdemu regionowi własną średnią,
+więc opisuje **ten sam zbiór funkcji**. Predykcje, RSS i $R^2$ są te
+same, różnią się tylko współczynniki.
+
+. . .
+
+- Testy $t$ porównują regiony z poziomem odniesienia -- inny poziom
+  odniesienia, inne hipotezy, inne $p$-wartości.
+- Pytanie „czy region w ogóle się liczy?” to $H_0:\beta_{\mathrm{South}}
+  =\beta_{\mathrm{West}}=0$ -- **test $F$** z $q=K-1=2$. Zależy tylko od
+  $\mathrm{RSS}$ i $\mathrm{RSS}_0$, więc nie od kodowania.
+
+::: {.wniosek}
+Region: $F\approx$ `{python} pl(model_region.fvalue, 2)`,
+$p\approx$ `{python} pl(model_region.f_pvalue, 2)` -- region nie różnicuje sald.
+:::
+
+# Interakcje i nieliniowość
+
+## Addytywność to założenie
+
+W modelu z wykładu 4 tysiąc dolarów na telewizję daje tyle samo przy
+zerowym i przy dużym budżecie radiowym. A jeśli media się wzmacniają?
+
+::: {.definicja}
+**Interakcja** -- iloczyn cech jako nowa cecha:
+$$
+\begin{aligned}
+Y&=\beta_0+\beta_1X_1+\beta_2X_2+\beta_3X_1X_2+\varepsilon\\
+&=\beta_0+(\beta_1+\beta_3X_2)\,X_1+\beta_2X_2+\varepsilon .
+\end{aligned}
+$$
+:::
+
+Nachylenie względem $X_1$ wynosi $\beta_1+\beta_3X_2$ -- zmienia się
+z $X_2$. Iloczyn $X_1X_2$ to po prostu jeszcze jedna kolumna $\X$.
+
+## Telewizja $\times$ radio
+
+```{python}
+ads_int = ads.assign(TV_radio=ads["TV"] * ads["radio"])
+model_add = ols(ads["sales"], ads[["TV", "radio"]])
+model_int = ols(ads["sales"], ads_int[["TV", "radio", "TV_radio"]])
+coef_table(model_int, 4)
+```
+
+```{python}
+b_int = model_int.params
+slope_r0 = 1000 * b_int["TV"]
+slope_r40 = 1000 * (b_int["TV"] + 40 * b_int["TV_radio"])
+```
+
+- $R^2$: `{python} pl(model_add.rsquared, 3)` $\to$ `{python} pl(model_int.rsquared, 3)`,
+  $\;\widehat\sigma$: `{python} pl(np.sqrt(model_add.scale), 2)` $\to$
+  `{python} pl(np.sqrt(model_int.scale), 2)` tys. sztuk.
+- Tysiąc dolarów na telewizję: `{python} pl(slope_r0, 0)` sztuk więcej przy
+  radiu $0$, `{python} pl(slope_r40, 0)` przy radiu $40$ tys. USD.
+
+## Efekty główne zostają
+
+Przy interakcji nie usuwamy $\beta_1X_1$ ani $\beta_2X_2$, nawet gdy
+ich testy $t$ nie są istotne.
+
+- Bez $\beta_1X_1$ nachylenie względem $X_1$ przy $X_2=0$ jest
+  wymuszone na zero -- a położenie zera na skali $X_2$ bywa umowne.
+- $\beta_1$ to nachylenie **przy $X_2=0$**, nie przeciętne nachylenie.
+  Wyśrodkowanie cech zmienia jego sens, ale nie dopasowanie.
+
+## Cecha ilościowa $\times$ jakościowa
+
+```{python}
+#| fig-width: 11
+#| fig-height: 3.8
+
+student = (credit["Student"] == "Yes").astype(float)
+feats_no = pd.DataFrame({"Income": credit["Income"], "Student": student})
+feats_yes = feats_no.assign(Income_Student=credit["Income"] * student)
+model_no = ols(credit["Balance"], feats_no)
+model_yes = ols(credit["Balance"], feats_yes)
+
+grid = np.linspace(0, credit["Income"].max(), 2)
+fig, axes = plt.subplots(1, 2, figsize=(11, 3.8), sharey=True)
+for ax, model, title in zip(axes, [model_no, model_yes], ["bez interakcji", "z interakcją"]):
+    for s, color in [(0, BLUE), (1, RED)]:
+        mask = student == s
+        ax.scatter(credit.loc[mask, "Income"], credit.loc[mask, "Balance"],
+                   s=10, color=color, alpha=0.5)
+        b = model.params
+        slope = b["Income"] + b.get("Income_Student", 0.0) * s
+        ax.plot(grid, b["const"] + b["Student"] * s + slope * grid, color=color, lw=2)
+    ax.set_title(title)
+    ax.set_xlabel("dochód (tys. USD)")
+axes[0].set_ylabel("saldo (USD)")
+plt.tight_layout()
+plt.show()
+```
+
+Czerwone -- studenci. Bez interakcji zmienna zero-jedynkowa przesuwa
+prostą, z interakcją zmienia też nachylenie.
+
+::: notes
+Model z interakcją = dwie osobne proste, jedna na grupę, ze wspólnym
+oszacowaniem $\sigma^2$. Nachylenia 6,22 i 4,22, ale różnica nachyleń
+ma $p\approx0{,}25$, a studentów jest tylko 40: dane nie przeczą
+prostym równoległym.
+:::
+
+## Przekształcenia cech
+
+```{python}
+#| fig-width: 7
+#| fig-height: 3.4
+
+hp, mpg = auto["horsepower"].to_numpy(), auto["mpg"].to_numpy()
+model_lin = ols(mpg, hp)
+model_sq = ols(mpg, np.column_stack([hp, hp ** 2]))
+
+grid = np.linspace(hp.min(), hp.max(), 200)
+fig, ax = plt.subplots(figsize=(7, 3.4))
+ax.scatter(hp, mpg, s=10, color=BLUE, alpha=0.5)
+ax.plot(grid, model_lin.params[0] + model_lin.params[1] * grid, color="0.3",
+        ls="--", lw=1.5, label=f"liniowa, $R^2 = {pl(model_lin.rsquared, 2)}$")
+ax.plot(grid, model_sq.params @ np.vstack([np.ones_like(grid), grid, grid ** 2]),
+        color=RED, lw=2, label=f"kwadratowa, $R^2 = {pl(model_sq.rsquared, 2)}$")
+ax.set_xlabel("moc silnika (KM)")
+ax.set_ylabel("mile na galon")
+ax.legend(frameon=False)
+plt.tight_layout()
+plt.show()
+```
+
+*Auto*: $392$ samochody. Kwadrat mocy jako cecha -- regresja wielomianowa
+z wykładu 3, liniowa w parametrach.
+
+::: {.wniosek}
+Które potęgi, logarytmy, interakcje -- to wybór klasy modeli. Rozstrzyga
+walidacja, nie $R^2$.
+:::
+
+# Diagnostyka
+
+## Reszty zamiast błędów
+
+Wnioski z wykładu 4 opierają się na (Z1)--(Z3). Błędów $\varepsilon_i$
+nie widzimy -- sprawdzamy założenia na **resztach** $e_i=y_i-\widehat y_i$.
+
+. . .
+
+Z równań normalnych reszty sumują się do zera i są w próbie
+nieskorelowane z predykcjami $\widehat y_i$. Na wykresie reszt
+względem $\widehat y$:
+
+- szukamy **kształtu**, nie trendu -- trendu nie będzie nigdy,
+- przy trafnym modelu: bezkształtny pas stałej szerokości wokół zera,
+- jeden wykres niezależnie od liczby cech.
+
+## Łuk: zależność nie jest liniowa
+
+```{python}
+def residual_plot(ax, model, title):
+    """Reszty względem predykcji z wygładzeniem lowess."""
+    ax.scatter(model.fittedvalues, model.resid, s=10, color=BLUE, alpha=0.5)
+    smooth = lowess(model.resid, model.fittedvalues, frac=0.4)
+    ax.plot(smooth[:, 0], smooth[:, 1], color=RED, lw=2)
+    ax.axhline(0, color="black", lw=0.8)
+    ax.set_title(title)
+    ax.set_xlabel(r"predykcja $\widehat y$")
+```
+
+```{python}
+#| fig-width: 7
+#| fig-height: 3.4
+
+fig, ax = plt.subplots(figsize=(7, 3.4))
+residual_plot(ax, model_lin, "Auto: regresja liniowa")
+ax.set_ylabel("reszta $e$")
+plt.tight_layout()
+plt.show()
+```
+
+Średnia reszt zależy od $\widehat y$: dodatnia na krańcach, ujemna
+w środku. Funkcja regresji nie jest liniowa w cechach -- **(Z1)** nie
+zachodzi, predykcje są systematycznie złe.
+
+## Pytanie {.pytanie}
+
+```{python}
+#| fig-width: 7
+#| fig-height: 3.4
+
+fig, ax = plt.subplots(figsize=(7, 3.4))
+residual_plot(ax, model_sq, "Auto: z kwadratem mocy")
+ax.set_ylabel("reszta $e$")
+plt.tight_layout()
+plt.show()
+```
+
+Łuk zniknął. Czy coś jest jeszcze nie tak?
+
+. . .
+
+**Lejek**: średnia reszt jest bliska zera, ale **rozrzut rośnie**
+z predykcją. Wariancja błędu nie jest stała -- **(Z2)** nie zachodzi.
+
+## Lejek: niestała wariancja
+
+::: {.definicja}
+**Heteroskedastyczność** -- wariancja błędu zależy od $\x$.
+:::
+
+Już ją widzieliśmy: w *Advertising* rozrzut sprzedaży rośnie z budżetem
+telewizyjnym.
+
+. . .
+
+Co psuje?
+
+- $\widehat\bbeta$ zostaje **nieobciążony** -- to wymaga tylko (Z1).
+- Wzór $\Cov\widehat\bbeta=\sigma^2(\X^\top\X)^{-1}$ wymaga (Z2), więc
+  **błędy standardowe, przedziały i testy** z wykładu 4 są niepoprawne.
+
+::: {.wniosek}
+Skąd wziąć błąd standardowy bez założenia o stałej wariancji?
+:::
+
+# Bootstrap
+
+## Gdybyśmy mieli kolejne próby
+
+Na wykładzie 4 błąd standardowy był rozrzutem $\widehat\beta_1$
+w **kolejnych próbach** -- w symulacji. Na danych mamy jedną próbę.
+
+. . .
+
+Pomysł: kolejne próby losujemy **z naszej próby**, ze zwracaniem.
+
+Pięć pomiarów $2,4,4,6,9$, średnia $5$:
+
+| Próba ze zwracaniem | Średnia |
+|---|---:|
+| $2,2,4,6,6$ | 4,0 |
+| $4,4,6,9,9$ | 6,4 |
+| $2,4,4,6,9$ | 5,0 |
+
+Żadna replikacja nie wnosi nowej informacji, ale rozrzut ich średnich
+przybliża niepewność średniej.
+
+## Bootstrap
+
+**Rozkład empiryczny** $\widehat P_n$ -- każda z $n$ obserwacji ma
+prawdopodobieństwo $1/n$. Losowanie z $\widehat P_n$ to losowanie
+z próby ze zwracaniem.
+
+::: {.definicja}
+**Błąd standardowy metodą bootstrap.** Dla wielkości
+$\widehat\theta=s(\mathcal D)$:
+
+1. dla $b=1,\dots,B$: wylosuj ze zwracaniem $n$ obserwacji
+   $\mathcal D^*_b$, oblicz $\widehat\theta^*_b=s(\mathcal D^*_b)$,
+2. błąd standardowy $\approx$ odchylenie standardowe
+   $\widehat\theta^*_1,\dots,\widehat\theta^*_B$,
+3. kwantyle $2{,}5\%$ i $97{,}5\%$ -- **przedział percentylowy**.
+:::
+
+Ten sam przepis działa dla wielkości, dla których wzoru nie mamy.
+
+::: notes
+Dwa przybliżenia: $P\to\widehat P_n$ (zależy od $n$) i skończone $B$
+(poprawiamy, zwiększając $B$; do SE kilkaset, do kwantyli kilka
+tysięcy). Większe $B$ nie zastępuje większego $n$. Wymaga niezależnych
+obserwacji -- przy szeregach czasowych i grupach inny schemat.
+Próba bootstrapowa zawiera ok. 63,2% różnych obserwacji.
+:::
+
+## Bootstrap par w regresji
+
+Losujemy całe wiersze $(\x_i,y_i)$ i za każdym razem dopasowujemy OLS.
+Para zachowuje związek $\x_i$ z rozrzutem błędu -- **nie zakładamy stałej
+wariancji**.
+
+```{python}
+#| echo: true
+X = sm.add_constant(ads[["TV", "radio"]]).to_numpy()
+y = ads["sales"].to_numpy()
+rng = np.random.default_rng(0)
+n, B = len(y), 2000
+
+boot_coef = np.empty((B, X.shape[1]))
+for b in range(B):
+    idx = rng.integers(0, n, size=n)          # losowanie ze zwracaniem
+    boot_coef[b] = np.linalg.lstsq(X[idx], y[idx], rcond=None)[0]
+```
+
+## Telewizja i radio: wzór a bootstrap
+
+```{python}
+#| fig-width: 10
+#| fig-height: 2.8
+
+model_hc3 = sm.OLS(y, X).fit(cov_type="HC3")
+se_boot = boot_coef.std(axis=0, ddof=1)
+
+fig, axes = plt.subplots(1, 2, figsize=(10, 2.8))
+for ax, j, name in zip(axes, [1, 2], ["telewizja", "radio"]):
+    ax.hist(boot_coef[:, j], bins=50, density=True, color=BLUE, alpha=0.6,
+            label="bootstrap")
+    grid_b = np.linspace(boot_coef[:, j].min(), boot_coef[:, j].max(), 200)
+    ax.plot(grid_b, stats.norm.pdf(grid_b, model_add.params.iloc[j], model_add.bse.iloc[j]),
+            color=RED, lw=1.5, label="rozkład ze wzoru")
+    ax.set_title(rf"$\widehat\beta$: {name}", fontsize=11)
+    ax.set_yticks([])
+axes[0].legend(frameon=False, fontsize=9)
+plt.tight_layout()
+plt.show()
+
+pd.DataFrame(
+    {"wzór (Z2)": model_add.bse.to_numpy()[1:], "bootstrap par": se_boot[1:],
+     "HC3": model_hc3.bse[1:]},
+    index=["telewizja", "radio"],
+).style.format(precision=5, decimal=",")
+```
+
+Przy telewizji bootstrap daje błąd o około
+`{python} pl(100 * (se_boot[1] / model_add.bse.iloc[1] - 1), 0)`% większy -- zgodnie z lejkiem.
+`statsmodels` liczy podobną poprawkę analitycznie: `fit(cov_type="HC3")`.
+
+::: notes
+Wnioski o obu mediach się nie zmieniają: przedziały szersze, ale daleko
+od zera. HC3 zastępuje wspólne $\widehat\sigma^2$ kwadratami reszt
+poszczególnych obserwacji -- szczegóły w rozdziale 6. Druga droga: zmienić
+model, np. modelować $\log Y$, gdy rozrzut rośnie z poziomem wyniku.
+:::
+
+# Obserwacje wpływowe
+
+## Dwa rodzaje nietypowości
+
+:::: {.columns}
+::: {.column .karta width="50%"}
+**Odstająca**
+
+nietypowy **wynik** -- daleko od dopasowania, duża reszta
+:::
+
+::: {.column .karta width="50%"}
+**O dużej dźwigni**
+
+nietypowe **cechy** -- daleko od pozostałych w przestrzeni cech
+:::
+::::
+
+Dla jednej cechy **dźwignia**
+$$
+h_i=\frac1n+\frac{(x_i-\bar x)^2}{\sum_k(x_k-\bar x)^2}
+$$
+rośnie z odległością od $\bar x$. Średnio wynosi $(p+1)/n$; za dużą
+uznaje się zwykle dwukrotność średniej.
+
+::: notes
+$h_i$ to waga, z jaką $y_i$ wchodzi do własnej predykcji $\widehat y_i$:
+$\widehat y_i=\sum_j h_{ij}y_j$. W ogólnym przypadku $h_{ii}$ to
+element przekątnej macierzy daszkowej -- rozdział 6, „Reszty
+i dźwignie”.
+:::
+
+## Pytanie {.pytanie}
+
+```{python}
+#| fig-width: 11
+#| fig-height: 3.4
+
+rng = np.random.default_rng(7)
+x_base = rng.uniform(0, 10, 30)
+y_base = 1 + 0.5 * x_base + rng.normal(0, 1, 30)
+cases = [("A", 5, 1 + 0.5 * 5 + 7),
+         ("B", 22, 1 + 0.5 * 22),
+         ("C", 22, 1 + 0.5 * 22 - 7)]
+line_x = np.array([0, 23])
+b_base = np.polyfit(x_base, y_base, 1)
+
+
+def influence_panel(ax, label, x_new, y_new, with_fit):
+    """Panel z 30 punktami bazowymi, jednym nowym i (opcjonalnie) prostymi."""
+    x_all, y_all = np.append(x_base, x_new), np.append(y_base, y_new)
+    fit = ols(y_all, x_all)
+    ax.scatter(x_base, y_base, s=12, color=BLUE)
+    ax.scatter([x_new], [y_new], s=40, color=RED, zorder=3)
+    ax.plot(line_x, np.polyval(b_base, line_x), color="0.3", ls="--", lw=1.5)
+    if with_fit:
+        ax.plot(line_x, fit.params[0] + fit.params[1] * line_x, color=RED, lw=2)
+        infl = fit.get_influence()
+        h = infl.hat_matrix_diag[-1]
+        cook = infl.cooks_distance[0][-1]
+        ax.set_title(f"{label}:  $h = {pl(h, 2)}$,  $D = {pl(cook, 2)}$", fontsize=11)
+    else:
+        ax.set_title(label, fontsize=11)
+    ax.set_xlabel("$x$")
+
+
+fig, axes = plt.subplots(1, 3, figsize=(11, 3.4), sharey=True)
+for ax, case in zip(axes, cases):
+    influence_panel(ax, *case, with_fit=False)
+plt.tight_layout()
+plt.show()
+```
+
+Linia przerywana: prosta z $30$ niebieskich punktów. Który czerwony punkt
+najmocniej ją przechyli?
+
+. . .
+
+**C** -- duża dźwignia i niedopasowanie naraz. A ma dużą resztę, ale leży
+nad środkiem chmury; B ma dużą dźwignię, ale zgadza się z resztą danych.
+
+## Odległość Cooka
+
+```{python}
+#| fig-width: 11
+#| fig-height: 3.4
+
+fig, axes = plt.subplots(1, 3, figsize=(11, 3.4), sharey=True)
+for ax, case in zip(axes, cases):
+    influence_panel(ax, *case, with_fit=True)
+plt.tight_layout()
+plt.show()
+```
+
+**Odległość Cooka** $D_i$ -- jak bardzo zmieniają się wszystkie predykcje
+po usunięciu obserwacji $i$. Rośnie z resztą **i** z dźwignią; uwagi
+wymaga $D_i$ bliskie $1$ lub wyraźnie odstające od pozostałych.
+
+## Co z wykrytą obserwacją?
+
+Nie usuwamy automatycznie -- ustalamy, skąd się wzięła.
+
+- **Błąd zapisu** -- poprawiamy albo usuwamy.
+- **Prawdziwa, ale nietypowa** -- może znaczyć, że model nie obowiązuje
+  w całym zakresie cech. Pokazujemy wyniki z nią i bez niej albo
+  zawężamy zakres wniosków.
+
+# Współliniowość
+
+## Limit a ocena kredytowa
+
+```{python}
+corr_lr = credit["Limit"].corr(credit["Rating"])
+rows = {}
+for feats in [["Limit", "Age"], ["Limit", "Rating"]]:
+    m = ols(credit["Balance"], credit[feats])
+    rows[" + ".join(feats)] = pd.DataFrame(
+        {"współczynnik": m.params, "błąd std.": m.bse, "t": m.tvalues, "p": m.pvalues}
+    ).drop(index="const").assign(**{"R²": m.rsquared})
+pd.concat(rows).style.format(precision=3, decimal=",")
+```
+
+Korelacja limitu i oceny: `{python} pl(corr_lr, 3)`. Oba modele
+dopasowują się tak samo, ale błąd standardowy przy limicie rośnie
+kilkanaście razy, a limit „przestaje być istotny”.
+
+## Dolina RSS
+
+```{python}
+#| fig-width: 10
+#| fig-height: 3.4
+
+fig, axes = plt.subplots(1, 2, figsize=(10, 3.4))
+limit_range = np.linspace(-0.2, 0.25, 200)
+for ax, other in zip(axes, ["Age", "Rating"]):
+    # Po wyśrodkowaniu wyraz wolny nie zależy od pozostałych współczynników.
+    Xc = credit[["Limit", other]].to_numpy(float)
+    Xc = Xc - Xc.mean(axis=0)
+    yc = credit["Balance"].to_numpy(float) - credit["Balance"].mean()
+    b_opt = np.linalg.lstsq(Xc, yc, rcond=None)[0]
+    rss_min = np.sum((yc - Xc @ b_opt) ** 2)
+    sigma2 = rss_min / (len(yc) - 3)
+    se2 = np.sqrt(sigma2 * np.linalg.inv(Xc.T @ Xc)[1, 1])
+    other_range = np.linspace(b_opt[1] - 5 * se2, b_opt[1] + 5 * se2, 200)
+    B1, B2 = np.meshgrid(limit_range, other_range)
+    # RSS(b) = RSS_min + (b - b_opt)^T X^T X (b - b_opt).
+    G = Xc.T @ Xc
+    d1, d2 = B1 - b_opt[0], B2 - b_opt[1]
+    rss = rss_min + G[0, 0] * d1 ** 2 + 2 * G[0, 1] * d1 * d2 + G[1, 1] * d2 ** 2
+    ax.contour(B1, B2, (rss - rss_min) / sigma2, levels=[1, 4, 9, 16],
+               colors=BLUE, linewidths=1.2)
+    ax.plot(*b_opt, "o", color=RED)
+    ax.set_xlabel(r"$\beta_{\mathrm{Limit}}$")
+    ax.set_ylabel(rf"$\beta_{{\mathrm{{{other}}}}}$")
+plt.tight_layout()
+plt.show()
+```
+
+Z wiekiem -- małe elipsy. Z oceną -- długa dolina: większy współczynnik
+przy limicie i mniejszy przy ocenie dają prawie te same predykcje.
+
+::: {.wniosek}
+Dane wyznaczają kombinację współczynników, nie każdy z osobna.
+Interpretacja cierpi, predykcja -- nie.
+:::
+
+::: notes
+Ten sam mechanizm co prasa i radio na wykładzie 4, tylko przy korelacji
+0,997 zamiast 0,35. I przykład z mieszkaniami z rozdziału 1: metraż
+i liczba pokoi dobrze przewidują cenę, ale nie rozdzielają wpływu.
+:::
+
+## Czynnik inflacji wariancji
+
+::: {.definicja}
+$$
+\mathrm{VIF}_j=\frac1{1-R_j^2},
+$$
+$R_j^2$ -- współczynnik determinacji regresji cechy $j$ względem
+pozostałych cech.
+:::
+
+Do oszacowania $\beta_j$ służy tylko ta część cechy $j$, której pozostałe
+nie przewidują -- ułamek $1-R_j^2$ jej zmienności. Wariancja
+$\widehat\beta_j$ rośnie $\mathrm{VIF}_j$ razy.
+
+```{python}
+X_vif = sm.add_constant(credit[["Limit", "Age", "Rating"]]).to_numpy(float)
+pd.DataFrame({"VIF": [variance_inflation_factor(X_vif, j) for j in range(1, 4)]},
+             index=["Limit", "Age", "Rating"]).T.style.format(precision=1, decimal=",")
+```
+
+Reguła kciuka: kłopot powyżej $5$--$10$. Co robić: usunąć jedną z cech,
+połączyć je albo **ściągać współczynniki** -- wykład 6.
+
+## Podsumowanie
+
+Rozszerzenia modelu to nowe kolumny $\X$: zmienne zero-jedynkowe
+($K-1$ na cechę), iloczyny cech, przekształcenia.
+
+| Co widać | Co jest nie tak | Co robić |
+|---|---|---|
+| łuk na wykresie reszt | (Z1): zależność nieliniowa | przekształcenia, interakcje |
+| lejek na wykresie reszt | (Z2): niestała wariancja, złe SE | bootstrap par, HC3, $\log Y$ |
+| punkt z dużą resztą i dźwignią | jeden punkt zmienia dopasowanie | sprawdzić źródło, wyniki z nim i bez |
+| duże VIF, „znikające” cechy | współczynniki niewyznaczalne osobno | usunąć cechę, ściąganie (W6) |
