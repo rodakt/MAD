@@ -14,13 +14,14 @@ execute:
 ## Materiał
 
 - Rozdział [Regresja liniowa](https://rodakt.github.io/MAD_book/2-modele-liniowe/06-regresja-liniowa.html),
-  sekcje „Model liniowy” i „Metoda najmniejszych kwadratów” (bez
-  geometrii) z dopasowaniem do danych *Advertising*; z sekcji
-  „Wnioskowanie o parametrach” test $t$ i test $F$
+  sekcje „Model liniowy”, „Metoda najmniejszych kwadratów”, „Własności
+  estymatora OLS”, „Jakość dopasowania” i „Wnioskowanie o parametrach”,
+  na danych *Advertising*
 - Sekcja „Kompromis między interpretowalnością a dokładnością”
   z [rozdziału 1](https://rodakt.github.io/MAD_book/1-fundamenty/01-czym-jest-model.html)
 
-Cechy jakościowe, interakcje i diagnostyka modelu -- na wykładzie 5.
+Geometria, dowody i Gauss--Markow -- rozszerzenia rozdziału 6. Cechy
+jakościowe, interakcje i diagnostyka modelu -- na wykładzie 5.
 
 ```{python}
 import numpy as np
@@ -38,6 +39,14 @@ media_pl = {"TV": "telewizja", "radio": "radio", "newspaper": "prasa"}
 def fit_ols(features, data=ads):
     """Model OLS sprzedaży względem podanych cech (statsmodels)."""
     return sm.OLS(data["sales"], sm.add_constant(data[features])).fit()
+
+
+def pl(value, digits):
+    """Liczba z przecinkiem dziesiętnym."""
+    return f"{value:.{digits}f}".replace(".", ",")
+
+
+model_tv_sigma = np.sqrt(fit_ols(["TV"]).scale)
 ```
 
 # Model liniowy
@@ -45,7 +54,9 @@ def fit_ols(features, data=ads):
 ## Dane *Advertising*
 
 $200$ rynków: budżety reklamy w telewizji, radiu i prasie (tys. USD)
-i sprzedaż produktu (tys. sztuk).
+i sprzedaż produktu (tys. sztuk). Trzy pytania: **czy** reklama wiąże
+się ze sprzedażą, **które** media, **jak dokładnie** przewidujemy
+sprzedaż.
 
 ```{python}
 #| fig-width: 11
@@ -126,7 +137,8 @@ Metoda najmniejszych kwadratów ma sens przy obu odczytaniach.
 :::
 
 ::: notes
-Drugie odczytanie nie wymaga wiary w model.
+Drugie odczytanie nie wymaga wiary w model. Własności estymatora
+i wnioskowanie (koniec wykładu) opierają się na pierwszym.
 :::
 
 ## Co mówi $\beta_j$
@@ -330,6 +342,8 @@ $$
   odpowiednik $\Cov(X,Y)/\Var X$, nachylenia najlepszej prostej
   $f_{\mathcal F}$.
 - Prosta przechodzi przez punkt $(\bar x,\bar y)$.
+- Z równań normalnych: reszty **sumują się do zera** i są w próbie
+  **nieskorelowane** z $x$.
 
 ## RSS dla telewizji
 
@@ -409,41 +423,56 @@ Dlatego na wykładzie 3 wielomiany dopasowywała funkcja `Polynomial.fit`,
 która przeskalowuje $x$ do $[-1,1]$.
 :::
 
-## Współczynnik determinacji $R^2$
+## Jakość dopasowania: RSE i $R^2$
 
-::: {.definicja}
-$$
-R^2=1-\frac{\mathrm{RSS}}{\mathrm{TSS}},\qquad
-\mathrm{TSS}=\sum_{i}(y_i-\bar y)^2 .
-$$
-:::
+**Resztowy błąd standardowy**
+$\widehat\sigma=\sqrt{\mathrm{RSS}/(n-p-1)}$ -- typowa odległość wyniku
+od dopasowania, w jednostkach $Y$. Sama telewizja: $\widehat\sigma\approx$ `{python} pl(model_tv_sigma, 2)` tys.
+sztuk przy średniej sprzedaży `{python} pl(ads["sales"].mean(), 1)` tys.
 
-- $\mathrm{TSS}$ to RSS modelu bez cech, który zawsze przewiduje $\bar y$.
-- $R^2$ to ułamek tego błędu, który usuwają cechy: $0$ -- cechy nic nie
-  dają, $1$ -- dopasowanie idealne.
-- Dla jednej cechy $R^2=r^2$, gdzie $r$ to współczynnik korelacji z próby
-  między $x$ i $y$.
+. . .
+
+Reszty są prostopadłe do kolumn $\X$, więc (Pitagoras)
+$$
+\underbrace{\sum_i(y_i-\bar y)^2}_{\mathrm{TSS}}
+=\underbrace{\sum_i(\widehat y_i-\bar y)^2}_{\mathrm{ESS}}
++\underbrace{\sum_i(y_i-\widehat y_i)^2}_{\mathrm{RSS}}
+$$
+$R^2=1-\mathrm{RSS}/\mathrm{TSS}=\mathrm{ESS}/\mathrm{TSS}$ -- odsetek zmienności $y$ w próbie odtworzony przez model. Dla
+jednej cechy $R^2=r^2$.
+
+## $R^2$ nie wybiera modelu
 
 ```{python}
+fits_r2 = {"TV": ["TV"], "TV + radio": ["TV", "radio"],
+           "TV + radio + prasa": media}
 pd.DataFrame(
-    {nazwa: [fit_ols(cechy).rsquared] for nazwa, cechy in
-     {"TV": ["TV"], "TV + radio": ["TV", "radio"],
-      "TV + radio + prasa": media}.items()},
-    index=["$R^2$"],
+    {name: [fit_ols(feats).rsquared, fit_ols(feats).rsquared_adj,
+            np.sqrt(fit_ols(feats).scale)]
+     for name, feats in fits_r2.items()},
+    index=["R²", "R² skorygowane", "σ̂ (RSE)"],
 ).style.format(precision=3, decimal=",")
 ```
+
+Radio: $R^2$ z $0{,}61$ do $0{,}90$, $\widehat\sigma$ o połowę mniej.
+Prasa: RSS zmienia się na trzecim miejscu, $\widehat\sigma$ nawet rośnie.
 
 . . .
 
 ::: {.wniosek}
-$R^2$ nigdy nie maleje po dodaniu cechy, bo RSS na zbiorze uczącym nie
-rośnie -- nie nadaje się do wyboru modelu.
+$1-R^2$ to błąd uczący przez wariancję $y$, więc $R^2$ nigdy nie maleje
+po dodaniu cechy -- ma wszystkie wady błędu uczącego.
 :::
 
-::: aside
-Bez wyrazu wolnego $\mathrm{RSS}$ może przekroczyć $\mathrm{TSS}$, a $R^2$
-wyjść ujemne; pakiety liczą wtedy $R^2$ inaczej, z $\sum_i y_i^2$
-w mianowniku.
+Skorygowane $R^2$ dzieli sumy przez stopnie swobody i może zmaleć, ale
+optymizmu wyboru spośród wielu modeli nie usuwa.
+
+::: notes
+Bez wyrazu wolnego RSS może przekroczyć TSS, a $R^2$ wyjść ujemne;
+pakiety liczą wtedy $R^2$ z $\sum_i y_i^2$ w mianowniku. $R^2$ zależy
+też od rozrzutu $x$ w próbie: ten sam model z tym samym szumem da wysokie
+$R^2$ przy szerokim zakresie cechy i niskie przy wąskim -- do porównań
+między próbami lepsze $\widehat\sigma$.
 :::
 
 # Interpretacja
@@ -495,35 +524,124 @@ Od najbardziej do najmniej interpretowalnych, z grubsza:
 W tej samej kolejności zwykle rośnie elastyczność.
 :::
 
-# Testowanie hipotez
+# Wnioskowanie
 
-## Model losowości
+## Inna próba, inne $\widehat\bbeta$
 
-**Ustalony układ**: punkty $\x_i$ traktujemy jako ustalone, losowe są
-tylko wyniki.
+**Ustalony układ**: punkty $\x_i$ ustalone, losowe tylko wyniki.
+Założenia: $\y=\X\bbeta+\boldsymbol\varepsilon$, (Z1)
+$\E\boldsymbol\varepsilon=\mathbf 0$, (Z2)
+$\Cov\boldsymbol\varepsilon=\sigma^2\mathbf I$.
 
-::: {.definicja}
-$\y=\X\bbeta+\boldsymbol\varepsilon$, gdzie
-$\boldsymbol\varepsilon\sim\Nrozk(\mathbf 0,\sigma^2\mathbf I)$: błędy
-niezależne, o średniej zero, jednakowej wariancji i rozkładzie normalnym.
-:::
+```{python}
+#| fig-width: 10
+#| fig-height: 2.5
 
-Wtedy
+# Symulacja z rozdziału 6: n = 30 ustalonych punktów, 10 000 prób wyników.
+rng = np.random.default_rng(0)
+n_sim, beta_sim, sigma_sim, reps_sim = 30, np.array([1.0, 0.5]), 1.5, 10_000
+x_sim = np.sort(rng.uniform(0, 10, n_sim))
+X_sim = np.column_stack([np.ones(n_sim), x_sim])
+y_sim = X_sim @ beta_sim + rng.normal(0, sigma_sim, (reps_sim, n_sim))
+coef_sim = np.linalg.lstsq(X_sim, y_sim.T, rcond=None)[0].T
+rss_sim = ((y_sim - coef_sim @ X_sim.T) ** 2).sum(axis=1)
+sxx = ((x_sim - x_sim.mean()) ** 2).sum()
+se_slope_sim = np.sqrt(rss_sim / (n_sim - 2) / sxx)
+t_crit_sim = stats.t.ppf(0.975, n_sim - 2)
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 2.5))
+grid_x = np.array([0, 10])
+for b in coef_sim[:30]:
+    ax1.plot(grid_x, b[0] + b[1] * grid_x, color="#1B6CA8", lw=0.7, alpha=0.5)
+ax1.plot(grid_x, beta_sim[0] + beta_sim[1] * grid_x, "k--", lw=1.5)
+ax1.set_title("30 prób: dopasowane proste", fontsize=10)
+ax1.set_xlabel("$x$")
+ax2.hist(coef_sim[:, 1], bins=60, density=True, color="#1B6CA8", alpha=0.6)
+grid_b = np.linspace(coef_sim[:, 1].min(), coef_sim[:, 1].max(), 200)
+ax2.plot(grid_b, stats.norm.pdf(grid_b, beta_sim[1], sigma_sim / np.sqrt(sxx)),
+         color="#D7263D", lw=1.5)
+ax2.axvline(beta_sim[1], color="k", ls="--", lw=1)
+ax2.set_title(r"nachylenia $\widehat\beta_1$ z 10 000 prób", fontsize=10)
+ax2.set_yticks([])
+plt.tight_layout()
+plt.show()
+```
+
 $$
-\widehat\bbeta\sim\Nrozk\big(\bbeta,\sigma^2(\X^\top\X)^{-1}\big),
-\qquad
-\mathrm{SE}(\widehat\beta_j)=\widehat\sigma\sqrt{v_{jj}},
-\qquad
-\widehat\sigma^2=\frac{\mathrm{RSS}}{n-p-1},
+\E\widehat\bbeta=\bbeta,\qquad
+\Cov\widehat\bbeta=\sigma^2(\X^\top\X)^{-1},\qquad
+\Var\widehat\beta_1=\frac{\sigma^2}{\sum_i(x_i-\bar x)^2} .
 $$
-gdzie $v_{jj}$ -- element przekątnej $(\X^\top\X)^{-1}$.
-**Błąd standardowy** szacuje, o ile $\widehat\beta_j$ zmienia się
-typowo między próbami.
 
 ::: notes
-Jednakowa wariancja jest dla telewizji wątpliwa -- rozrzut rośnie
-z budżetem (pierwszy slajd z danymi). Diagnostyka na wykładzie 5.
+$y_i=1+0{,}5x_i+\varepsilon_i$, $\varepsilon_i\sim\Nrozk(0;1{,}5^2)$,
+$x_i$ z $U[0,10]$ wylosowane raz. Proste rozchodzą się najmocniej na
+krańcach. Szeroki rozrzut $x$ stabilizuje nachylenie: odchylenie
+$\widehat\beta_1$ maleje jak $\sigma/(s_x\sqrt n)$. Nieobciążoność:
+$\widehat\bbeta=\bbeta+(\X^\top\X)^{-1}\X^\top\boldsymbol\varepsilon$.
+(Z2) wyklucza rosnący rozrzut, jak dla telewizji -- diagnostyka na
+wykładzie 5. Gauss--Markow (OLS najlepszy wśród liniowych
+nieobciążonych) i jego ograniczenia -- w książce.
 :::
+
+## Błąd standardowy
+
+$\sigma^2$ jest nieznane. Reszty są mniejsze od błędów -- $\widehat\bbeta$
+dobrano, by RSS był najmniejszy:
+$$
+\E\,\mathrm{RSS}=\sigma^2(n-p-1),\qquad
+\widehat\sigma^2=\frac{\mathrm{RSS}}{n-p-1}.
+$$
+$n-p-1$ -- **stopnie swobody**: reszty spełniają $p+1$ równań
+$\X^\top\mathbf e=\mathbf 0$, więc tyle z nich wynika z pozostałych.
+
+. . .
+
+::: {.definicja}
+**Błąd standardowy** $\;\mathrm{SE}(\widehat\beta_j)=\widehat\sigma\sqrt{v_{jj}}$,
+$\;v_{jj}$ -- element przekątnej $(\X^\top\X)^{-1}$: oszacowanie, o ile
+$\widehat\beta_j$ zmienia się typowo między próbami -- szerokość
+histogramu z poprzedniego slajdu.
+:::
+
+Telewizja w modelu z trzema mediami: $0{,}0458$, SE $\approx0{,}0014$.
+
+::: notes
+$\mathrm{RSS}/n$ ma średnią $\sigma^2(1-(p+1)/n)$ -- zaniża nawet błąd
+nieredukowalny: optymizm błędu uczącego policzony dokładnie. Dla $p=0$
+to wariancja z próby z mianownikiem $n-1$.
+:::
+
+## Przedział ufności
+
+Przy (Z3) -- błędy niezależne i normalne --
+$(\widehat\beta_j-\beta_j)/\mathrm{SE}(\widehat\beta_j)\sim t_{n-p-1}$, więc
+$$
+\Big[\,\widehat\beta_j\pm t_{n-p-1}\,\mathrm{SE}(\widehat\beta_j)\,\Big]
+$$
+pokrywa $\beta_j$ z prawdopodobieństwem $1-\alpha$.
+
+```{python}
+#| fig-width: 10
+#| fig-height: 2.2
+
+lo = coef_sim[:, 1] - t_crit_sim * se_slope_sim
+hi = coef_sim[:, 1] + t_crit_sim * se_slope_sim
+covered = (lo <= beta_sim[1]) & (beta_sim[1] <= hi)
+fig, ax = plt.subplots(figsize=(10, 2.2))
+for i in range(50):
+    ax.plot([i, i], [lo[i], hi[i]], color="#1B6CA8" if covered[i] else "#D7263D", lw=2)
+ax.axhline(beta_sim[1], color="k", ls="--", lw=1)
+ax.set_xticks([])
+ax.set_xlabel(f"50 prób; we wszystkich 10 000 pokrycie {covered.mean():.1%}"
+              .replace(".", ","))
+plt.tight_layout()
+plt.show()
+```
+
+**Losowy jest przedział, nie $\beta_j$.** Telewizja: $[0{,}043;\,0{,}049]$ --
+tysiąc dolarów więcej to przeciętnie $43$--$49$ sztuk więcej, przy tych
+samych budżetach radia i prasy.
 
 ## Test $t$: czy $\beta_j=0$?
 
@@ -576,7 +694,13 @@ plt.show()
 ```
 
 - Mała $p$-wartość: dane byłyby przy $H_0$ zaskakujące.
-- $p$-wartość **nie jest** prawdopodobieństwem, że $H_0$ jest prawdziwa.
+- $p$-wartość **nie jest** prawdopodobieństwem, że $H_0$ jest prawdziwa,
+  ani miarą siły związku: przy dużym $n$ małe $\beta_j\neq0$ daje małe $p$.
+
+::: notes
+Test na poziomie $\alpha$ odrzuca $H_0$ dokładnie wtedy, gdy przedział
+ufności na poziomie $1-\alpha$ nie zawiera zera.
+:::
 
 ## Które media?
 
@@ -589,7 +713,8 @@ pd.DataFrame(
 
 - Telewizja i radio: $t\approx33$ i $22$.
 - Prasa: $p\approx0{,}86$ -- przy tych samych budżetach TV i radia brak
-  śladu zależności.
+  śladu zależności. Ale przedział $[-0{,}013;\,0{,}011]$ nie wyklucza
+  słabego związku: duża $p$ nie dowodzi $\beta_j=0$.
 
 . . .
 
@@ -635,10 +760,11 @@ z osobna może wyjść nieistotna, choć razem wyjaśniają dużo.
 ## Test $F$: wszystkie cechy naraz
 
 $H_0\colon\beta_1=\dots=\beta_p=0$. Model przy $H_0$ to sama średnia
-$\bar y$, jego RSS to $\mathrm{TSS}$. Czy spadek do $\mathrm{RSS}$ jest
-większy, niż dałby sam szum?
+$\bar y$, jego RSS to $\mathrm{TSS}$; spadek
+$\mathrm{TSS}-\mathrm{RSS}=\mathrm{ESS}$:
 $$
-F=\frac{(\mathrm{TSS}-\mathrm{RSS})/p}{\mathrm{RSS}/(n-p-1)}
+F=\frac{\mathrm{ESS}/p}{\mathrm{RSS}/(n-p-1)}
+=\frac{R^2/p}{(1-R^2)/(n-p-1)}
 \;\sim\;F_{p,\,n-p-1}\quad\text{przy }H_0 .
 $$
 
@@ -657,5 +783,61 @@ reklamę wiążą się ze sprzedażą.
 Ogólnie: usunięcie $q$ cech, $F=\frac{(\mathrm{RSS}_0-\mathrm{RSS})/q}
 {\mathrm{RSS}/(n-p-1)}\sim F_{q,n-p-1}$. Dla $q=1$ test $F$ i test $t$
 są równoważne: $F=t^2$. W symulacji ze 100 cechami szumu test $F$
-odrzuca w około $5\%$ prób, tak jak powinien.
+odrzuca w około $5\%$ prób, tak jak powinien. Przy ustalonym $R^2$
+$F$ rośnie z $n$: w dużej próbie nawet małe $R^2$ daje małą $p$-wartość.
 :::
+
+## Średnia a pojedynczy rynek
+
+```{python}
+model_tr = fit_ols(["TV", "radio"])
+new_market = pd.DataFrame({"const": [1.0], "TV": [100.0], "radio": [20.0]})
+frame = model_tr.get_prediction(new_market).summary_frame(alpha=0.05).iloc[0]
+```
+
+Rynek z budżetem TV $100$ i radio $20$ tys. USD. Prognoza:
+`{python} pl(frame["mean"], 2)` tys. sztuk.
+
+:::: {.columns}
+::: {.column .karta width="50%"}
+**Przeciętna sprzedaż** na takich rynkach, $\fopt(\x_0)$:
+
+[`{python} pl(frame["mean_ci_lower"], 2)`; `{python} pl(frame["mean_ci_upper"], 2)`]
+
+Niepewność tylko oszacowania $\widehat\bbeta$.
+:::
+
+::: {.column .karta width="50%"}
+**Sprzedaż na jednym** nowym rynku, $Y_0$:
+
+[`{python} pl(frame["obs_ci_lower"], 2)`; `{python} pl(frame["obs_ci_upper"], 2)`]
+
+Dochodzi błąd $\varepsilon_0$ nowego rynku.
+:::
+::::
+
+. . .
+
+$$
+\Var\big(Y_0-\widehat f(\x_0)\big)
+=\underbrace{\sigma^2}_{\text{nieredukowalny}}
++\underbrace{\sigma^2\,\tilde\x_0^\top(\X^\top\X)^{-1}\tilde\x_0}_{\text{redukowalny: wariancja}}
+$$
+
+Rozkład błędu z wykładu 1: przy rosnącym $n$ przedział dla średniej
+kurczy się do punktu, przedział predykcji -- nie poniżej $\pm1{,}96\,\sigma$.
+
+## Podsumowanie
+
+Trzy pytania o *Advertising*:
+
+- **Czy reklama wiąże się ze sprzedażą?** Test $F$: $F\approx570$,
+  $p$ rzędu $10^{-96}$ -- tak.
+- **Które media?** Testy $t$: telewizja i radio tak; prasa -- przy tych
+  samych budżetach TV i radia brak śladu związku (choć sama, bez nich,
+  „wychodzi”).
+- **Jak dokładnie?** Średnią sprzedaż -- z dokładnością ok. $\pm0{,}3$
+  tys. sztuk, sprzedaż na jednym rynku -- tylko ok. $\pm3{,}3$ tys.
+
+Wszystko to przy założeniach (Z1)--(Z3). Czy dane je spełniają -- i jak
+rozszerzyć model o cechy jakościowe i interakcje -- na wykładzie 5.
