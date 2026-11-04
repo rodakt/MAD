@@ -208,8 +208,11 @@ slope_r40 = 1000 * (b_int["TV"] + 40 * b_int["TV_radio"])
 - $R^2$: `{python} pl(model_add.rsquared, 3)` $\to$ `{python} pl(model_int.rsquared, 3)`,
   $\;\widehat\sigma$: `{python} pl(np.sqrt(model_add.scale), 2)` $\to$
   `{python} pl(np.sqrt(model_int.scale), 2)` tys. sztuk.
-- Tysiąc dolarów na telewizję: `{python} pl(slope_r0, 0)` sztuk więcej przy
-  radiu $0$, `{python} pl(slope_r40, 0)` przy radiu $40$ tys. USD.
+- Efekt telewizji zależy od radia. Dodatkowy tysiąc USD na telewizję
+  zwiększa przeciętną sprzedaż o $\widehat\beta_1+\widehat\beta_3\cdot\text{radio}$
+  tys. sztuk, czyli o:
+  - `{python} pl(slope_r0, 0)` szt., gdy budżet radiowy wynosi $0$,
+  - `{python} pl(slope_r40, 0)` szt., gdy budżet radiowy wynosi $40$ tys. USD.
 
 ## Efekty główne zostają
 
