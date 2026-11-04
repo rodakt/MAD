@@ -213,13 +213,23 @@ slope_r40 = 1000 * (b_int["TV"] + 40 * b_int["TV_radio"])
 
 ## Efekty główne zostają
 
-Przy interakcji nie usuwamy $\beta_1X_1$ ani $\beta_2X_2$, nawet gdy
-ich testy $t$ nie są istotne.
+$\beta_1X_1$ i $\beta_2X_2$ -- **efekty główne**, $\beta_3X_1X_2$ -- interakcja.
+Nachylenie względem $X_1$ wynosi $\beta_1+\beta_3X_2$.
 
-- Bez $\beta_1X_1$ nachylenie względem $X_1$ przy $X_2=0$ jest
-  wymuszone na zero -- a położenie zera na skali $X_2$ bywa umowne.
-- $\beta_1$ to nachylenie **przy $X_2=0$**, nie przeciętne nachylenie.
-  Wyśrodkowanie cech zmienia jego sens, ale nie dopasowanie.
+- $\beta_1$ to nachylenie tylko **przy $X_2=0$**. Jego test $t$ pyta,
+  czy $X_1$ działa w tym jednym punkcie, a nie czy w ogóle się liczy.
+- Usunięcie $\beta_1X_1$ wymusza zerowe nachylenie przy $X_2=0$ --
+  a gdzie jest zero, to często umowa (°C czy °F).
+
+::: {.wniosek}
+Z interakcją zostawiamy oba efekty główne, nawet gdy ich testy $t$
+nie są istotne.
+:::
+
+::: notes
+Wyśrodkowanie cech zmienia sens $\beta_1$ (nachylenie przy przeciętnym
+$X_2$), ale nie dopasowanie.
+:::
 
 ## Cecha ilościowa $\times$ jakościowa
 
