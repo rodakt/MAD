@@ -22,23 +22,19 @@ Przypomnienia z rachunku prawdopodobieństwa i zadania są w książce.
 
 ## Model upraszcza
 
-- Mapa jest modelem terytorium -- i jest użyteczna **dlatego**, że pomija
-  szczegóły.
-- Model doskonale wierny byłby kopią rzeczywistości: równie
-  przeładowaną i równie trudną do zrozumienia.
+- Mapa jest modelem terytorium -- użyteczna **dlatego**, że pomija szczegóły.
+- Model doskonale wierny byłby kopią rzeczywistości, równie przeładowaną.
 
 > „Wszystkie modele są błędne, ale niektóre są użyteczne” -- G. Box
 
 . . .
 
-Kryterium nie jest więc wierność, lecz:
+Kryterium nie jest wierność, lecz:
 
-- **celowość** -- miasto ma inny model dla urbanisty, epidemiologa
-  i nawigacji satelitarnej,
-- **selektywność i jawne granice** -- to, co model pomija, może się
-  później ujawnić jako źródło błędu,
-- **ograniczony zakres stosowalności** -- nowe dane mogą ujawnić granice
-  modelu; modelowanie jest procesem iteracyjnym.
+- **celowość** -- inny model miasta dla urbanisty, epidemiologa i nawigacji,
+- **jawne granice** -- to, co model pomija, może później stać się źródłem błędu,
+- **ograniczony zakres** -- nowe dane ujawniają granice modelu;
+  modelowanie jest iteracyjne.
 
 ::: notes
 Pełna lista cech dobrego modelu (także zachowanie istotnych relacji,
