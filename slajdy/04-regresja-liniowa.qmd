@@ -449,7 +449,7 @@ pd.DataFrame(
             np.sqrt(fit_ols(feats).scale)]
      for name, feats in fits_r2.items()},
     index=["R²", "R² skorygowane", "σ̂ (RSE)"],
-).style.format(precision=3, decimal=",")
+).style.format(precision=4, decimal=",")
 ```
 
 Radio: $R^2$ z $0{,}61$ do $0{,}90$, $\widehat\sigma$ o połowę mniej.
