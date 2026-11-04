@@ -24,6 +24,8 @@ Geometria, dowody i Gauss--Markow -- rozszerzenia rozdziału 6. Cechy
 jakościowe, interakcje i diagnostyka modelu -- na wykładzie 5.
 
 ```{python}
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -31,7 +33,9 @@ import statsmodels.api as sm
 from scipy import stats
 
 # Dane z repozytorium książki (katalog obok repozytorium kursu).
-ads = pd.read_csv("../../mad-book/dane/Advertising.csv", index_col=0)
+data_dir = next(p for p in [Path("../../MAD_book/dane"), Path("../../mad-book/dane")]
+                if p.exists())
+ads = pd.read_csv(data_dir / "Advertising.csv", index_col=0)
 media = ["TV", "radio", "newspaper"]
 media_pl = {"TV": "telewizja", "radio": "radio", "newspaper": "prasa"}
 
@@ -155,12 +159,6 @@ $$
 - Różnica nie zależy od $\x$: ta sama w każdym punkcie.
 - Porównujemy dwie grupy obiektów, które różnią się tylko wartością $X_j$.
   To opis zależności w populacji, a nie skutek interwencji.
-
-. . .
-
-W wielomianie $\beta_0+\beta_1x+\beta_2x^2$ nie da się zmienić $x$,
-zostawiając $x^2$:
-$\fopt(x+1)-\fopt(x)=\beta_1+\beta_2(2x+1)$.
 
 ::: {.wniosek}
 $\beta_j$ -- zmiana **średniego** wyniku, gdy $X_j$ rośnie o jednostkę,
