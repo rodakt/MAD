@@ -33,6 +33,12 @@ $link-color: $turkus;
   padding: 0.3em 0.7em;
 }
 
+// Wzory w połowie szerokości slajdu (np. macierze) nie mieszczą się
+// w pełnym rozmiarze.
+.reveal .karta .math.display {
+  font-size: 90%;
+}
+
 // Wniosek, którym kończy się slajd.
 .reveal .wniosek {
   margin-top: 0.8em;
