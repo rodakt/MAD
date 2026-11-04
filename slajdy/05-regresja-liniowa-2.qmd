@@ -236,9 +236,15 @@ $X_2$), ale nie dopasowanie.
 
 ## Cecha ilościowa $\times$ jakościowa
 
+*Credit*: saldo karty, dochód i status studenta $x_{\text{st}}\in\{0,1\}$.
+$$
+\text{saldo}=\beta_0+\beta_1\,\text{dochód}+\beta_2\,x_{\text{st}}
++\beta_3\,\text{dochód}\cdot x_{\text{st}}+\varepsilon
+$$
+
 ```{python}
 #| fig-width: 11
-#| fig-height: 3.8
+#| fig-height: 3
 
 student = (credit["Student"] == "Yes").astype(float)
 feats_no = pd.DataFrame({"Income": credit["Income"], "Student": student})
@@ -247,7 +253,7 @@ model_no = ols(credit["Balance"], feats_no)
 model_yes = ols(credit["Balance"], feats_yes)
 
 grid = np.linspace(0, credit["Income"].max(), 2)
-fig, axes = plt.subplots(1, 2, figsize=(11, 3.8), sharey=True)
+fig, axes = plt.subplots(1, 2, figsize=(11, 3), sharey=True)
 for ax, model, title in zip(axes, [model_no, model_yes], ["bez interakcji", "z interakcją"]):
     for s, color in [(0, BLUE), (1, RED)]:
         mask = student == s
@@ -263,8 +269,8 @@ plt.tight_layout()
 plt.show()
 ```
 
-Czerwone -- studenci. Bez interakcji zmienna zero-jedynkowa przesuwa
-prostą, z interakcją zmienia też nachylenie.
+Niebiescy (nie-studenci): $\beta_0+\beta_1\,\text{dochód}$; czerwoni (studenci):
+$(\beta_0+\beta_2)+(\beta_1+\beta_3)\,\text{dochód}$. Bez interakcji $\beta_3=0$.
 
 ::: notes
 Model z interakcją = dwie osobne proste, jedna na grupę, ze wspólnym
