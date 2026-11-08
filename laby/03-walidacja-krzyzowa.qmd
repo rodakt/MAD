@@ -66,7 +66,8 @@ Treść zadań jest w książce; tutaj jej nie powtarzamy.
    próbie. Część 2 notebooka.
 3. **Błędy metodologiczne** (tablica) --
    [Zadanie 5.2](https://rodakt.github.io/MAD_book/1-fundamenty/05-ocena-modeli.html#exr-bledy-procedury):
-   pięć procedur oceny z błędem; kierunek zniekształcenia i poprawka.
+   pięć procedur oceny z błędem; jak błąd może zniekształcić ocenę
+   i jak go poprawić.
    Punkty a) i b) to sytuacje z części 2 i 1 notebooka.
 
 [Otwórz notebook w Colabie](https://colab.research.google.com/github/rodakt/MAD/blob/2026-27/laby/notebooki/03-walidacja-krzyzowa.ipynb){.btn .btn-primary target="_blank"}

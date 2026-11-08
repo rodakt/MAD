@@ -64,8 +64,8 @@ Treść zadań jest w książce; tutaj jej nie powtarzamy.
    [Zadanie 1.6](https://rodakt.github.io/MAD_book/1-fundamenty/01-czym-jest-model.html#exr-ryzyko-1nn)
    i wniosek z
    [Zadania 3.3](https://rodakt.github.io/MAD_book/1-fundamenty/03-knn.html#exr-knn-skrajne-k).
-4. **Klasy niezrównoważone** (Colab) --
-   [Zadanie 2.4](https://rodakt.github.io/MAD_book/1-fundamenty/02-predyktory-optymalne.html#exr-niezrownowazone-klasy):
+4. **Klasy niezrównoważone** (Colab, rozszerzenie) --
+   [Zadanie 2.12](https://rodakt.github.io/MAD_book/1-fundamenty/02-predyktory-optymalne.html#exr-niezrownowazone-klasy):
    błąd bayesowski przy prawdopodobieństwach a priori $0{,}9$ i $0{,}1$,
    klasyfikator trywialny i ryzyko $k$-NN w zależności od liczności próby.
 
