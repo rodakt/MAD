@@ -13,6 +13,7 @@ project:
   # Te same notebooki do pobrania z kart laboratoriów.
   resources:
     - laby/notebooki/*.ipynb
+    - laby/dane/*.csv
 
 lang: pl
 

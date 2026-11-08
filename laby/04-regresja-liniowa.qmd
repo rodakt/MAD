@@ -1,0 +1,76 @@
+---
+title: "Od przewidywania do modelu liniowego"
+subtitle: "komputerowe i tablicowe"
+---
+
+## Przed zajęciami
+
+Spróbuj odpowiedzieć na podane niżej pytania. Jeżeli sprawiają Ci
+trudność, przeczytaj fragmenty wskazane pod pytaniami.
+
+1. Jeśli zaobserwowana sprzedaż wynosi 12 tys. sztuk, a model przewiduje
+   10 tys., jaka jest reszta? Co oznacza jej znak?
+2. W modelu $\widehat y = 5 + 0{,}04x$ budżet $x$ jest w tysiącach USD,
+   a sprzedaż w tysiącach sztuk. Ile model przewiduje przy $x=100$?
+3. Dlaczego błędu modelu na nowych danych nie oceniamy wyłącznie
+   na obserwacjach użytych do jego dopasowania?
+
+::: {.callout-note collapse="true" title="Odpowiedzi"}
+1. Reszta to obserwacja minus predykcja: 2 tys. sztuk. Model przewidział
+   za mało.
+2. 9 tys. sztuk. Wartość $x=100$ oznacza budżet 100 tys. USD.
+3. Dopasowanie wykorzystuje wyniki z próby uczącej, więc ocena na niej
+   może być zbyt optymistyczna. Nowe dane pozwalają sprawdzić,
+   czy model potrafi przewidywać poza tą próbą.
+:::
+
+Do pytań 1--2 wystarczą początki sekcji
+[Model liniowy](https://rodakt.github.io/MAD_book/2-modele-liniowe/06-regresja-liniowa.html#sec-model-liniowy)
+i [Metoda najmniejszych kwadratów](https://rodakt.github.io/MAD_book/2-modele-liniowe/06-regresja-liniowa.html#sec-mnk).
+Pytanie 3 nawiązuje do [laboratorium 3](03-walidacja-krzyzowa.qmd).
+
+## Przebieg zajęć
+
+Pracujemy na danych *Advertising* z rozdziału 6 książki. Polecenia są
+w notebooku. Każdy krok obejmuje krótkie obliczenie oraz interpretację
+wyniku. Kod wpisujemy samodzielnie w puste komórki; rozwijane podpowiedzi
+pomagają w wyborze operacji i jej zapisaniu w Pythonie.
+
+1. **Dane i pytanie** -- odczytanie jednostek i wykres sprzedaży
+   względem budżetu TV.
+2. **Jedna predykcja dla wszystkich** -- reszty, błąd średniokwadratowy
+   i przewidywanie średniej jako punkt odniesienia.
+3. **Własna prosta** -- ręczne dobieranie wyrazu wolnego i nachylenia,
+   obserwowanie zmian wykresu i porównywanie błędów.
+4. **Dopasowanie MNK** -- porównanie prostej bibliotecznej z własną,
+   predykcja dla nowego budżetu i interpretacja nachylenia.
+5. **Nowe dane** -- porównanie modelu TV z przewidywaniem średniej
+   na wspólnej próbie testowej.
+6. **Samodzielnie: radio** -- zbudowanie i ocena drugiego modelu
+   poznanym sposobem oraz krótki wniosek.
+
+Plan obejmuje 75 minut na części 1--6, 5 minut na wnioski i 10 minut
+rezerwy na pytania. Opcjonalne rozszerzenie dotyczy modelu z TV i radiem
+oraz interpretacji współczynnika przy ustalonym drugim budżecie.
+
+Podstawą jest wywód rozdziału 6; laboratorium prowadzi przez własną
+sekwencję ćwiczeń. Dodatkowe uzasadnienie wzorów na prostą daje
+[zadanie 6.1 a)](https://rodakt.github.io/MAD_book/2-modele-liniowe/06-regresja-liniowa.html#exr-mnk-regresja-prosta).
+
+[Otwórz notebook w Colabie](https://colab.research.google.com/github/rodakt/MAD/blob/2026-27/laby/notebooki/04-regresja-liniowa.ipynb){.btn .btn-primary target="_blank"}
+[Podgląd notebooka](notebooki/04-regresja-liniowa.html){.btn .btn-outline-primary target="_blank"}
+[Pobierz notebook](https://rodakt.github.io/MAD/laby/notebooki/04-regresja-liniowa.ipynb){.btn .btn-outline-primary download="04-regresja-liniowa.ipynb"}
+
+Notebook otwarty z tego linku nie jest zapisany na Twoim Dysku: po ponownym
+kliknięciu linku zobaczysz wersję wyjściową. Na początku zajęć zapisz kopię
+(*Plik → Zapisz kopię na Dysku*) i pracuj na niej.
+
+## Python
+
+Gotowa komórka początkowa importuje biblioteki, wczytuje dane i ustala
+podział na 150 rynków uczących i 50 testowych. Dalszy kod piszemy sami.
+Potrzebne są `numpy`, `pandas`, `matplotlib`, `statsmodels` i `scikit-learn`,
+dostępne w Colabie bez instalacji.
+
+Dane *Advertising* są kopią danych z książki, udostępnioną na stronie
+kursu: [pobierz CSV](dane/Advertising.csv).
