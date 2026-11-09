@@ -1,5 +1,5 @@
 ---
-title: "Od przewidywania do modelu liniowego"
+title: "Od prostej do interakcji"
 subtitle: "komputerowe i tablicowe"
 ---
 
@@ -27,7 +27,6 @@ trudność, przeczytaj fragmenty wskazane pod pytaniami.
 Do pytań 1--2 wystarczą początki sekcji
 [Model liniowy](https://rodakt.github.io/MAD_book/2-modele-liniowe/06-regresja-liniowa.html#sec-model-liniowy)
 i [Metoda najmniejszych kwadratów](https://rodakt.github.io/MAD_book/2-modele-liniowe/06-regresja-liniowa.html#sec-mnk).
-Pytanie 3 nawiązuje do [laboratorium 3](03-walidacja-krzyzowa.qmd).
 
 ## Przebieg zajęć
 
@@ -36,25 +35,30 @@ w notebooku. Każdy krok obejmuje krótkie obliczenie oraz interpretację
 wyniku. Kod wpisujemy samodzielnie w puste komórki; rozwijane podpowiedzi
 pomagają w wyborze operacji i jej zapisaniu w Pythonie.
 
-1. **Dane i pytanie** -- odczytanie jednostek i wykres sprzedaży
-   względem budżetu TV.
-2. **Jedna predykcja dla wszystkich** -- reszty, błąd średniokwadratowy
-   i przewidywanie średniej jako punkt odniesienia.
-3. **Własna prosta** -- ręczne dobieranie wyrazu wolnego i nachylenia,
-   obserwowanie zmian wykresu i porównywanie błędów.
-4. **Dopasowanie MNK** -- porównanie prostej bibliotecznej z własną,
-   predykcja dla nowego budżetu i interpretacja nachylenia.
-5. **Nowe dane** -- porównanie modelu TV z przewidywaniem średniej
-   na wspólnej próbie testowej.
-6. **Samodzielnie: radio** -- zbudowanie i ocena drugiego modelu
-   poznanym sposobem oraz krótki wniosek.
+1. **Od stałej do prostej** -- reszty i MSE, własne parametry prostej,
+   dopasowanie OLS i interpretacja nachylenia.
+2. **TV i radio** -- regresja wieloraka, predykcje dla czterech rynków,
+   interpretacja współczynnika przy ustalonym drugim budżecie
+   i założenie addytywności.
+3. **Prasa oraz testy $t$ i $F$** -- test współczynnika prasy
+   przy ustalonych TV i radiu oraz wspólny test radia i prasy ponad
+   samo TV. Obliczenie statystyk i sprawdzenie ich w bibliotece.
+4. **Interakcja** -- iloczyn budżetów jako dodatkowa cecha,
+   nachylenie TV zależne od radia i samodzielne porównanie
+   predykcji przy nowym budżecie radia.
+5. **Nowe dane i wnioski** -- ocena wcześniej ustalonych modeli
+   na wspólnej próbie testowej; rozróżnienie testowania hipotez
+   i oceny jakości predykcji.
 
-Plan obejmuje 75 minut na części 1--6, 5 minut na wnioski i 10 minut
-rezerwy na pytania. Opcjonalne rozszerzenie dotyczy modelu z TV i radiem
-oraz interpretacji współczynnika przy ustalonym drugim budżecie.
+Plan obejmuje po 20 minut na części 1--4 i 10 minut na ocenę predykcji
+oraz wnioski. Opcjonalnie sprawdzamy równość $F=t^2$ dla jednej cechy
+oraz rysujemy proste predykcji przy dwóch budżetach radia.
 
 Podstawą jest wywód rozdziału 6; laboratorium prowadzi przez własną
-sekwencję ćwiczeń. Dodatkowe uzasadnienie wzorów na prostą daje
+sekwencję ćwiczeń. Przed częściami 3--4 warto przypomnieć
+[wnioskowanie o parametrach](https://rodakt.github.io/MAD_book/2-modele-liniowe/06-regresja-liniowa.html#sec-wnioskowanie-mnk)
+i [interakcje](https://rodakt.github.io/MAD_book/2-modele-liniowe/06-regresja-liniowa.html#sec-interakcje-nieliniowosc).
+Dodatkowe uzasadnienie wzorów na prostą daje
 [zadanie 6.1 a)](https://rodakt.github.io/MAD_book/2-modele-liniowe/06-regresja-liniowa.html#exr-mnk-regresja-prosta).
 
 [Otwórz notebook w Colabie](https://colab.research.google.com/github/rodakt/MAD/blob/2026-27/laby/notebooki/04-regresja-liniowa.ipynb){.btn .btn-primary target="_blank"}
