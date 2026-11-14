@@ -14,7 +14,7 @@ semestru. Daty i laboratoria zostaną uzupełnione.
 | 2 | | Metoda $k$ najbliższych sąsiadów | 12 X: [Reguła Bayesa i metoda $k$ najbliższych sąsiadów](laby/02-knn.qmd) |
 | 3 | | Kompromis obciążenie--wariancja i ocena modeli | [Wybór modelu walidacją krzyżową i wyciek informacji](laby/03-walidacja-krzyzowa.qmd) |
 | 4 | | Regresja liniowa I: model i metoda najmniejszych kwadratów | [Od prostej do interakcji](laby/04-regresja-liniowa.qmd) |
-| 5 | | Regresja liniowa II: zmienne jakościowe, interakcje, diagnostyka | |
+| 5 | | Regresja liniowa II: zmienne jakościowe, interakcje, diagnostyka | [Co mówi współczynnik i co pokazują reszty?](laby/05-regresja-liniowa-2.qmd) |
 | 6 | | Selekcja i regularyzacja | |
 | 7 | | Regresja logistyczna | |
 | 8 | | Uogólnione modele liniowe i regresja Poissona | |

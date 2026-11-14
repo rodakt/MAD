@@ -12,6 +12,6 @@ listing:
     subtitle: Rodzaj
 ---
 
-Treść zadań jest w [książce](https://rodakt.github.io/MAD_book/).
-Karta laboratorium wskazuje, które zadania z książki rozwiązujemy,
-i dokłada część pythonową: dane, szkielet kodu i wskazówki do bibliotek.
+Podstawą laboratoriów jest [książka](https://rodakt.github.io/MAD_book/).
+Karta laboratorium wskazuje potrzebne fragmenty i przebieg zajęć.
+Notebook zawiera ćwiczenia, dane i wskazówki do samodzielnego pisania kodu.

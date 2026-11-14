@@ -1,0 +1,88 @@
+---
+title: "Co mówi współczynnik i co pokazują reszty?"
+subtitle: "komputerowe i tablicowe"
+---
+
+## Przed zajęciami
+
+Spróbuj odpowiedzieć na podane niżej pytania. Jeżeli sprawiają Ci
+trudność, przeczytaj fragmenty wskazane pod pytaniami.
+
+1. W modelu $\widehat y=200+6x+400s$ zmienna $s$ wynosi 1 dla
+   studentów i 0 dla pozostałych osób. Jakie dwa wyniki porównuje
+   współczynnik 400?
+2. Co zmieni dodanie składnika $-2xs$? Jakie będzie nachylenie
+   względem $x$ w każdej grupie?
+3. Czy reszty sumujące się do zera gwarantują, że model dobrze opisuje
+   zależność? Co może pokazać ich wykres?
+4. Czym losowanie ze zwracaniem różni się od przetasowania wierszy?
+
+::: {.callout-note collapse="true" title="Odpowiedzi"}
+1. Przewidywane wyniki studenta i osoby niebędącej studentem przy tej
+   samej wartości $x$. Różnica wynosi 400.
+2. Różnica między grupami będzie zależeć od $x$: $400-2x$.
+   Nachylenie wyniesie 6 dla osób niebędących studentami i 4 dla studentów.
+3. Nie. Przy OLS z wyrazem wolnym suma reszt jest zerowa z konstrukcji.
+   Na wykresie może pozostać np. łuk albo zmieniający się rozrzut.
+4. Przy losowaniu ze zwracaniem wiersz może wystąpić wielokrotnie,
+   a inny wcale. Przetasowanie zachowuje każdy wiersz dokładnie raz
+   i nie zmienia dopasowania OLS.
+:::
+
+Do pytań 1--2 wystarczą sekcje
+[Cechy jakościowe](https://rodakt.github.io/MAD_book/2-modele-liniowe/06-regresja-liniowa.html#sec-cechy-jakosciowe)
+i [Interakcje i nieliniowość](https://rodakt.github.io/MAD_book/2-modele-liniowe/06-regresja-liniowa.html#sec-interakcje-nieliniowosc).
+Do pytań 3--4: początek
+[Diagnostyki modelu](https://rodakt.github.io/MAD_book/2-modele-liniowe/06-regresja-liniowa.html#sec-diagnostyka)
+i algorytm z sekcji
+[Bootstrap](https://rodakt.github.io/MAD_book/1-fundamenty/05-ocena-modeli.html#sec-bootstrap).
+
+## Przebieg zajęć
+
+Kontynuujemy sposób pracy z laboratorium 4: przed obliczeniem
+przewidujemy wynik, kod wpisujemy samodzielnie w puste komórki,
+a po obliczeniu zapisujemy interpretację. Rozwijane podpowiedzi
+pomagają w wyborze operacji i składni Pythona.
+
+1. **Cecha jakościowa** (20 minut, *Credit*) -- różnica średnich
+   jako współczynnik modelu; porównanie studentów z pozostałymi
+   klientami przed uwzględnieniem dochodu i przy ustalonym dochodzie.
+2. **Interakcja z grupą** (15 minut, *Credit*) -- równoległe proste
+   i osobne nachylenia, równania dla obu grup oraz różnice predykcji
+   przy dwóch dochodach. Interpretacja testu braku interakcji.
+3. **Diagnostyka i poprawa modelu** (25 minut, *Auto*) -- wykres
+   reszt, rozpoznanie łuku, dodanie kwadratu mocy i ponowna ocena
+   reszt. Oddzielenie postaci średniej od stałości wariancji błędów.
+4. **Bootstrap par** (25 minut, *Auto*) -- jedna próba ze zwracaniem,
+   a następnie pętla dopasowań. Niepewność przewidywanej średniej
+   liczby mil na galon dla samochodów o mocy 70 KM: histogram,
+   błąd standardowy i przedział percentylowy.
+5. **Wnioski** (5 minut) -- co znaczy współczynnik po dodaniu
+   interakcji, co poprawiła zmiana modelu i czego dotyczy przedział.
+
+Opcjonalnie badamy współliniowość limitu kredytowego i oceny kredytowej
+w danych *Credit*: zmiany współczynników, błędów standardowych i predykcji.
+
+Podstawą są rozdział 6 oraz sekcja o bootstrapie z rozdziału 5.
+Laboratorium prowadzi przez własną sekwencję ćwiczeń. W tej analizie
+skupiamy się na interpretacji modelu i niepewności oszacowań;
+błąd predykcji na nowych danych ocenialiśmy w laboratorium 4.
+
+[Otwórz notebook w Colabie](https://colab.research.google.com/github/rodakt/MAD/blob/2026-27/laby/notebooki/05-regresja-liniowa-2.ipynb){.btn .btn-primary target="_blank"}
+[Podgląd notebooka](notebooki/05-regresja-liniowa-2.html){.btn .btn-outline-primary target="_blank"}
+[Pobierz notebook](https://rodakt.github.io/MAD/laby/notebooki/05-regresja-liniowa-2.ipynb){.btn .btn-outline-primary download="05-regresja-liniowa-2.ipynb"}
+
+Notebook otwarty z tego linku nie jest zapisany na Twoim Dysku: po ponownym
+kliknięciu linku zobaczysz wersję wyjściową. Na początku zajęć zapisz kopię
+(*Plik → Zapisz kopię na Dysku*) i pracuj na niej.
+
+## Python i dane
+
+Gotowa komórka początkowa importuje biblioteki i wczytuje dane.
+Dalszy kod piszemy sami. Potrzebne są `numpy`, `pandas`, `matplotlib`
+i `statsmodels`, dostępne w Colabie bez instalacji.
+
+Dane są kopiami plików z książki:
+[Credit](dane/Credit.csv) i [Auto](dane/Auto.csv).
+Notebook usuwa z *Auto* wiersze bez wyniku lub mocy silnika;
+pozostają 392 samochody. Wczytane *Credit* opisuje 400 klientów banku.
