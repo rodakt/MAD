@@ -1,0 +1,912 @@
+---
+title: "Selekcja i regularyzacja"
+subtitle: "Rozdział 7; ściąganie z rozdziału 4"
+format:
+  revealjs:
+    slide-number: true
+    chalkboard: true
+    footer: "[Strona kursu](../index.html) · [Slajdy](index.html)"
+    theme: [default, _slajdy.scss]
+execute:
+  echo: false
+---
+
+## Materiał
+
+- Rozdział [Selekcja i regularyzacja](https://rodakt.github.io/MAD_book/2-modele-liniowe/07-selekcja-regularyzacja.html).
+- Estymator ściągający z [rozdziału 4](https://rodakt.github.io/MAD_book/1-fundamenty/04-bias-wariancja.html).
+
+Wyprowadzenia kryteriów wyboru, geometria spektralna i algorytm
+obliczania LASSO zostają w książce.
+
+::: {.notes}
+Plan 90 minut: motywacja 8, selekcja 12, kryteria 10, ściąganie 8,
+ridge 18, LASSO 17, walidacja i porównanie 14, podsumowanie 3.
+W razie opóźnienia skrócić kryteria oraz rachunek miękkiego progowania.
+Zachować końcowe porównanie i poprawną walidację.
+:::
+
+```{python}
+from pathlib import Path
+from itertools import combinations
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from IPython.display import display
+from sklearn.base import BaseEstimator, RegressorMixin
+from sklearn.linear_model import LinearRegression, Ridge, Lasso
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import Pipeline, make_pipeline
+from sklearn.model_selection import train_test_split, KFold, GridSearchCV
+from sklearn.dummy import DummyRegressor
+from sklearn.metrics import mean_squared_error
+
+# Ten sam podział co w rozdziale 07; test pozostaje poza wyborem.
+data_dir = Path("../../MAD_book/dane")
+credit = pd.read_csv(data_dir / "Credit.csv")
+idx_tr, idx_te = train_test_split(np.arange(len(credit)), test_size=100,
+                                random_state=707)
+credit_tr = credit.iloc[idx_tr].copy()
+Y_tr = credit_tr["Balance"].to_numpy()
+BLUE, RED, GREEN = "#1B6CA8", "#D7263D", "#33865B"
+plt.rcParams.update({"font.size": 12, "figure.dpi": 100})
+
+
+def show_table(frame, digits=1):
+    display(frame.style.format(precision=digits, decimal=",").hide(axis="index"))
+
+
+def subset_rss(data, y, features):
+    A = np.column_stack([np.ones(len(y)), data[list(features)].to_numpy()])
+    beta = np.linalg.lstsq(A, y, rcond=None)[0]
+    return np.sum((y - A @ beta)**2)
+```
+
+## Usunąć cechę czy ograniczyć współczynniki?
+
+*Credit*: przewidujemy saldo zadłużenia (`Balance`, USD).
+
+`Limit` i `Rating` niosą bardzo podobną informację.
+Na W5: duże błędy standardowe, długa dolina RSS.
+
+. . .
+
+- **Selekcja**: wybieramy podzbiór cech; pozostałe współczynniki to zero.
+- **Regularyzacja**: karzemy wielkość współczynników.
+
+::: {.wniosek}
+Mniej swobody może oznaczać gorsze dopasowanie do próby,
+ale lepsze przewidywanie nowych wyników.
+:::
+
+## Pytanie {.pytanie}
+
+Dodajemy cechę do modelu OLS. Czy uczące $R^2$ może zmaleć?
+Czy błąd na nowych danych musi się zmniejszyć?
+
+. . .
+
+Stary model nadal jest dostępny: wystarczy nadać nowemu
+współczynnikowi wartość zero. Minimum RSS nie rośnie, a $R^2$ nie maleje.
+
+Nowy współczynnik może jednak dopasować **szum**.
+Błąd na nowych danych może wzrosnąć.
+
+## Jedna cecha informacyjna, wiele szumowych
+
+$n=60$, $p=30$, $Y=3X_1+\varepsilon$, $\varepsilon\sim\Nrozk(0,2^2)$.
+Cechy $X_1$ i $X_2$ są silnie skorelowane; pozostałe to szum.
+
+```{python}
+#| fig-align: center
+#| fig-alt: "Średnie błędy uczące i testowe: pełny OLS dopasowuje szum, a ridge ogranicza ten koszt."
+#| fig-width: 9
+#| fig-height: 3.3
+rng = np.random.default_rng(707)
+
+
+def linear_sample(rng, n, p=30):
+    X = rng.normal(size=(n, p))
+    X[:, 1] = 0.98 * X[:, 0] + np.sqrt(1 - 0.98**2) * X[:, 1]
+    y = 3 * X[:, 0] + rng.normal(scale=2, size=n)
+    return X, y
+
+
+errors = []
+for _ in range(200):
+    X_tr_sim, Y_tr_sim = linear_sample(rng, 60)
+    X_te_sim, Y_te_sim = linear_sample(rng, 2000)
+    models = [LinearRegression().fit(X_tr_sim, Y_tr_sim),
+              LinearRegression().fit(X_tr_sim[:, :1], Y_tr_sim),
+              make_pipeline(StandardScaler(), Ridge(alpha=30)).fit(X_tr_sim, Y_tr_sim)]
+    for j, model in enumerate(models):
+        X_tr_view, X_te_view = ((X_tr_sim[:, :1], X_te_sim[:, :1]) if j == 1
+                               else (X_tr_sim, X_te_sim))
+        errors.append([j, mean_squared_error(Y_tr_sim, model.predict(X_tr_view)),
+                       mean_squared_error(Y_te_sim, model.predict(X_te_view))])
+mean_errors = pd.DataFrame(errors, columns=["model", "uczący", "nowe"]).groupby("model").mean()
+fig, ax = plt.subplots(figsize=(9, 3.3))
+mean_errors.plot.bar(ax=ax, color=[BLUE, RED], rot=0)
+ax.set_xticklabels(["OLS: 30 cech", "OLS: właściwa cecha", "ridge: 30 cech"])
+ax.axhline(4, color="0.4", ls="--")
+ax.set(xlabel="", ylabel="średni kwadrat błędu")
+ax.legend(title="dane")
+plt.tight_layout()
+plt.show()
+```
+
+Model z jedną cechą zna właściwy podzbiór **z konstrukcji eksperymentu**.
+
+::: {.notes}
+Średnie z 200 prób. Przerywana linia: wariancja błędu 4.
+Ridge ma karę ustaloną z góry (30), a nie wybraną na teście.
+Wyjaśnienie mechanizmu ridge nastąpi po selekcji.
+:::
+
+# Selekcja podzbioru predyktorów
+
+## Osiem modeli z trzech cech
+
+`Income`, `Limit`, `Rating`: każdą cechę włączamy albo pomijamy.
+$2^3=8$ podzbiorów. Model pusty przewiduje średnią.
+
+```{python}
+small_features = ["Income", "Limit", "Rating"]
+rows = []
+for k in range(4):
+    for features in combinations(small_features, k):
+        rows.append({"cechy": ", ".join(features) or "tylko średnia",
+                     "k": k, "d": k + 1,
+                     "RSS": subset_rss(credit_tr, Y_tr, features)})
+subsets = pd.DataFrame(rows)
+show_table(subsets.assign(**{"RSS / 1000": subsets["RSS"] / 1000})
+           [["cechy", "k", "RSS / 1000"]])
+```
+
+::: {.notes}
+Dopasowanie na 300 obserwacjach; 100 odłożono jako test przed analizą.
+RSS w tysiącach USD². Wskazać najlepszy model każdej wielkości.
+:::
+
+## Przegląd zupełny: dwa wybory
+
+1. Dla każdej liczby $k$ cech: podzbiór o najmniejszym RSS.
+2. Spośród rozmiarów $k=0,\ldots,p$: wybór według kryterium
+   uwzględniającego złożoność albo przez walidację.
+
+. . .
+
+Łącznie $2^p$ modeli: przy $p=20$ ponad milion, przy $p=40$ ponad bilion.
+
+::: {.wniosek}
+Najlepszy podzbiór na przeszukanej liście nie musi mieć
+najmniejszego ryzyka w populacji.
+:::
+
+## Metoda schodów w przód i wstecz
+
+:::: {.columns}
+::: {.column .karta width="50%"}
+**W przód**
+
+Start: tylko wyraz wolny.
+
+Dodajemy cechę najbardziej zmniejszającą uczący RSS.
+
+Wybranych cech nie usuwamy.
+:::
+::: {.column .karta width="50%"}
+**Wstecz**
+
+Start: pełny model.
+
+Usuwamy cechę najmniej zwiększającą uczący RSS.
+
+Usuniętych cech nie dodajemy.
+:::
+::::
+
+W przód: $p(p+1)/2$ sprawdzanych rozszerzeń zamiast $2^p$ podzbiorów.
+Długość ścieżki wybieramy osobno.
+
+::: {.notes}
+Model początkowy liczymy osobno. W klasycznej selekcji wstecz pełny
+model musi mieć pełny rząd kolumnowy; problem przy zbyt wielu cechach.
+:::
+
+## Pytanie {.pytanie}
+
+| Podzbiór | A | B | C | A, B | A, C | B, C |
+|---|---:|---:|---:|---:|---:|---:|
+| RSS | 140 | 150 | 170 | 120 | 125 | 110 |
+
+Którą parę wybierze selekcja w przód? Czy jest najlepsza?
+
+. . .
+
+Najpierw **A**, potem **A, B**. Najlepsza para to jednak **B, C**.
+
+Oszczędność obliczeń ma cenę: pierwszy krok może zamknąć drogę
+do najlepszego podzbioru.
+
+::: {.notes}
+Tabela dydaktyczna z zadania „Podzbiory predyktorów” w rozdziale 07.
+:::
+
+## Zmienna to nie zawsze jedna kolumna
+
+- Zmienna jakościowa o $K$ poziomach daje $K-1$ kolumn.
+  Przy selekcji całych zmiennych wybieramy je **razem**.
+- Przy interakcjach zachowujemy efekty główne.
+- W karze za liczbę parametrów liczymy **współczynniki**,
+  łącznie z wyrazem wolnym: tę liczbę oznaczamy $d$.
+
+. . .
+
+Zwykłe LASSO wybiera pojedyncze kolumny. Nie wymusza ani wyboru
+całego bloku, ani zachowania efektów głównych.
+
+# Kryteria wyboru modelu
+
+## Ile poprawy za dodatkowy parametr?
+
+OLS, te same $n$ obserwacji i ten sam wynik; $d$ obejmuje wyraz wolny.
+
+| Kryterium | Wartość do porównania | Wybieramy |
+|---|---|---|
+| Skorygowany $R^2$ | $1-\dfrac{\mathrm{RSS}/(n-d)}{\mathrm{TSS}/(n-1)}$ | największą |
+| $C_p$ Mallowsa | $\mathrm{RSS}/\widehat\sigma^2-n+2d$ | najmniejszą |
+| AIC | $n\log(\mathrm{RSS}/n)+2d$ | najmniejszą |
+| BIC | $n\log(\mathrm{RSS}/n)+d\log n$ | najmniejszą |
+
+::: {.notes}
+Zakładamy pełny rząd, d < n i dodatni RSS. Dla Cp wspólne oszacowanie
+wariancji z dostatecznie bogatego modelu. Wyprowadzenie kary 2d
+zostaje w książce. AIC/BIC w postaciach do porównania normalnych modeli
+z nieznaną wariancją, po pominięciu wspólnych stałych. Pełna liczba
+parametrów probabilistycznych wynosi d+1. Nie przenosić tych wzorów
+na ridge przez wpisanie liczby kolumn jako d.
+:::
+
+## AIC i BIC mogą wybrać inaczej
+
+AIC i BIC powyżej dotyczą regresji z niezależnymi normalnymi błędami
+oraz nieznaną wspólną wariancją. Dla $n\geq8$ BIC mocniej karze parametr.
+
+```{python}
+n = len(Y_tr)
+subsets["AIC"] = n * np.log(subsets["RSS"] / n) + 2 * subsets["d"]
+subsets["BIC"] = n * np.log(subsets["RSS"] / n) + subsets["d"] * np.log(n)
+comparison = subsets[subsets["cechy"].isin(["Income, Rating", "Income, Limit, Rating"])].copy()
+comparison["RSS / 1000000"] = comparison["RSS"] / 1e6
+show_table(comparison[["cechy", "RSS / 1000000", "AIC", "BIC"]], 2)
+```
+
+Dodanie `Limit` obniża RSS, ale poprawa nie rekompensuje kary BIC.
+
+::: {.notes}
+AIC przybliża jakość probabilistycznego opisu nowych wyników; BIC
+wywodzi się z porównania modeli przy innych założeniach.
+Żadne kryterium nie gwarantuje najmniejszego MSE predykcji.
+Cp i skorygowany R² wybierają tu także model wszystkich trzech cech.
+:::
+
+## Wybór modelu a ocena i wnioskowanie
+
+**CV** porównuje straty poza częścią uczącą. Może wybierać liczbę cech,
+siłę regularyzacji i samą metodę.
+
+. . .
+
+- Końcowa ocena wymaga osobnych danych albo zagnieżdżenia.
+- Kara za złożoność nie usuwa całego optymizmu przeszukiwania modeli.
+- Testy i przedziały z W4 traktują postać modelu jako ustaloną.
+  Po selekcji na tych samych danych zwykłe p-wartości
+  nie mają automatycznie dotychczasowej interpretacji.
+
+# Dlaczego ściąganie może pomagać?
+
+## Nieobciążoność ma swoją cenę
+
+Niezależne $Y_i$ mają średnią $\mu$ i wariancję $\sigma^2$.
+Estymujemy $\mu$ przez $\widehat\mu_c=c\bar Y$, gdzie $0\leq c\leq1$.
+
+$$
+\E[\widehat\mu_c]-\mu=(c-1)\mu,
+\qquad
+\Var(\widehat\mu_c)=c^2\frac{\sigma^2}{n}.
+$$
+
+. . .
+
+::: {.definicja}
+$$
+\operatorname{MSE}(c\bar Y)
+=(1-c)^2\mu^2+c^2\frac{\sigma^2}{n}.
+$$
+:::
+
+Mniejsza wariancja może z nadwyżką pokryć koszt obciążenia.
+
+::: {.notes}
+Tablica: dodać i odjąć E estymatora w błędzie kwadratowym; wyraz
+mieszany ma średnią zero. Następnie porównać z MSE średniej = sigma²/n.
+Dla c=1-h różnica to -2h sigma²/n + h²(mu²+sigma²/n).
+Dla każdego ustalonego mu dostatecznie małe h pomaga; nie znamy jednak
+mu, więc rachunek nie podaje uniwersalnej siły ściągania.
+:::
+
+## Koszt i korzyść na jednym rysunku
+
+```{python}
+#| fig-align: center
+#| fig-alt: "MSE estymatora c razy średnia: minimum wypada pomiędzy zerem a jednością."
+mu, variance_mean = 1.0, 1.0
+c_grid = np.linspace(0, 1, 201)
+bias_sq = (1 - c_grid)**2 * mu**2
+variance = c_grid**2 * variance_mean
+fig, ax = plt.subplots(figsize=(8, 3.6))
+ax.plot(c_grid, bias_sq, label="obciążenie²", color=RED)
+ax.plot(c_grid, variance, label="wariancja", color=BLUE)
+ax.plot(c_grid, bias_sq + variance, label="MSE", color=GREEN, lw=3)
+ax.axvline(0.5, color="0.5", ls=":")
+ax.set(xlabel="mnożnik c", ylabel="błąd", title="Przykład: μ = 1, σ²/n = 1")
+ax.legend()
+plt.tight_layout()
+plt.show()
+```
+
+Tutaj $c=1/2$ zmniejsza MSE z $1$ do $1/2$.
+Najlepsze $c$ zależy jednak od nieznanego $\mu$.
+
+# Regresja grzbietowa
+
+## RSS plus kara kwadratowa
+
+::: {.definicja}
+**Regresja grzbietowa (ridge)** minimalizuje
+$$
+\sum_{i=1}^n(y_i-\beta_0-\x_i^\top\bbeta)^2
++\lambda\sum_{j=1}^p\beta_j^2,\qquad\lambda\geq0.
+$$
+:::
+
+- $\lambda=0$: zadanie MNK.
+- Większe $\lambda$: mocniejsze ograniczenie dopasowania.
+- **Wyrazu wolnego nie karzemy**: nie ściągamy umownego poziomu wyniku do zera.
+
+## Pytanie {.pytanie}
+
+Dochód mierzymy w tysiącach dolarów. Zmieniamy jednostkę na dolary:
+$X'=1000X$. Jaki współczynnik daje te same predykcje?
+Co stanie się z karą?
+
+. . .
+
+$\beta'=\beta/1000$. Predykcje są identyczne, ale
+$$
+\lambda(\beta')^2=\frac{\lambda\beta^2}{10^6}.
+$$
+
+Kara zależy od jednostek. Dlatego przed regularyzacją
+zwykle **standaryzujemy cechy**.
+
+## Skalowanie jest częścią metody
+
+$$
+z_{ij}=\frac{x_{ij}-\bar x_j}{s_j}.
+$$
+
+Średnią i odchylenie wyznaczamy **na danych uczących**.
+Te same wartości stosujemy do nowych obserwacji.
+
+- Współczynnik opisuje zmianę wyniku na jedno odchylenie cechy.
+- Stała kolumna wymaga osobnego potraktowania lub usunięcia.
+- Kodowanie cech jakościowych też wpływa na karę.
+
+::: {.notes}
+W tym slajdzie s_j jest odchyleniem standardowym; w rachunku jednej
+cechy poniżej s oznacza sumę kwadratów. Dla rzadkiej kategorii
+standaryzacja zmienia znaczenie kary względem jednostki 0/1.
+Wybór poziomu odniesienia również może zmieniać regularyzację.
+:::
+
+## Jedna cecha: ridge to mnożenie przez $c$
+
+Dane wycentrowane. Oznaczmy $s=\sum_i x_i^2>0$, $z=\sum_i x_iy_i$.
+
+$$
+\widehat\beta_{\mathrm{OLS}}=\frac zs,
+\qquad
+\widehat\beta_\lambda=\frac{z}{s+\lambda}
+=\underbrace{\frac{s}{s+\lambda}}_{c}\widehat\beta_{\mathrm{OLS}}.
+$$
+
+Dla $s=10$, $z=30$:
+
+| $\lambda$ | 0 | 10 | 30 |
+|---|---:|---:|---:|
+| $\widehat\beta_\lambda$ | 3 | 1,5 | 0,75 |
+
+Wariancja mnoży się przez $c^2$. Przy niezerowym prawdziwym
+współczynniku pojawia się obciążenie.
+
+::: {.notes}
+Tablica: RSS + lambda beta², pochodna -2z+2(s+lambda)beta=0.
+Przy ustalonym X czynnik c jest stały po ponownym losowaniu błędów.
+To dokładnie mechanizm poprzedniego przykładu ze średnią.
+:::
+
+## Wiele cech: rozwiązanie ridge
+
+Po wycentrowaniu $\X$ i $\y$, bez kolumny jedynek:
+
+$$
+\widehat{\bbeta}_\lambda
+=(\X^\top\X+\lambda\mathbf I)^{-1}\X^\top\y.
+$$
+
+Dla $\lambda>0$ rozwiązanie jest **jednoznaczne**, także przy
+liniowo zależnych kolumnach.
+
+Wyraz wolny odzyskujemy jako
+$\widehat\beta_0=\bar y-\bar\x^\top\widehat{\bbeta}_\lambda$.
+
+. . .
+
+Gdy $\lambda\to\infty$, nachylenia dążą do zera,
+a model przewiduje średnią uczącą $\bar y$.
+
+::: {.notes}
+Wzór jako fakt, bez pełnego dowodu. Dodanie lambda I usuwa osobliwość:
+vᵀ(XᵀX+lambda I)v = ||Xv||²+lambda||v||² > 0.
+W obliczeniach rozwiązuje się układ, nie liczy jawnie odwrotności.
+:::
+
+## Powrót do doliny RSS
+
+Dwie niemal identyczne, standaryzowane cechy:
+predykcje zależą głównie od **sumy** współczynników.
+
+$$
+\beta_L^2+\beta_R^2
+=\tfrac12\big[(\beta_L+\beta_R)^2+(\beta_L-\beta_R)^2\big].
+$$
+
+Przy ustalonej sumie kara jest najmniejsza dla $\beta_L=\beta_R$.
+Ridge ogranicza więc swobodę podziału efektu między podobne cechy.
+
+::: {.wniosek}
+Przy skorelowanych cechach ściąganie działa wspólnie.
+Nie każdy współczynnik musi monotonicznie maleć co do modułu.
+:::
+
+::: {.notes}
+Na tablicy odtworzyć wydłużone poziomice RSS z W5, zaznaczyć kierunek
+sumy i różnicy. Bez wartości własnych. Ridge zwykle zachowuje wszystkie
+cechy: nie ma mechanizmu progowania, choć szczególne dane mogą dać zero.
+:::
+
+# LASSO i geometria regularyzacji
+
+## Moduły zamiast kwadratów
+
+::: {.definicja}
+**LASSO** minimalizuje
+$$
+\sum_{i=1}^n(y_i-\beta_0-\x_i^\top\bbeta)^2
++\lambda\sum_{j=1}^p|\beta_j|.
+$$
+:::
+
+Wyraz wolny nadal nie jest karany. Reguły skalowania zostają te same.
+
+. . .
+
+Część współczynników może być **dokładnie równa zero**.
+LASSO łączy ściąganie z selekcją.
+
+## Miękkie progowanie
+
+Dla jednej wycentrowanej cechy: $s=\sum_i x_i^2>0$, $z=\sum_i x_iy_i$.
+
+$$
+\widehat\beta_\lambda
+=\frac{\operatorname{sign}(z)(|z|-\lambda/2)_+}{s},
+\qquad (a)_+=\max(a,0).
+$$
+
+Zmniejszamy moduł $z$ o $\lambda/2$; poniżej progu dostajemy zero.
+
+| $s=10$, $z=30$ | $\lambda=0$ | $\lambda=10$ | $\lambda=30$ | $\lambda=60$ |
+|---|---:|---:|---:|---:|
+| ridge | 3 | 1,5 | 0,75 | 0,43 |
+| LASSO | 3 | 2,5 | 1,5 | **0** |
+
+::: {.notes}
+Wzór jako fakt i przykład liczbowy. Czynnik 1/2 wynika z konwencji
+RSS plus kara. Dla skorelowanych cech nie wystarczy osobno progować
+współczynników OLS. W razie zapasu czasu: rozpatrzyć pochodną dla
+beta dodatniego i ujemnego oraz załamanie w zerze.
+:::
+
+## Ścieżki współczynników na *Credit*
+
+Cztery standaryzowane cechy, 300 obserwacji uczących.
+
+```{python}
+#| fig-align: center
+#| fig-alt: "Ścieżki współczynników ridge i LASSO: w LASSO pojawiają się dokładne zera."
+path_features = ["Income", "Limit", "Rating", "Student"]
+X_path = credit_tr[path_features].copy()
+X_path["Student"] = X_path["Student"].map({"No": 0, "Yes": 1})
+Z = StandardScaler().fit_transform(X_path)
+fig, axes = plt.subplots(1, 2, figsize=(10, 3.7))
+for ax, name, grid in zip(axes, ["ridge", "LASSO"],
+                         [np.geomspace(0.01, 1e6, 100), np.geomspace(10, 1e6, 100)]):
+    coefficients = []
+    for lam in grid:
+        estimator = (Ridge(alpha=lam) if name == "ridge" else
+                     Lasso(alpha=lam / (2 * len(Y_tr)), max_iter=100000, tol=1e-8))
+        coefficients.append(estimator.fit(Z, Y_tr).coef_)
+    for j, feature in enumerate(path_features):
+        ax.plot(grid, np.array(coefficients)[:, j], label=feature)
+    ax.set(xscale="log", xlabel=r"kara $\lambda$", ylabel="współczynnik (USD)", title=name)
+    ax.axhline(0, color="0.6", lw=0.7)
+axes[1].legend(fontsize=9)
+plt.tight_layout()
+plt.show()
+```
+
+Każda rodzina ma własną skalę kary. `Income` w ridge nawet zmienia znak.
+
+::: {.notes}
+Współczynniki na jedno odchylenie cechy. Ridge zbliża współczynniki
+Limit i Rating; LASSO przy silnej karze zostawia Rating jako jedną
+z dwóch niemal równoważnych cech. Nie tłumaczyć wszystkich zakrętów.
+:::
+
+## Kara jako budżet
+
+Możemy minimalizować RSS przy ograniczeniu:
+
+$$
+\sum_j\beta_j^2\leq t\quad\text{(ridge)},
+\qquad
+\sum_j|\beta_j|\leq t\quad\text{(LASSO)}.
+$$
+
+Duży budżet dopuszcza OLS. Mniejszy wymusza punkt bliższy zeru.
+
+Dla dwóch współczynników: **koło** dla ridge, **romb** dla LASSO.
+Szukamy najmniejszej poziomicy RSS spotykającej zbiór dopuszczalny.
+
+::: {.notes}
+Kara i budżet to dwa opisy regularyzacji. Rozwiązaniu dla dodatniej
+kary odpowiada budżet osiągnięty przez rozwiązanie; relacja nie musi
+być jeden do jednego. Budżet zero w ridge może wymagać granicy kary.
+:::
+
+## Dlaczego romb sprzyja zerom?
+
+```{python}
+#| fig-align: center
+#| fig-alt: "Poziomica RSS dotyka koła poza osiami, a rombu w wierzchołku na osi."
+beta_ols = np.array([2.0, 0.6])
+q1, q2 = np.meshgrid(np.linspace(-1.5, 3, 300), np.linspace(-1.5, 2, 240))
+rss_levels = (q1 - beta_ols[0])**2 + (q2 - beta_ols[1])**2
+fig, axes = plt.subplots(1, 2, figsize=(9, 4))
+theta = np.linspace(0, 2 * np.pi, 400)
+for ax, minimum in zip(axes, [(np.linalg.norm(beta_ols) - 1)**2, 1.36]):
+    ax.contour(q1, q2, rss_levels, levels=[0.15, 0.5, minimum, 2, 3, 5, 8],
+               colors="0.65", linewidths=0.8)
+    ax.axhline(0, color="0.3", lw=0.7)
+    ax.axvline(0, color="0.3", lw=0.7)
+    ax.plot(*beta_ols, "ko", label="OLS")
+    ax.set(xlabel=r"$\beta_1$", ylabel=r"$\beta_2$", aspect="equal",
+           xlim=(-1.5, 3), ylim=(-1.5, 2))
+axes[0].fill(np.cos(theta), np.sin(theta), color=BLUE, alpha=0.18)
+axes[0].plot(np.cos(theta), np.sin(theta), color=BLUE)
+axes[0].plot(*(beta_ols / np.linalg.norm(beta_ols)), "o", color=RED,
+             label="minimum z ograniczeniem")
+axes[0].set_title(r"ridge: $\beta_1^2+\beta_2^2\leq1$")
+axes[1].fill([1, 0, -1, 0], [0, 1, 0, -1], color=BLUE, alpha=0.18)
+axes[1].plot([1, 0, -1, 0, 1], [0, 1, 0, -1, 0], color=BLUE)
+axes[1].plot(1, 0, "o", color=RED)
+axes[1].set_title(r"LASSO: $|\beta_1|+|\beta_2|\leq1$")
+axes[0].legend(fontsize=8, loc="upper right")
+plt.tight_layout()
+plt.show()
+```
+
+Kontakt z wierzchołkiem rombu oznacza zerową współrzędną.
+LASSO **może**, ale nie musi usuwać cech.
+
+## Pytanie {.pytanie}
+
+LASSO wyzerowało współczynnik `Limit`, pozostawiając `Rating`.
+Czy limit nie ma związku z saldem zadłużenia?
+
+. . .
+
+Nie. Przy tej próbie, reprezentacji i karze procedura nie wykorzystuje
+tej kolumny. Podobna cecha może ją zastąpić.
+
+::: {.wniosek}
+Stabilność listy cech i stabilność predykcji to różne pytania.
+Selekcja do predykcji nie identyfikuje przyczyn zjawiska.
+:::
+
+# Dobór regularyzacji i porównanie metod
+
+## Co wybieramy i na jakich danych?
+
+*Credit*: 300 obserwacji uczących, 100 testowych; podział jak w książce.
+
+| Metoda | Ustawienie wybierane przez pięciokrotną CV |
+|---|---|
+| OLS | brak |
+| Selekcja w przód | liczba cech na ścieżce |
+| Ridge | siła kary |
+| LASSO | siła kary |
+
+Siedem cech: `Income`, `Limit`, `Rating`, `Cards`, `Age`, `Education`, `Student`.
+Model samej średniej jest dodatkowym punktem odniesienia.
+
+::: {.notes}
+Wybór listy siedmiu cech ustalony przed analizą. Student kodowany 0/1.
+W każdym podziale te same obserwacje walidacyjne dla wszystkich metod.
+:::
+
+## Cała procedura wewnątrz CV
+
+W każdym podziale:
+
+1. **Część ucząca**: wyznacz skalowanie, wybierz cechy i dopasuj model.
+2. **Część walidacyjna**: zastosuj wyuczone przekształcenia i zmierz stratę.
+3. Uśrednij straty dla danego ustawienia po pięciu podziałach.
+
+. . .
+
+Po wyborze ustawienia i metody: dopasowanie na wszystkich 300
+obserwacjach uczących. **Dopiero potem test.**
+
+::: {.notes}
+W selekcji w przód w każdym kroku decyduje uczący RSS. CV wybiera
+liczbę kroków; ścieżka jest za każdym razem budowana od początku.
+Wybranie podzbiorów przed CV albo skalowanie przed CV ujawnia
+informację z części walidacyjnych.
+:::
+
+## Pytanie {.pytanie}
+
+Wybieram trzy cechy najlepiej związane z saldem na całych danych.
+Potem uruchamiam poprawny potok skalowania i LASSO w CV.
+Czy ocena jest poprawna?
+
+. . .
+
+**Nie.** Wyniki części walidacyjnych uczestniczyły już w wyborze cech.
+Sam potok skalowania i LASSO nie naprawia wcześniejszego wycieku.
+
+Selekcja też musi być powtarzana wewnątrz części uczących.
+
+```{python}
+#| include: false
+class ForwardSelection(RegressorMixin, BaseEstimator):
+    def __init__(self, n_features=1):
+        self.n_features = n_features
+
+    def fit(self, X, y):
+        X, y = np.asarray(X), np.asarray(y)
+        self.n_features_in_ = X.shape[1]
+        if not 1 <= self.n_features <= X.shape[1]:
+            raise ValueError("Liczba cech poza zakresem 1,...,p.")
+        selected = []
+        for _ in range(self.n_features):
+            candidates = []
+            for j in range(X.shape[1]):
+                if j not in selected:
+                    columns = selected + [j]
+                    model = LinearRegression().fit(X[:, columns], y)
+                    rss = np.sum((y - model.predict(X[:, columns]))**2)
+                    candidates.append((rss, j))
+            selected.append(min(candidates)[1])
+        self.selected_ = selected
+        self.model_ = LinearRegression().fit(X[:, selected], y)
+        return self
+
+    def predict(self, X):
+        return self.model_.predict(np.asarray(X)[:, self.selected_])
+
+
+features = ["Income", "Limit", "Rating", "Cards", "Age", "Education", "Student"]
+X_all = credit[features].copy()
+X_all["Student"] = X_all["Student"].map({"No": 0, "Yes": 1})
+X_tr = X_all.iloc[idx_tr].to_numpy()
+cv = list(KFold(n_splits=5, shuffle=True, random_state=708).split(X_tr))
+procedures = {
+    "OLS": (LinearRegression(), {}),
+    "selekcja w przód": (ForwardSelection(), {"model__n_features": list(range(1, 8))}),
+    "ridge": (Ridge(), {"model__alpha": np.geomspace(1e-4, 1e5, 46)}),
+    "LASSO": (Lasso(max_iter=100000, tol=1e-8),
+              {"model__alpha": np.geomspace(1e-6, 1e3, 55)}),
+    "średnia": (DummyRegressor(strategy="mean"), {}),
+}
+searches = {}
+for name, (estimator, grid) in procedures.items():
+    pipeline = Pipeline([("scale", StandardScaler()), ("model", estimator)])
+    search = GridSearchCV(pipeline, grid, scoring="neg_mean_squared_error",
+                          cv=cv, refit=True, error_score="raise")
+    searches[name] = search.fit(X_tr, Y_tr)
+chosen_method = max(searches, key=lambda name: searches[name].best_score_)
+# Kontrola zgodności odtworzonego przykładu z rozdziałem.
+assert chosen_method == "ridge"
+assert np.isclose(searches["ridge"].best_params_["model__alpha"], 1)
+assert searches["selekcja w przód"].best_params_["model__n_features"] == 7
+assert np.count_nonzero(searches["LASSO"].best_estimator_.named_steps["model"].coef_) == 7
+```
+
+## Krzywe błędu i reguła 1 SE
+
+```{python}
+#| fig-align: center
+#| fig-alt: "Krzywe CV ridge i LASSO z zaznaczonym minimum oraz mocniejszą karą według reguły 1 SE."
+fig, axes = plt.subplots(1, 2, figsize=(10, 3.7))
+choices_1se = {}
+for ax, name in zip(axes, ["ridge", "LASSO"]):
+    search = searches[name]
+    result = search.cv_results_
+    alpha = np.array([p["model__alpha"] for p in result["params"]])
+    mse = -result["mean_test_score"]
+    fold_mse = np.array([-result[f"split{k}_test_score"] for k in range(5)])
+    se = fold_mse.std(axis=0, ddof=1) / np.sqrt(5)
+    j = search.best_index_
+    eligible = np.flatnonzero(mse <= mse[j] + se[j])
+    j_1se = eligible[np.argmax(alpha[eligible])]
+    choices_1se[name] = alpha[j_1se]
+    ax.errorbar(alpha, mse, yerr=se, color=BLUE, marker=".", lw=0.8, elinewidth=0.5)
+    ax.axvline(alpha[j], color=RED, ls="--", label="minimum")
+    ax.axvline(alpha[j_1se], color=GREEN, ls=":", label="1 SE")
+    ax.set(xscale="log", yscale="log", xlabel=r"$\alpha$ biblioteki",
+           ylabel=r"MSE (USD$^2$)", title=name)
+    ax.legend(fontsize=9)
+plt.tight_layout()
+plt.show()
+```
+
+Reguła 1 SE: największa kara z błędem CV nie większym niż
+minimum plus jego przybliżony SE.
+
+::: {.notes}
+SE to odchylenie pięciu wyników podzielone przez sqrt(5). Części
+nie są niezależne: to heurystyka, nie przedział ufności ani test
+równoważności. W głównym porównaniu stosujemy regułę minimum.
+Przy minimum na brzegu zbadać zakres przed testem. Dla LASSO płaski
+odcinek przy małych karach oznacza praktycznie OLS.
+:::
+
+## Uwaga na skalę kary
+
+W książce: **RSS plus kara**. Na poprzednim wykresie:
+parametr `alpha` używany przez bibliotekę.
+
+$$
+\lambda_{\mathrm{ridge}}=\alpha_{\mathrm{Ridge}},
+\qquad
+\lambda_{\mathrm{LASSO}}=2n\alpha_{\mathrm{Lasso}}.
+$$
+
+Te same liczby `alpha` nie oznaczają tej samej normalizacji.
+Kary kwadratowa i bezwzględna również mają różne skale.
+
+::: {.notes}
+Ridge minimalizuje RSS + alpha suma beta², Lasso: RSS/(2n) + alpha
+suma modułów. Szczegóły implementacji i potoków zostają na laboratorium.
+Przy refit zachowujemy alpha; dla LASSO lambda w konwencji RSS zmienia
+się z liczebnością próby, a dla ridge nie.
+:::
+
+## Co wybrała walidacja?
+
+```{python}
+cv_rows = []
+for name in ["OLS", "selekcja w przód", "ridge", "LASSO"]:
+    search = searches[name]
+    params = search.best_params_
+    setting = (f"alpha = {params['model__alpha']:.3g}" if "model__alpha" in params else
+               f"{params['model__n_features']} cech" if "model__n_features" in params else
+               "bez strojenia")
+    cv_rows.append({"metoda": name, "ustawienie": setting.replace(".", ","),
+                    "MSE CV": -search.best_score_})
+show_table(pd.DataFrame(cv_rows), 2)
+```
+
+CV wskazuje **ridge**. Selekcja zachowuje wszystkie siedem cech,
+a LASSO przy bardzo małej karze nie zeruje żadnej.
+
+::: {.notes}
+Na płaskim odcinku krzywej LASSO konkretne położenie minimum może
+wynikać z dokładności obliczeń. Nie interpretować małej różnicy jako
+mocnego dowodu przewagi rodziny. Wybór metody zamknięty przed testem.
+:::
+
+## Końcowa ocena na 100 odłożonych obserwacjach
+
+```{python}
+X_te = X_all.iloc[idx_te].to_numpy()
+Y_te = credit.iloc[idx_te]["Balance"].to_numpy()
+test_rows = []
+for name in ["OLS", "selekcja w przód", "ridge", "LASSO"]:
+    losses = (Y_te - searches[name].predict(X_te))**2
+    test_rows.append({"metoda": name, "MSE": losses.mean(),
+                      "SE MSE": losses.std(ddof=1) / np.sqrt(len(losses)),
+                      "RMSE (USD)": np.sqrt(losses.mean())})
+show_table(pd.DataFrame(test_rows))
+```
+
+Ridge ma tu nieco większy błąd niż OLS.
+**Nie zmieniamy wyboru po obejrzeniu testu.**
+
+::: {.notes}
+SE dotyczy testowego MSE ustalonego dopasowania, nie minimum CV.
+MSE w USD², RMSE w USD. Nie porównywać różnicy metod z SE pojedynczego
+MSE: do tego służą sparowane różnice strat na tych samych osobach.
+:::
+
+## Czy ta różnica świadczy o przewadze?
+
+Na tych samych osobach liczymy różnice strat:
+$$
+D_i=(y_i-\widehat y_i^{\mathrm{ridge}})^2
+-(y_i-\widehat y_i^{\mathrm{OLS}})^2.
+$$
+
+```{python}
+loss_diff = ((Y_te - searches["ridge"].predict(X_te))**2
+             - (Y_te - searches["OLS"].predict(X_te))**2)
+show_table(pd.DataFrame({"średnia różnica (USD²)": [loss_diff.mean()],
+                         "SE różnicy (USD²)": [loss_diff.std(ddof=1) / np.sqrt(len(loss_diff))]}))
+```
+
+Różnica jest mała względem swojej niepewności.
+Regularyzacja nie gwarantuje poprawy na każdym zbiorze.
+
+## A co z `Limit` i `Rating`?
+
+Współczynniki na skali standaryzowanych cech, końcowe modele:
+
+```{python}
+coefficients = pd.DataFrame({name: searches[name].best_estimator_.named_steps["model"].coef_
+                             for name in ["OLS", "ridge"]}, index=features)
+pair = coefficients.loc[["Limit", "Rating"]].copy()
+pair.loc["suma"] = pair.loc["Limit"] + pair.loc["Rating"]
+pair.loc["różnica"] = pair.loc["Limit"] - pair.loc["Rating"]
+show_table(pair.rename_axis("cecha / kombinacja").reset_index(), 0)
+```
+
+Suma prawie się nie zmienia; różnica wyraźnie maleje.
+Ridge ogranicza kierunek, który dane słabo wyznaczają.
+
+::: {.notes}
+To siedem cech, więc współczynniki OLS różnią się od wykresu ścieżek
+czterech cech. Wrócić do pytania otwierającego: CV wskazała zachowanie
+obu cech z niewielką karą. Nie oznacza to uniwersalnej przewagi ridge.
+:::
+
+## Trzy sposoby ograniczenia swobody
+
+| Metoda | Co ograniczamy? | Dokładne zera? |
+|---|---|---|
+| Selekcja | zbiór dostępnych cech | tak, dla pominiętych cech |
+| Ridge | sumę kwadratów współczynników | zwykle nie |
+| LASSO | sumę modułów współczynników | możliwe |
+
+::: {.wniosek}
+Stabilniejsze współczynniki, mniej cech i lepsza predykcja
+są różnymi celami. Sprawdzamy, który osiągnęliśmy.
+:::
+
+Siłę ograniczenia wybieramy na danych uczących przez CV.
+Test służy do końcowej oceny całej procedury.
