@@ -43,7 +43,8 @@ from sklearn.dummy import DummyRegressor
 from sklearn.metrics import mean_squared_error
 
 # Ten sam podział co w rozdziale 07; test pozostaje poza wyborem.
-data_dir = Path("../../MAD_book/dane")
+data_dir = next(p for p in [Path("../../MAD_book/dane"), Path("../../mad-book/dane")]
+                if p.exists())
 credit = pd.read_csv(data_dir / "Credit.csv")
 idx_tr, idx_te = train_test_split(np.arange(len(credit)), test_size=100,
                                 random_state=707)
@@ -87,13 +88,26 @@ Czy błąd na nowych danych musi się zmniejszyć?
 
 . . .
 
-Stary model nadal jest dostępny: wystarczy nadać nowemu
-współczynnikowi wartość zero. Minimum RSS nie rośnie, a $R^2$ nie maleje.
+$$
+\begin{aligned}
+\text{stary:}\quad &\beta_0+\beta_1x_1+\cdots+\beta_px_p,\\
+\text{nowy:}\quad &\beta_0+\beta_1x_1+\cdots+\beta_px_p
++\underbrace{\gamma z}_{\gamma=0\;\Rightarrow\;\text{stary model}}.
+\end{aligned}
+$$
 
-Nowy współczynnik może jednak dopasować **szum**.
-Błąd na nowych danych może wzrosnąć.
+Stąd przy dopasowaniu OLS:
 
-## Jedna cecha informacyjna, wiele szumowych
+$$
+\mathrm{RSS}_{\mathrm{nowy}}\le \mathrm{RSS}_{\mathrm{stary}}
+\quad\Rightarrow\quad
+R^2_{\mathrm{nowy}}\ge R^2_{\mathrm{stary}}.
+$$
+
+Na danych uczących $R^2$ **na pewno nie zmaleje**.
+Na nowych danych błąd może jednak wzrosnąć.
+
+## Jedna cecha informacyjna, reszta to szum
 
 $n=60$, $p=30$, $Y=3X_1+\varepsilon$, $\varepsilon\sim\Nrozk(0,2^2)$.
 Cechy $X_1$ i $X_2$ są silnie skorelowane; pozostałe to szum.
@@ -169,22 +183,39 @@ Dopasowanie na 300 obserwacjach; 100 odłożono jako test przed analizą.
 RSS w tysiącach USD². Wskazać najlepszy model każdej wielkości.
 :::
 
-## Przegląd zupełny: dwa wybory
+## Przegląd zupełny: które cechy i ile?
 
-1. Dla każdej liczby $k$ cech: podzbiór o najmniejszym RSS.
-2. Spośród rozmiarów $k=0,\ldots,p$: wybór według kryterium
-   uwzględniającego złożoność albo przez walidację.
+1. **Sprawdź wszystkie podzbiory cech**: dopasuj OLS i policz uczący RSS.
+2. **Dla każdej liczby $k=0,\ldots,p$ cech zostaw jeden model** --
+   ten z najmniejszym uczącym RSS.
+3. **Wybierz liczbę cech** według AIC, BIC albo błędu walidacyjnego.
 
 . . .
 
 Łącznie $2^p$ modeli: przy $p=20$ ponad milion, przy $p=40$ ponad bilion.
 
 ::: {.wniosek}
-Najlepszy podzbiór na przeszukanej liście nie musi mieć
-najmniejszego ryzyka w populacji.
+Przy CV wybór podzbioru powtarzamy w każdej części uczącej.
+Błąd mierzymy na odpowiadającej jej części walidacyjnej.
 :::
 
-## Metoda schodów w przód i wstecz
+::: {.notes}
+Krok 2 odpowiada na pytanie „które cechy, jeśli ma ich być k?”,
+a krok 3 -- „ile cech pozostawić?”. Uwzględniamy też model z samym
+wyrazem wolnym (k=0).
+
+Przy CV kroki 1 i 2 powtarzamy w każdej części uczącej. Dla każdej
+wielkości k uśredniamy błędy walidacyjne po podziałach i wybieramy k.
+Następnie powtarzamy selekcję dla wybranego k na całym zbiorze uczącym.
+
+Te dwa etapy wyboru nie oznaczają walidacji zagnieżdżonej. W zagnieżdżonej
+CV wewnętrzna pętla wybiera model, a zewnętrzna ocenia całą procedurę.
+Alternatywą dla oceny zewnętrznej jest osobny zbiór testowy.
+Najlepszy podzbiór na przeszukanej liście nie musi mieć najmniejszego
+ryzyka w populacji.
+:::
+
+## Selekcja krokowa: w przód i wstecz
 
 :::: {.columns}
 ::: {.column .karta width="50%"}
@@ -207,10 +238,13 @@ Usuniętych cech nie dodajemy.
 :::
 ::::
 
-W przód: $p(p+1)/2$ sprawdzanych rozszerzeń zamiast $2^p$ podzbiorów.
-Długość ścieżki wybieramy osobno.
+Obie metody tworzą **po jednym modelu każdej wielkości**.
+Liczbę cech wybieramy według AIC, BIC albo błędu walidacyjnego.
+
+Przy CV selekcję krokową powtarzamy w każdej części uczącej.
 
 ::: {.notes}
+W przód: $p(p+1)/2$ sprawdzanych rozszerzeń zamiast $2^p$ podzbiorów.
 Model początkowy liczymy osobno. W klasycznej selekcji wstecz pełny
 model musi mieć pełny rząd kolumnowy; problem przy zbyt wielu cechach.
 :::
@@ -291,19 +325,6 @@ wywodzi się z porównania modeli przy innych założeniach.
 Żadne kryterium nie gwarantuje najmniejszego MSE predykcji.
 Cp i skorygowany R² wybierają tu także model wszystkich trzech cech.
 :::
-
-## Wybór modelu a ocena i wnioskowanie
-
-**CV** porównuje straty poza częścią uczącą. Może wybierać liczbę cech,
-siłę regularyzacji i samą metodę.
-
-. . .
-
-- Końcowa ocena wymaga osobnych danych albo zagnieżdżenia.
-- Kara za złożoność nie usuwa całego optymizmu przeszukiwania modeli.
-- Testy i przedziały z W4 traktują postać modelu jako ustaloną.
-  Po selekcji na tych samych danych zwykłe p-wartości
-  nie mają automatycznie dotychczasowej interpretacji.
 
 # Dlaczego ściąganie może pomagać?
 
@@ -639,6 +660,35 @@ Selekcja do predykcji nie identyfikuje przyczyn zjawiska.
 :::
 
 # Dobór regularyzacji i porównanie metod
+
+## Najpierw wybór modelu, potem ocena
+
+1. **Wybierz model przez CV na danych uczących** -- np. liczbę cech,
+   siłę regularyzacji lub metodę.
+2. **Dopasuj wybrany model na całym zbiorze uczącym.**
+3. **Oceń go na odłożonym zbiorze testowym**, który nie uczestniczył
+   w wyborze.
+
+. . .
+
+::: {.wniosek}
+Wynik CV użyty do wyboru modelu może przeceniać jego jakość.
+Dlatego końcową ocenę robimy na osobnych danych.
+:::
+
+::: {.notes}
+Zbiór testowy odkładamy przed rozpoczęciem wyboru modelu.
+CV porównuje błędy poza częścią uczącą każdego podziału. Wybór najlepszego
+wyniku spośród wielu ustawień może jednak prowadzić do zbyt optymistycznej
+oceny. Kara za złożoność też nie usuwa całego optymizmu przeszukiwania modeli.
+
+Alternatywą dla osobnego testu jest zagnieżdżona CV: wewnętrzna pętla
+wybiera model, a zewnętrzna ocenia całą procedurę wyboru.
+
+Osobne pytanie dotyczy wnioskowania o współczynnikach. Testy i przedziały
+z W4 traktują postać modelu jako ustaloną. Po selekcji na tych samych
+danych zwykłe p-wartości nie mają automatycznie dotychczasowej interpretacji.
+:::
 
 ## Co wybieramy i na jakich danych?
 
