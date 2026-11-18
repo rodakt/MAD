@@ -188,7 +188,9 @@ RSS w tysiącach USD². Wskazać najlepszy model każdej wielkości.
 1. **Sprawdź wszystkie podzbiory cech**: dopasuj OLS i policz uczący RSS.
 2. **Dla każdej liczby $k=0,\ldots,p$ cech zostaw jeden model** --
    ten z najmniejszym uczącym RSS.
-3. **Wybierz liczbę cech** według AIC, BIC albo błędu walidacyjnego.
+3. **Porównaj zachowane modele według wybranego kryterium** --
+   np. $C_p$ Mallowsa, skorygowanego $R^2$, AIC, BIC albo błędu
+   walidacyjnego. Liczba cech w wybranym modelu wyznacza $k$.
 
 . . .
 
@@ -238,8 +240,9 @@ Usuniętych cech nie dodajemy.
 :::
 ::::
 
-Obie metody tworzą **po jednym modelu każdej wielkości**.
-Liczbę cech wybieramy według AIC, BIC albo błędu walidacyjnego.
+**RSS wskazuje kolejny krok.** Budujemy ścieżkę $\mathcal M_0,\ldots,\mathcal M_p$,
+po jednym modelu na każdą liczbę cech. Model ze ścieżki wybieramy według
+jednego z kryteriów z następnej sekcji albo na podstawie błędu walidacyjnego.
 
 Przy CV selekcję krokową powtarzamy w każdej części uczącej.
 
@@ -251,21 +254,30 @@ model musi mieć pełny rząd kolumnowy; problem przy zbyt wielu cechach.
 
 ## Pytanie {.pytanie}
 
-| Podzbiór | A | B | C | A, B | A, C | B, C |
-|---|---:|---:|---:|---:|---:|---:|
-| RSS | 140 | 150 | 170 | 120 | 125 | 110 |
+Jakich kandydatów do ostatecznego wyboru daje każda metoda?
 
-Którą parę wybierze selekcja w przód? Czy jest najlepsza?
+| Podzbiór | ∅ | A | B | C | AB | AC | BC | ABC |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| RSS | 200 | 140 | 150 | 170 | 120 | 125 | 110 | 100 |
+
+**W przód** ∅ → A → AB → ABC
 
 . . .
 
-Najpierw **A**, potem **A, B**. Najlepsza para to jednak **B, C**.
+**Wstecz** ABC → BC → B → ∅
 
-Oszczędność obliczeń ma cenę: pierwszy krok może zamknąć drogę
-do najlepszego podzbioru.
+. . .
+
+**Przegląd zupełny** ∅ · A · BC · ABC
+
+RSS wyznacza kandydatów. Spośród nich wybieramy model według jednego
+z kryteriów z następnej sekcji albo na podstawie błędu walidacyjnego.
 
 ::: {.notes}
-Tabela dydaktyczna z zadania „Podzbiory predyktorów” w rozdziale 07.
+Dane z zadania „Podzbiory predyktorów” w rozdziale 07.
+W przód po A porównujemy tylko AB i AC. Wstecz po BC porównujemy
+tylko B i C. W przeglądzie zupełnym porównujemy wszystkie podzbiory
+osobno dla każdego k.
 :::
 
 ## Zmienna to nie zawsze jedna kolumna
@@ -305,8 +317,9 @@ na ridge przez wpisanie liczby kolumn jako d.
 
 ## AIC i BIC mogą wybrać inaczej
 
-AIC i BIC powyżej dotyczą regresji z niezależnymi normalnymi błędami
-oraz nieznaną wspólną wariancją. Dla $n\geq8$ BIC mocniej karze parametr.
+Liczymy AIC i BIC dla wszystkich ośmiu podzbiorów cech
+`Income`, `Limit`, `Rating`. Tabela pokazuje modele o najmniejszym AIC
+(trzy cechy) i najmniejszym BIC (`Income` i `Rating`).
 
 ```{python}
 n = len(Y_tr)
@@ -317,9 +330,12 @@ comparison["RSS / 1000000"] = comparison["RSS"] / 1e6
 show_table(comparison[["cechy", "RSS / 1000000", "AIC", "BIC"]], 2)
 ```
 
-Dodanie `Limit` obniża RSS, ale poprawa nie rekompensuje kary BIC.
+Dodanie `Limit` do pary `Income` i `Rating` obniża RSS na tyle,
+by zmniejszyć AIC, ale BIC rośnie.
 
 ::: {.notes}
+AIC i BIC powyżej dotyczą regresji z niezależnymi normalnymi błędami
+oraz nieznaną wspólną wariancją. Dla n ≥ 8 BIC mocniej karze parametr.
 AIC przybliża jakość probabilistycznego opisu nowych wyników; BIC
 wywodzi się z porównania modeli przy innych założeniach.
 Żadne kryterium nie gwarantuje najmniejszego MSE predykcji.
@@ -399,19 +415,25 @@ $$
 
 ## Pytanie {.pytanie}
 
-Dochód mierzymy w tysiącach dolarów. Zmieniamy jednostkę na dolary:
-$X'=1000X$. Jaki współczynnik daje te same predykcje?
-Co stanie się z karą?
+Dochód w kolumnie $j$ przeliczamy z tysięcy dolarów na dolary,
+czyli $x'_{ij}=1000x_{ij}$. Co zmieni się po ponownym dopasowaniu
+OLS i ridge?
 
 . . .
 
-$\beta'=\beta/1000$. Predykcje są identyczne, ale
+**OLS** daje te same predykcje, bo $\beta'_j=\beta_j/1000$ zachowuje
+iloczyn $x'_{ij}\beta'_j=x_{ij}\beta_j$, a więc też RSS.
+
+**Ridge** przy tym samym $\lambda>0$ przypisuje tej samej funkcji
+predykcji karę
 $$
-\lambda(\beta')^2=\frac{\lambda\beta^2}{10^6}.
+\lambda\sum_{\ell\ne j}\beta_\ell^2+\lambda\frac{\beta_j^2}{10^6}.
 $$
 
-Kara zależy od jednostek. Dlatego przed regularyzacją
-zwykle **standaryzujemy cechy**.
+Wkład dochodu jest karany milion razy słabiej względem innych cech.
+Po ponownym dopasowaniu predykcje mogą się więc zmienić.
+
+**Standaryzacja uniezależnia siłę regularyzacji od jednostek pomiaru.**
 
 ## Skalowanie jest częścią metody
 
