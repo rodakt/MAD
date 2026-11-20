@@ -1,0 +1,41 @@
+---
+title: "Czy do przewidywania salda potrzebujemy i Limit, i Rating?"
+subtitle: "komputerowe i tablicowe"
+---
+
+## Przed zajęciami
+
+1. Limit klienta wynosi 4000 USD. Jak musi zmienić się współczynnik przy limicie, żeby po wpisaniu 4 (w tysiącach USD) model dał tę samą predykcję?
+2. Dwie oceny tego samego klienta są prawie idealnie skorelowane. Czy model może dobrze przewidywać saldo, choć trudno określić osobny wkład każdej oceny?
+3. Z których obserwacji obliczysz średnią i odchylenie standardowe cechy podczas jednego kroku walidacji krzyżowej?
+
+::: {.callout-note collapse="true" title="Odpowiedzi"}
+1. Współczynnik musi wzrosnąć tysiąckrotnie, aby jego iloczyn z limitem pozostał taki sam. Zmieni się więc także wkład współczynnika do kary ridge.
+2. Tak. Różne pary współczynników mogą dawać podobne sumy ważone dla obserwowanych klientów.
+3. Z części uczącej tego podziału. Tymi samymi wartościami standaryzujemy następnie obserwacje walidacyjne.
+:::
+
+W książce przeczytaj fragment o skali cech w sekcji
+[Regresja grzbietowa](https://rodakt.github.io/MAD_book/2-modele-liniowe/07-selekcja-regularyzacja.html#sec-ridge)
+oraz początek sekcji
+[Dobór regularyzacji i porównanie metod](https://rodakt.github.io/MAD_book/2-modele-liniowe/07-selekcja-regularyzacja.html#sec-regularyzacja-praktyka).
+
+## Przebieg zajęć
+
+1. **Limit i ocena kredytowa** (15 minut). Sprawdź, jak po dodaniu oceny zmienia się współczynnik przy limicie i o ile dolarów zmieniają się predykcje dla tych samych klientów.
+2. **Skala cech** (15 minut). Zmień jednostkę limitu i porównaj predykcje ridge. Powtórz doświadczenie po standaryzacji.
+3. **Ścieżki współczynników** (20 minut). Dodaj dochód i status studenta. Prześledź, jak ridge i LASSO rozdzielają współczynniki między cztery cechy przy rosnącej karze.
+4. **Wybór przez walidację krzyżową** (30 minut). Porównaj trzy zestawy cech w OLS oraz dobierz karę dla ridge i LASSO. Zapisz wybór przed oceną na próbie testowej.
+5. **Ocena i interpretacja** (10 minut). Podaj błąd testowy w dolarach i wróć do pytania o przydatność limitu i oceny kredytowej.
+
+Dla chętnych: sprawdź, jak zmienia się wybór kary LASSO według reguły 1 SE.
+
+[Otwórz notebook w Colabie](https://colab.research.google.com/github/rodakt/MAD/blob/2026-27/laby/notebooki/06-selekcja-regularyzacja.ipynb){.btn .btn-primary target="_blank"}
+[Podgląd notebooka](notebooki/06-selekcja-regularyzacja.html){.btn .btn-outline-primary target="_blank"}
+[Pobierz notebook](https://rodakt.github.io/MAD/laby/notebooki/06-selekcja-regularyzacja.ipynb){.btn .btn-outline-primary download="06-selekcja-regularyzacja.ipynb"}
+
+W Colabie wybierz *Plik → Zapisz kopię na Dysku*, żeby zachować własny kod i odpowiedzi.
+
+## Python i dane
+
+Pierwsza komórka wczytuje [dane Credit](dane/Credit.csv) i odkłada 100 z 400 klientów do końcowej oceny. Kod do kolejnych doświadczeń wpisujesz w pustych komórkach. Do obliczeń używamy bibliotek NumPy, pandas, Matplotlib i scikit-learn.

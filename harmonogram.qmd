@@ -15,7 +15,7 @@ semestru. Daty i laboratoria zostaną uzupełnione.
 | 3 | | Kompromis obciążenie--wariancja i ocena modeli | [Wybór modelu walidacją krzyżową i wyciek informacji](laby/03-walidacja-krzyzowa.qmd) |
 | 4 | | Regresja liniowa I: model i metoda najmniejszych kwadratów | [Od prostej do interakcji](laby/04-regresja-liniowa.qmd) |
 | 5 | | Regresja liniowa II: zmienne jakościowe, interakcje, diagnostyka | [Co mówi współczynnik i co pokazują reszty?](laby/05-regresja-liniowa-2.qmd) |
-| 6 | | Selekcja i regularyzacja | |
+| 6 | | Selekcja i regularyzacja | [Czy do przewidywania salda potrzebujemy i Limit, i Rating?](laby/06-selekcja-regularyzacja.qmd) |
 | 7 | | Regresja logistyczna | |
 | 8 | | Uogólnione modele liniowe i regresja Poissona | |
 | 9 | | Paradygmat bayesowski | |
