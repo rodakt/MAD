@@ -21,8 +21,8 @@ obliczania LASSO zostają w książce.
 
 ::: {.notes}
 Plan 90 minut: motywacja 8, selekcja 12, kryteria 10, ściąganie 8,
-ridge 18, LASSO 17, walidacja i porównanie 14, podsumowanie 3.
-W razie opóźnienia skrócić kryteria oraz rachunek miękkiego progowania.
+ridge 18, LASSO 14, walidacja i porównanie 17, podsumowanie 3.
+W razie opóźnienia skrócić kryteria oraz geometrię rombu w LASSO.
 Zachować końcowe porównanie i poprawną walidację.
 :::
 
@@ -427,11 +427,11 @@ Większa kara $\lambda$ oznacza silniejsze ściąganie nachylenia OLS do zera.
 ```{python}
 #| label: ridge-mse
 #| fig-align: center
-#| fig-alt: "MSE nachylenia spada z 2 dla OLS do minimum 4/3 przy karze 0,5, a następnie rośnie. Przy karze 3 przekracza początkową wartość 2."
-true_slope = 2.0
-sum_x_sq = 1.0
-error_variance = 2.0
-penalties = np.linspace(0, 3, 301)
+#| fig-alt: "MSE nachylenia spada z 4,5 dla OLS do minimum 3 przy karze 1, a następnie rośnie. Od kary 4 przekracza błąd OLS i zbliża się do granicy β² = 9, ale jej nie przekracza."
+true_slope = 3.0
+sum_x_sq = 2.0
+error_variance = 9.0
+penalties = np.linspace(0, 20, 601)
 shrinkage = sum_x_sq / (sum_x_sq + penalties)
 bias_sq = ((1 - shrinkage) * true_slope)**2
 variance = shrinkage**2 * error_variance / sum_x_sq
@@ -440,9 +440,15 @@ ax.plot(penalties, bias_sq, label="obciążenie²", color=RED)
 ax.plot(penalties, variance, label="wariancja", color=BLUE)
 ax.plot(penalties, bias_sq + variance, label="MSE", color=GREEN, lw=3)
 ax.axvline(error_variance / true_slope**2, color="0.5", ls=":")
+ax.axhline(error_variance / sum_x_sq, color="0.5", ls="--", lw=1)
+ax.axhline(true_slope**2, color="0.5", ls="--", lw=1)
+ax.text(penalties[-1], error_variance / sum_x_sq, "MSE OLS", ha="right", va="bottom", color="0.4")
+ax.text(penalties[-1], true_slope**2, r"$\beta^2$: granica dla $\lambda\to\infty$", ha="right", va="bottom", color="0.4")
 ax.set(xlabel=r"kara $\lambda$ (0 oznacza OLS)", ylabel=r"MSE nachylenia $\hat{\beta}_\lambda$ i jego składniki",
-       title=r"Przykład: $\beta=2$, $\sum_i x_i^2=1$, $\sigma^2=2$")
-ax.legend()
+       title=r"Przykład: $\beta=3$, $\sum x_i^2=2$, $\sigma^2=9$")
+ax.set_ylim(0, 10.4)
+ax.set_xticks(range(0, 21, 5))
+ax.legend(loc="lower right", bbox_to_anchor=(1, 0.06))
 plt.tight_layout()
 plt.show()
 ```
@@ -450,8 +456,10 @@ plt.show()
 ::: {.notes}
 Jedna wycentrowana cecha, niezależne błędy o średniej zero i wariancji
 $\sigma^2$. Krzywe obliczono dokładnie, uśredniając po losowych błędach
-przy ustalonych $x_i$. Minimum MSE wynosi $4/3$ przy $\lambda=0{,}5$,
-czyli $c=2/3$. Przy $\lambda=3$ MSE wynosi $19/8$, więcej niż dla OLS.
+przy ustalonych $x_i$. Minimum MSE wynosi $3$ przy $\lambda=\sigma^2/\beta^2=1$,
+czyli $c=2/3$. Dla $\lambda>4$ MSE przekracza błąd OLS $\sigma^2/s=4{,}5$,
+np. $51/8$ przy $\lambda=10$. Gdy $\lambda\to\infty$, estymator dąży do zera,
+a MSE do $\beta^2=9$.
 Dla $s=\sum_i x_i^2$ mamy
 $c=s/(s+\lambda)$, a wariancja nachylenia OLS wynosi $\sigma^2/s$.
 :::
@@ -481,6 +489,15 @@ $$
 
 Przy tym samym $\lambda$ dopasowane współczynniki na skali standaryzowanej są więc takie same.
 
+::: {.notes}
+Średnią i odchylenie wyznaczamy na danych uczących i stosujemy je
+do nowych obserwacji; szczegóły przy walidacji krzyżowej.
+Stałą kolumnę trzeba usunąć, bo jej odchylenie wynosi zero.
+Kodowanie cech jakościowych też wpływa na karę: dla rzadkiej kategorii
+standaryzacja zmienia znaczenie kary względem jednostki 0/1,
+a wybór poziomu odniesienia może zmienić regularyzację.
+:::
+
 ## Wiele cech: rozwiązanie ridge
 
 Po wycentrowaniu $\X$ i $\y$, bez kolumny jedynek:
@@ -509,20 +526,26 @@ W obliczeniach rozwiązuje się układ, nie liczy jawnie odwrotności.
 
 ## Powrót do doliny RSS
 
-Dwie niemal identyczne, standaryzowane cechy:
-predykcje zależą głównie od **sumy** współczynników.
+`Limit` i `Rating` z wykładu 5 po standaryzacji są niemal identyczne.
+Oznaczmy ich współczynniki $\beta_L$ i $\beta_R$.
 
+- Predykcje zależą głównie od **sumy** $\beta_L+\beta_R$.
+- Podziału sumy dane prawie nie wyznaczają: to dno doliny RSS.
+
+. . .
+
+Kara ridge rozkłada się na sumę i różnicę:
 $$
 \beta_L^2+\beta_R^2
-=\tfrac12\big[(\beta_L+\beta_R)^2+(\beta_L-\beta_R)^2\big].
+=\tfrac12(\beta_L+\beta_R)^2+\tfrac12(\beta_L-\beta_R)^2.
 $$
 
-Przy ustalonej sumie kara jest najmniejsza dla $\beta_L=\beta_R$.
-Ridge ogranicza więc swobodę podziału efektu między podobne cechy.
+Wzdłuż doliny suma jest stała, więc kara maleje, gdy różnica maleje.
+Na przykład przy sumie $2$: punkt $(2,0)$ ma karę $4$, a $(1,1)$ tylko $2$.
 
 ::: {.wniosek}
-Przy skorelowanych cechach ściąganie działa wspólnie.
-Nie każdy współczynnik musi monotonicznie maleć co do modułu.
+Ridge zbliża do siebie współczynniki podobnych cech.
+Ściąganie działa więc wspólnie: pojedynczy współczynnik może nawet wzrosnąć co do modułu.
 :::
 
 ::: {.notes}
