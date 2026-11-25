@@ -347,12 +347,12 @@ Cp i skorygowany R² wybierają tu także model wszystkich trzech cech.
 ## Nieobciążoność ma swoją cenę
 
 Niezależne $Y_i$ mają średnią $\mu$ i wariancję $\sigma^2$.
-Estymujemy $\mu$ przez $\widehat\mu_c=c\bar Y$, gdzie $0\leq c\leq1$.
+Estymujemy $\mu$ przez $c\bar Y$, gdzie $0\leq c\leq1$.
 
 $$
-\E[\widehat\mu_c]-\mu=(c-1)\mu,
+\E[c\bar Y]=c\mu,
 \qquad
-\Var(\widehat\mu_c)=c^2\frac{\sigma^2}{n}.
+\Var(c\bar Y)=c^2\frac{\sigma^2}{n}.
 $$
 
 . . .
@@ -360,7 +360,9 @@ $$
 ::: {.definicja}
 $$
 \operatorname{MSE}(c\bar Y)
-=(1-c)^2\mu^2+c^2\frac{\sigma^2}{n}.
+=\E[(c\bar Y-\mu)^2]
+=\underbrace{(1-c)^2\mu^2}_{\text{kwadrat obciążenia}}
++\underbrace{c^2\frac{\sigma^2}{n}}_{\text{wariancja}}.
 $$
 :::
 
@@ -379,7 +381,7 @@ mu, więc rachunek nie podaje uniwersalnej siły ściągania.
 ```{python}
 #| fig-align: center
 #| fig-alt: "MSE estymatora c razy średnia: minimum wypada pomiędzy zerem a jednością."
-mu, variance_mean = 1.0, 1.0
+mu, variance_mean = 1.0, 2.0
 c_grid = np.linspace(0, 1, 201)
 bias_sq = (1 - c_grid)**2 * mu**2
 variance = c_grid**2 * variance_mean
@@ -387,14 +389,15 @@ fig, ax = plt.subplots(figsize=(8, 3.6))
 ax.plot(c_grid, bias_sq, label="obciążenie²", color=RED)
 ax.plot(c_grid, variance, label="wariancja", color=BLUE)
 ax.plot(c_grid, bias_sq + variance, label="MSE", color=GREEN, lw=3)
-ax.axvline(0.5, color="0.5", ls=":")
-ax.set(xlabel="mnożnik c", ylabel="błąd", title="Przykład: μ = 1, σ²/n = 1")
+best_c = mu**2 / (mu**2 + variance_mean)
+ax.axvline(best_c, color="0.5", ls=":")
+ax.set(xlabel="mnożnik c", ylabel="błąd", title="Przykład: μ = 1, σ²/n = 2")
 ax.legend()
 plt.tight_layout()
 plt.show()
 ```
 
-Tutaj $c=1/2$ zmniejsza MSE z $1$ do $1/2$.
+MSE spada z $2$ dla $c=1$ do minimum $2/3$ dla $c=1/3$.
 Najlepsze $c$ zależy jednak od nieznanego $\mu$.
 
 # Regresja grzbietowa
@@ -413,6 +416,45 @@ $$
 - Większe $\lambda$: mocniejsze ograniczenie dopasowania.
 - **Wyrazu wolnego nie karzemy**: nie ściągamy umownego poziomu wyniku do zera.
 
+Podobnie jak w przykładzie z $c\bar Y$, ściąganie może wprowadzić
+obciążenie, ale zmniejszyć wariancję oszacowania.
+
+## Jak kara ridge wpływa na błąd oszacowania nachylenia?
+
+Model $Y_i=\beta x_i+\varepsilon_i$. Ustalamy wycentrowane $x_i$.
+Większa kara $\lambda$ oznacza silniejsze ściąganie nachylenia OLS do zera.
+
+```{python}
+#| label: ridge-mse
+#| fig-align: center
+#| fig-alt: "Przy karze zero MSE nachylenia wynosi 2. Wraz ze wzrostem kary wariancja maleje, a kwadrat obciążenia rośnie. MSE jest najmniejsze przy karze 2."
+true_slope = 1.0
+sum_x_sq = 1.0
+error_variance = 2.0
+penalties = np.linspace(0, 10, 301)
+shrinkage = sum_x_sq / (sum_x_sq + penalties)
+bias_sq = ((1 - shrinkage) * true_slope)**2
+variance = shrinkage**2 * error_variance / sum_x_sq
+fig, ax = plt.subplots(figsize=(8, 3.6))
+ax.plot(penalties, bias_sq, label="obciążenie²", color=RED)
+ax.plot(penalties, variance, label="wariancja", color=BLUE)
+ax.plot(penalties, bias_sq + variance, label="MSE", color=GREEN, lw=3)
+ax.axvline(error_variance / true_slope**2, color="0.5", ls=":")
+ax.set(xlabel=r"kara $\lambda$ (0 oznacza OLS)", ylabel=r"MSE nachylenia $\hat{\beta}_\lambda$ i jego składniki",
+       title=r"Przykład: $\beta=1$, $\sum_i x_i^2=1$, $\sigma^2=2$")
+ax.legend()
+plt.tight_layout()
+plt.show()
+```
+
+::: {.notes}
+Jedna wycentrowana cecha, niezależne błędy o średniej zero i wariancji
+$\sigma^2$. Krzywe obliczono dokładnie, uśredniając po losowych błędach
+przy ustalonych $x_i$. Minimum MSE przypada przy $\lambda=2$, czyli
+$c=1/3$, jak w przykładzie ze średnią. Dla $s=\sum_i x_i^2$ mamy
+$c=s/(s+\lambda)$, a wariancja nachylenia OLS wynosi $\sigma^2/s$.
+:::
+
 ## Pytanie {.pytanie}
 
 Dochód w kolumnie $j$ przeliczamy z tysięcy dolarów na dolary,
@@ -421,65 +463,22 @@ OLS i ridge?
 
 . . .
 
-**OLS** daje te same predykcje, bo $\beta'_j=\beta_j/1000$ zachowuje
-iloczyn $x'_{ij}\beta'_j=x_{ij}\beta_j$, a więc też RSS.
+**OLS** daje te same predykcje. Współczynnik $\beta'_j=\beta_j/1000$
+zachowuje iloczyn $x'_{ij}\beta'_j=x_{ij}\beta_j$ i wartość RSS.
 
-**Ridge** przy tym samym $\lambda>0$ przypisuje tej samej funkcji
-predykcji karę
+**Ridge** przy tym samym $\lambda>0$ karze ten sam efekt dochodu
+milion razy słabiej, bo $\lambda(\beta_j/1000)^2=\lambda\beta_j^2/10^6$.
+Po dopasowaniu predykcje mogą się zmienić.
+
+**Po standaryzacji** ridge dostaje tę samą kolumnę w obu jednostkach.
+Przeliczenie na dolary mnoży przez $1000$ zarówno odchylenie od średniej,
+jak i odchylenie standardowe, więc
 $$
-\lambda\sum_{\ell\ne j}\beta_\ell^2+\lambda\frac{\beta_j^2}{10^6}.
-$$
-
-Wkład dochodu jest karany milion razy słabiej względem innych cech.
-Po ponownym dopasowaniu predykcje mogą się więc zmienić.
-
-**Standaryzacja uniezależnia siłę regularyzacji od jednostek pomiaru.**
-
-## Skalowanie jest częścią metody
-
-$$
-z_{ij}=\frac{x_{ij}-\bar x_j}{s_j}.
+z'_{ij}=\frac{x'_{ij}-\bar x'_j}{s'_j}
+=\frac{x_{ij}-\bar x_j}{s_j}=z_{ij}.
 $$
 
-Średnią i odchylenie wyznaczamy **na danych uczących**.
-Te same wartości stosujemy do nowych obserwacji.
-
-- Współczynnik opisuje zmianę wyniku na jedno odchylenie cechy.
-- Stała kolumna wymaga osobnego potraktowania lub usunięcia.
-- Kodowanie cech jakościowych też wpływa na karę.
-
-::: {.notes}
-W tym slajdzie s_j jest odchyleniem standardowym; w rachunku jednej
-cechy poniżej s oznacza sumę kwadratów. Dla rzadkiej kategorii
-standaryzacja zmienia znaczenie kary względem jednostki 0/1.
-Wybór poziomu odniesienia również może zmieniać regularyzację.
-:::
-
-## Jedna cecha: ridge to mnożenie przez $c$
-
-Dane wycentrowane. Oznaczmy $s=\sum_i x_i^2>0$, $z=\sum_i x_iy_i$.
-
-$$
-\widehat\beta_{\mathrm{OLS}}=\frac zs,
-\qquad
-\widehat\beta_\lambda=\frac{z}{s+\lambda}
-=\underbrace{\frac{s}{s+\lambda}}_{c}\widehat\beta_{\mathrm{OLS}}.
-$$
-
-Dla $s=10$, $z=30$:
-
-| $\lambda$ | 0 | 10 | 30 |
-|---|---:|---:|---:|
-| $\widehat\beta_\lambda$ | 3 | 1,5 | 0,75 |
-
-Wariancja mnoży się przez $c^2$. Przy niezerowym prawdziwym
-współczynniku pojawia się obciążenie.
-
-::: {.notes}
-Tablica: RSS + lambda beta², pochodna -2z+2(s+lambda)beta=0.
-Przy ustalonym X czynnik c jest stały po ponownym losowaniu błędów.
-To dokładnie mechanizm poprzedniego przykładu ze średnią.
-:::
+Przy tym samym $\lambda$ dopasowane współczynniki na skali standaryzowanej są więc takie same.
 
 ## Wiele cech: rozwiązanie ridge
 
@@ -547,32 +546,9 @@ Wyraz wolny nadal nie jest karany. Reguły skalowania zostają te same.
 
 . . .
 
+Podobnie jak w ridge, ściąganie może zmniejszyć wariancję kosztem obciążenia.
 Część współczynników może być **dokładnie równa zero**.
 LASSO łączy ściąganie z selekcją.
-
-## Miękkie progowanie
-
-Dla jednej wycentrowanej cechy: $s=\sum_i x_i^2>0$, $z=\sum_i x_iy_i$.
-
-$$
-\widehat\beta_\lambda
-=\frac{\operatorname{sign}(z)(|z|-\lambda/2)_+}{s},
-\qquad (a)_+=\max(a,0).
-$$
-
-Zmniejszamy moduł $z$ o $\lambda/2$; poniżej progu dostajemy zero.
-
-| $s=10$, $z=30$ | $\lambda=0$ | $\lambda=10$ | $\lambda=30$ | $\lambda=60$ |
-|---|---:|---:|---:|---:|
-| ridge | 3 | 1,5 | 0,75 | 0,43 |
-| LASSO | 3 | 2,5 | 1,5 | **0** |
-
-::: {.notes}
-Wzór jako fakt i przykład liczbowy. Czynnik 1/2 wynika z konwencji
-RSS plus kara. Dla skorelowanych cech nie wystarczy osobno progować
-współczynników OLS. W razie zapasu czasu: rozpatrzyć pochodną dla
-beta dodatniego i ujemnego oraz załamanie w zerze.
-:::
 
 ## Ścieżki współczynników na *Credit*
 
@@ -735,7 +711,7 @@ W każdym podziale te same obserwacje walidacyjne dla wszystkich metod.
 
 W każdym podziale:
 
-1. **Część ucząca**: wyznacz skalowanie, wybierz cechy i dopasuj model.
+1. **Część ucząca**: oblicz średnie i odchylenia standardowe cech, wybierz cechy i dopasuj model.
 2. **Część walidacyjna**: zastosuj wyuczone przekształcenia i zmierz stratę.
 3. Uśrednij straty dla danego ustawienia po pięciu podziałach.
 
@@ -947,7 +923,9 @@ Regularyzacja nie gwarantuje poprawy na każdym zbiorze.
 
 ## A co z `Limit` i `Rating`?
 
-Współczynniki na skali standaryzowanych cech, końcowe modele:
+W końcowych modelach współczynnik podaje, o ile dolarów zmienia się
+przewidywane saldo przy wzroście cechy o jedno odchylenie standardowe
+i ustalonych wartościach pozostałych cech.
 
 ```{python}
 coefficients = pd.DataFrame({name: searches[name].best_estimator_.named_steps["model"].coef_
