@@ -427,11 +427,11 @@ Większa kara $\lambda$ oznacza silniejsze ściąganie nachylenia OLS do zera.
 ```{python}
 #| label: ridge-mse
 #| fig-align: center
-#| fig-alt: "Przy karze zero MSE nachylenia wynosi 2. Wraz ze wzrostem kary wariancja maleje, a kwadrat obciążenia rośnie. MSE jest najmniejsze przy karze 2."
-true_slope = 1.0
+#| fig-alt: "MSE nachylenia spada z 2 dla OLS do minimum 4/3 przy karze 0,5, a następnie rośnie. Przy karze 3 przekracza początkową wartość 2."
+true_slope = 2.0
 sum_x_sq = 1.0
 error_variance = 2.0
-penalties = np.linspace(0, 10, 301)
+penalties = np.linspace(0, 3, 301)
 shrinkage = sum_x_sq / (sum_x_sq + penalties)
 bias_sq = ((1 - shrinkage) * true_slope)**2
 variance = shrinkage**2 * error_variance / sum_x_sq
@@ -441,7 +441,7 @@ ax.plot(penalties, variance, label="wariancja", color=BLUE)
 ax.plot(penalties, bias_sq + variance, label="MSE", color=GREEN, lw=3)
 ax.axvline(error_variance / true_slope**2, color="0.5", ls=":")
 ax.set(xlabel=r"kara $\lambda$ (0 oznacza OLS)", ylabel=r"MSE nachylenia $\hat{\beta}_\lambda$ i jego składniki",
-       title=r"Przykład: $\beta=1$, $\sum_i x_i^2=1$, $\sigma^2=2$")
+       title=r"Przykład: $\beta=2$, $\sum_i x_i^2=1$, $\sigma^2=2$")
 ax.legend()
 plt.tight_layout()
 plt.show()
@@ -450,8 +450,9 @@ plt.show()
 ::: {.notes}
 Jedna wycentrowana cecha, niezależne błędy o średniej zero i wariancji
 $\sigma^2$. Krzywe obliczono dokładnie, uśredniając po losowych błędach
-przy ustalonych $x_i$. Minimum MSE przypada przy $\lambda=2$, czyli
-$c=1/3$, jak w przykładzie ze średnią. Dla $s=\sum_i x_i^2$ mamy
+przy ustalonych $x_i$. Minimum MSE wynosi $4/3$ przy $\lambda=0{,}5$,
+czyli $c=2/3$. Przy $\lambda=3$ MSE wynosi $19/8$, więcej niż dla OLS.
+Dla $s=\sum_i x_i^2$ mamy
 $c=s/(s+\lambda)$, a wariancja nachylenia OLS wynosi $\sigma^2/s$.
 :::
 
